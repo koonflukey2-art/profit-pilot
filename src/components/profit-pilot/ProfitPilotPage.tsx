@@ -389,12 +389,12 @@ export function ProfitPilotPage() {
   const numAccounts = F.num(inputs.numberOfAccounts) || 1;
   
   const funnelData = useMemo(() => {
-    const baseColor = { h: 195, s: 100, l: 50 }; // A nice blue base
+    const baseColor = { h: 195, s: 100, l: 50 };
     return [
       { name: 'TOFU', value: currentFunnelPlan.tofu, color: `hsl(${baseColor.h}, ${baseColor.s}%, ${baseColor.l}%)` },
       { name: 'MOFU', value: currentFunnelPlan.mofu, color: `hsl(${baseColor.h}, ${baseColor.s}%, ${baseColor.l + 10}%)` },
       { name: 'BOFU', value: currentFunnelPlan.bofu, color: `hsl(${baseColor.h}, ${baseColor.s}%, ${baseColor.l + 20}%)` },
-    ].sort((a, b) => b.value - a.value); // Keep sorting to determine order
+    ];
   }, [currentFunnelPlan]);
   
   const newFunnelCampaigns = [
@@ -426,35 +426,40 @@ export function ProfitPilotPage() {
   const FunnelChart = () => {
     const totalValue = funnelData.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
-  
+    
+    // Ensure the order is always TOFU -> MOFU -> BOFU
     const stageOrder = ['TOFU', 'MOFU', 'BOFU'];
     const sortedData = stageOrder.map(stage => funnelData.find(d => d.name === stage)).filter(Boolean);
-  
+
+    let cumulativeValue = 0;
+    const chartData = sortedData.map(item => {
+      const start = cumulativeValue;
+      cumulativeValue += item.value;
+      const end = cumulativeValue;
+      return { ...item, start, end };
+    });
+
     return (
-      <div className="flex flex-col items-center justify-center w-full max-w-sm space-y-[-1px] relative">
-        {/* Connecting Lines */}
-        {sortedData.length > 1 && (
-          <div className="absolute top-0 bottom-0 left-1/2 w-px bg-gray-400 -z-10" />
-        )}
-  
-        {sortedData.map((item, index) => {
-          const maxWidth = 100; // %
-          const minWidth = 40; // %
-          const width = maxWidth - ((maxWidth - minWidth) / (sortedData.length -1 || 1)) * index;
-          
-          return (
-            <div key={item.name} className="relative flex items-center justify-center w-full group">
-               <div
-                  className="h-16 flex items-center justify-center text-white font-bold"
-                  style={{
-                    backgroundColor: item.color,
-                    width: `${width}%`,
-                    clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0% 100%)',
-                    boxShadow: `0 0 15px ${item.color}`
-                  }}
-              >
-                  <span>{item.name} {item.value}%</span>
-              </div>
+      <div className="flex flex-col items-center justify-center w-full max-w-sm mx-auto">
+        {chartData.map((item) => {
+           const width = 100 - item.start;
+           const topOffset = (100 - width) / 2;
+           
+           if(item.value === 0) return null;
+
+           return (
+            <div
+              key={item.name}
+              className="h-16 flex items-center justify-center text-white font-bold"
+              style={{
+                backgroundColor: item.color,
+                width: `${width}%`,
+                clipPath: `polygon(0% 0%, 100% 0%, ${100 - (item.value / width * 10)}% 100%, ${(item.value / width * 10)}% 100%)`,
+                boxShadow: `0 0 15px ${item.color}`,
+                marginTop: '-1px'
+              }}
+            >
+              <span>{item.name} {item.value}%</span>
             </div>
           );
         })}
@@ -718,26 +723,26 @@ export function ProfitPilotPage() {
                   <div>
                      <h4 className="text-lg font-bold mb-4 text-white">ค่า Breakeven</h4>
                      <div className="space-y-4">
-                        <div className="p-4 rounded-lg bg-background/50 shadow-inner neumorphic-card">
+                        <div className="p-4 rounded-lg bg-red-900/50 shadow-inner neumorphic-card">
                             <div className="flex justify-between items-center">
                                 <p className="font-bold text-red-400">BE ROAS</p>
-                                <p className="font-bold text-xl text-red-400">{F.formatNumber(calculated.breakevenRoas)}</p>
+                                <p className="font-bold text-xl text-white">{F.formatNumber(calculated.breakevenRoas)}</p>
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1">ค่า ROAS ต่ำสุดที่แคมเปญต้องทำให้ได้เพื่อ "เท่าทุน"</p>
+                            <p className="text-xs text-red-200 mt-1">ค่า ROAS ต่ำสุดที่แคมเปญต้องทำให้ได้เพื่อ "เท่าทุน"</p>
                         </div>
-                        <div className="p-4 rounded-lg bg-background/50 shadow-inner neumorphic-card">
+                        <div className="p-4 rounded-lg bg-red-900/50 shadow-inner neumorphic-card">
                             <div className="flex justify-between items-center">
                                 <p className="font-bold text-red-400">BE CPA</p>
-                                <p className="font-bold text-xl text-red-400">{F.formatCurrency(calculated.breakevenCpa)}</p>
+                                <p className="font-bold text-xl text-white">{F.formatCurrency(calculated.breakevenCpa)}</p>
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1">ค่าโฆษณาสูงสุดที่จ่ายได้โดยไม่ขาดทุน</p>
+                            <p className="text-xs text-red-200 mt-1">ค่าโฆษณาสูงสุดที่จ่ายได้โดยไม่ขาดทุน</p>
                         </div>
-                        <div className="p-4 rounded-lg bg-background/50 shadow-inner neumorphic-card">
+                        <div className="p-4 rounded-lg bg-red-900/50 shadow-inner neumorphic-card">
                             <div className="flex justify-between items-center">
                                 <p className="font-bold text-red-400">BE Ad Cost %</p>
-                                <p className="font-bold text-xl text-red-400">{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
+                                <p className="font-bold text-xl text-white">{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
                             </div>
-                             <p className="text-xs text-muted-foreground mt-1">สัดส่วนค่าโฆษณาสูงสุดเมื่อเทียบกับราคาขาย</p>
+                             <p className="text-xs text-red-200 mt-1">สัดส่วนค่าโฆษณาสูงสุดเมื่อเทียบกับราคาขาย</p>
                         </div>
                      </div>
                   </div>
