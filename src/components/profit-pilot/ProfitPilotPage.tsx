@@ -129,6 +129,7 @@ export function ProfitPilotPage() {
     const monthlyProfitGoal = i.profitGoalTimeframe === 'daily' ? profitGoal * 30 : profitGoal;
     const totalProfitTarget = monthlyProfitGoal + fixedCosts;
     s.targetOrders = s.netProfitUnit > 0 ? totalProfitTarget / s.netProfitUnit : 0;
+    s.targetOrdersDaily = s.targetOrders / 30;
     s.targetRevenue = s.targetOrders * s.sellingPrice;
     s.adBudget = s.targetOrders * targetCpa;
     s.adBudgetWithVat = s.adBudget * (1 + (F.num(i.vatProduct) / 100));
@@ -170,7 +171,7 @@ export function ProfitPilotPage() {
 
   useEffect(() => {
     calculateAll();
-  }, [inputs.sellingPrice, inputs.vatProduct, inputs.cogs, inputs.salesPlatform, inputs.platformFee, inputs.paymentFee, inputs.kolFee, inputs.packagingCost, inputs.shippingCost, inputs.profitGoal, inputs.profitGoalTimeframe, inputs.fixedCosts, inputs.targetRoas, inputs.targetCpa, inputs.adCostPercent, inputs.calcDriver, inputs.funnelPlan, inputs.numberOfAccounts]);
+  }, [calculateAll]);
 
   useEffect(() => {
     const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
@@ -357,9 +358,9 @@ export function ProfitPilotPage() {
 
   const funnelData = useMemo(() => {
     return [
-      { name: 'TOFU', value: currentFunnelPlan.tofu, color: 'hsl(var(--primary))', clipPath: 'polygon(0 0, 100% 0, 85% 100%, 15% 100%)' },
-      { name: 'MOFU', value: currentFunnelPlan.mofu, color: 'hsl(var(--accent))', clipPath: 'polygon(15% 0, 85% 0, 70% 100%, 30% 100%)' },
-      { name: 'BOFU', value: currentFunnelPlan.bofu, color: 'hsl(157 71% 38%)', clipPath: 'polygon(30% 0, 70% 0, 55% 100%, 45% 100%)' },
+      { name: 'TOFU', value: currentFunnelPlan.tofu, color: 'hsl(var(--primary))' },
+      { name: 'MOFU', value: currentFunnelPlan.mofu, color: 'hsl(var(--accent))' },
+      { name: 'BOFU', value: currentFunnelPlan.bofu, color: 'hsl(157 71% 38%)' },
     ].sort((a, b) => b.value - a.value);
   }, [currentFunnelPlan]);
   
@@ -665,19 +666,24 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8">
-                  <div className="w-full max-w-sm flex flex-col gap-1.5">
-                    {funnelData.map((stage, index) => (
-                      <div key={index} className="relative h-12 flex items-center justify-center text-white font-bold"
-                        style={{
-                          backgroundColor: stage.color,
-                          width: '100%',
-                          boxShadow: `0 0 15px ${stage.color}`,
-                          clipPath: stage.clipPath,
-                        }}
-                      >
-                        {stage.name} {stage.value}%
-                      </div>
-                    ))}
+                  <div className="w-full max-w-sm flex flex-col gap-1.5 items-center">
+                    {funnelData.map(({ name, value, color }, index) => {
+                      const scale = 1 - index * 0.15;
+                      return (
+                        <div
+                          key={index}
+                          className="relative h-12 flex items-center justify-center text-white font-bold"
+                          style={{
+                            backgroundColor: color,
+                            width: `${scale * 100}%`,
+                            boxShadow: `0 0 15px ${color}`,
+                            clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0% 100%)',
+                          }}
+                        >
+                          {name} {value}%
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
                 
