@@ -389,11 +389,10 @@ export function ProfitPilotPage() {
   const numAccounts = F.num(inputs.numberOfAccounts) || 1;
   
   const funnelData = useMemo(() => {
-    const baseColor = { h: 195, s: 100, l: 50 };
     return [
-      { name: 'TOFU', value: currentFunnelPlan.tofu, color: `hsl(${baseColor.h}, ${baseColor.s}%, ${baseColor.l}%)` },
-      { name: 'MOFU', value: currentFunnelPlan.mofu, color: `hsl(${baseColor.h}, ${baseColor.s}%, ${baseColor.l + 10}%)` },
-      { name: 'BOFU', value: currentFunnelPlan.bofu, color: `hsl(${baseColor.h}, ${baseColor.s}%, ${baseColor.l + 20}%)` },
+      { name: 'TOFU', value: currentFunnelPlan.tofu, color: '#2196F3' },
+      { name: 'MOFU', value: currentFunnelPlan.mofu, color: '#29B6F6' },
+      { name: 'BOFU', value: currentFunnelPlan.bofu, color: '#4DD0E1' },
     ];
   }, [currentFunnelPlan]);
   
@@ -442,8 +441,9 @@ export function ProfitPilotPage() {
     return (
       <div className="flex flex-col items-center justify-center w-full max-w-sm mx-auto">
         {chartData.map((item) => {
-           const width = 100 - item.start;
-           const topOffset = (100 - width) / 2;
+           // Makes the funnel less tapered
+           const topWidth = 100 - item.start * 0.8;
+           const bottomWidth = 100 - item.end * 0.8;
            
            if(item.value === 0) return null;
 
@@ -453,8 +453,8 @@ export function ProfitPilotPage() {
               className="h-16 flex items-center justify-center text-white font-bold"
               style={{
                 backgroundColor: item.color,
-                width: `${width}%`,
-                clipPath: `polygon(0% 0%, 100% 0%, ${100 - (item.value / width * 10)}% 100%, ${(item.value / width * 10)}% 100%)`,
+                width: `${topWidth}%`,
+                clipPath: `polygon(0% 0%, 100% 0%, ${(100 - bottomWidth) / 2 + (bottomWidth - topWidth)/2}% 100%, ${(100 - bottomWidth) / 2 - (bottomWidth - topWidth)/2}% 100%)`,
                 boxShadow: `0 0 15px ${item.color}`,
                 marginTop: '-1px'
               }}
