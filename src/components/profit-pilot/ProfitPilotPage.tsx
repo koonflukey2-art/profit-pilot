@@ -385,21 +385,53 @@ export function ProfitPilotPage() {
               <div className="flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground font-bold text-xl rounded-lg shadow-md">2</div>
               <h2 className="text-2xl font-bold">{uiTitles.costCalculationTitle}</h2>
             </div>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <Input value={inputs.sellingPrice} onChange={(e) => handleInputChange('sellingPrice', e.target.value)} type="number" placeholder="ราคาขาย" className="neumorphic-input" />
-                <Input value={inputs.vatProduct} onChange={(e) => handleInputChange('vatProduct', e.target.value)} type="number" placeholder="VAT %" className="neumorphic-input" />
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="sellingPrice" className="block text-sm mb-2 font-medium opacity-80">ราคาขาย</Label>
+                  <Input id="sellingPrice" value={inputs.sellingPrice} onChange={(e) => handleInputChange('sellingPrice', e.target.value)} type="number" placeholder="1000" className="neumorphic-input" />
+                </div>
+                <div>
+                  <Label htmlFor="vatProduct" className="block text-sm mb-2 font-medium opacity-80">VAT (%)</Label>
+                  <Input id="vatProduct" value={inputs.vatProduct} onChange={(e) => handleInputChange('vatProduct', e.target.value)} type="number" placeholder="7" className="neumorphic-input" />
+                </div>
               </div>
-              <Input value={inputs.cogs} onChange={(e) => handleInputChange('cogs', e.target.value)} type="number" placeholder="ต้นทุนสินค้า (COGS)" className="neumorphic-input" />
-              <Select value={inputs.salesPlatform} onValueChange={handlePlatformChange}>
-                <SelectTrigger className="neumorphic-select"><SelectValue/></SelectTrigger>
-                <SelectContent>
-                  {Object.keys(platformFees).map(p => <SelectItem key={p} value={p}>{p.replace(/_/g, ' ').toUpperCase()}</SelectItem>)}
-                </SelectContent>
-              </Select>
-               <div className="grid grid-cols-2 gap-3">
-                <Input value={inputs.platformFee} onChange={(e) => handleInputChange('platformFee', e.target.value)} type="number" placeholder="ค่าแพลตฟอร์ม %" className="neumorphic-input" readOnly={inputs.salesPlatform !== 'other'} />
-                <Input value={inputs.paymentFee} onChange={(e) => handleInputChange('paymentFee', e.target.value)} type="number" placeholder="ค่าชำระเงิน %" className="neumorphic-input" readOnly={inputs.salesPlatform !== 'other'} />
+              <div>
+                <Label htmlFor="cogs" className="block text-sm mb-2 font-medium opacity-80">ต้นทุนสินค้า (COGS)</Label>
+                <Input id="cogs" value={inputs.cogs} onChange={(e) => handleInputChange('cogs', e.target.value)} type="number" placeholder="300" className="neumorphic-input" />
+              </div>
+              <div>
+                <Label htmlFor="salesPlatform" className="block text-sm mb-2 font-medium opacity-80">ช่องทางขาย</Label>
+                <Select value={inputs.salesPlatform} onValueChange={handlePlatformChange}>
+                  <SelectTrigger id="salesPlatform" className="neumorphic-select"><SelectValue/></SelectTrigger>
+                  <SelectContent>
+                    {Object.keys(platformFees).map(p => <SelectItem key={p} value={p}>{p.replace(/_/g, ' ').toUpperCase()}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+               <div className="grid grid-cols-2 gap-4">
+                 <div>
+                    <Label htmlFor="platformFee" className="block text-sm mb-2 font-medium opacity-80">ค่าแพลตฟอร์ม (%)</Label>
+                    <Input id="platformFee" value={inputs.platformFee} onChange={(e) => handleInputChange('platformFee', e.target.value)} type="number" className="neumorphic-input" readOnly={inputs.salesPlatform !== 'other'} />
+                 </div>
+                 <div>
+                    <Label htmlFor="paymentFee" className="block text-sm mb-2 font-medium opacity-80">ค่าชำระเงิน (%)</Label>
+                    <Input id="paymentFee" value={inputs.paymentFee} onChange={(e) => handleInputChange('paymentFee', e.target.value)} type="number" className="neumorphic-input" readOnly={inputs.salesPlatform !== 'other'} />
+                 </div>
+              </div>
+              <div>
+                <Label htmlFor="kolFee" className="block text-sm mb-2 font-medium opacity-80">ค่าคอมมิชชั่น KOL (%)</Label>
+                <Input id="kolFee" value={inputs.kolFee} onChange={(e) => handleInputChange('kolFee', e.target.value)} type="number" placeholder="10" className="neumorphic-input" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                 <div>
+                    <Label htmlFor="packagingCost" className="block text-sm mb-2 font-medium opacity-80">ค่าแพ็ค</Label>
+                    <Input id="packagingCost" value={inputs.packagingCost} onChange={(e) => handleInputChange('packagingCost', e.target.value)} type="number" placeholder="10" className="neumorphic-input" />
+                 </div>
+                 <div>
+                    <Label htmlFor="shippingCost" className="block text-sm mb-2 font-medium opacity-80">ค่าส่ง</Label>
+                    <Input id="shippingCost" value={inputs.shippingCost} onChange={(e) => handleInputChange('shippingCost', e.target.value)} type="number" placeholder="35" className="neumorphic-input" />
+                 </div>
               </div>
             </div>
           </div>
