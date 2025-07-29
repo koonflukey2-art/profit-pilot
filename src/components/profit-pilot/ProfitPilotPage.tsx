@@ -64,7 +64,10 @@ const initialInputs = {
 
 export function ProfitPilotPage() {
   const [inputs, setInputs] = useState(initialInputs);
-  const [calculated, setCalculated] = useState({});
+  const [calculated, setCalculated] = useState({
+    adBudget: 0,
+    targetOrdersDaily: 0,
+  });
   const [automationRules, setAutomationRules] = useState([]);
   const [uiTitles, setUiTitles] = useState({ productInfoTitle: 'ข้อมูลสินค้า', costCalculationTitle: 'คำนวณต้นทุน', goalsAndResultsTitle: 'เป้าหมายและผลลัพธ์', advancedPlanningTitle: 'Advanced Planning' });
   const [activeTab, setActiveTab] = useState('planning');
@@ -177,7 +180,7 @@ export function ProfitPilotPage() {
 
   useEffect(() => {
     calculateAll();
-  }, [calculateAll]);
+  }, [inputs, calculateAll]);
 
   useEffect(() => {
     const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
@@ -642,21 +645,21 @@ export function ProfitPilotPage() {
                   <div>
                      <h4 className="text-lg font-bold mb-4 gradient-text">ค่า Breakeven</h4>
                      <div className="space-y-4">
-                        <div className="p-4 rounded-lg bg-card shadow-inner neumorphic-card">
+                        <div className="p-4 rounded-lg bg-background/50 shadow-inner neumorphic-card">
                             <div className="flex justify-between items-center">
                                 <p className="font-bold text-red-500">BE ROAS</p>
                                 <p className="font-bold text-xl text-red-500">{F.formatNumber(calculated.breakevenRoas)}</p>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">ค่า ROAS ต่ำสุดที่แคมเปญต้องทำให้ได้เพื่อ "เท่าทุน"</p>
                         </div>
-                        <div className="p-4 rounded-lg bg-card shadow-inner neumorphic-card">
+                        <div className="p-4 rounded-lg bg-background/50 shadow-inner neumorphic-card">
                             <div className="flex justify-between items-center">
                                 <p className="font-bold text-red-500">BE CPA</p>
                                 <p className="font-bold text-xl text-red-500">{F.formatCurrency(calculated.breakevenCpa)}</p>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">ค่าโฆษณาสูงสุดที่จ่ายได้โดยไม่ขาดทุน</p>
                         </div>
-                        <div className="p-4 rounded-lg bg-card shadow-inner neumorphic-card">
+                        <div className="p-4 rounded-lg bg-background/50 shadow-inner neumorphic-card">
                             <div className="flex justify-between items-center">
                                 <p className="font-bold text-red-500">BE Ad Cost %</p>
                                 <p className="font-bold text-xl text-red-500">{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
@@ -714,11 +717,10 @@ export function ProfitPilotPage() {
                       <h5 className="font-bold text-primary">TOFU</h5>
                       <span className="font-bold text-primary">{currentFunnelPlan.tofu}%</span>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudget)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency((calculated.tofuBudget || 0) / numAccounts)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}</p></div>
-                      <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{F.formatInt(numAccounts)} บัญชี</p></div>
                     </div>
                   </div>
                    <div className="neumorphic-card p-4 relative">
@@ -726,11 +728,10 @@ export function ProfitPilotPage() {
                       <h5 className="font-bold text-accent">MOFU</h5>
                        <span className="font-bold text-accent">{currentFunnelPlan.mofu}%</span>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudget)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency((calculated.mofuBudget || 0) / numAccounts)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudgetPerAccountDaily)}</p></div>
-                      <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{F.formatInt(numAccounts)} บัญชี</p></div>
                     </div>
                   </div>
                    <div className="neumorphic-card p-4 relative">
@@ -738,11 +739,10 @@ export function ProfitPilotPage() {
                       <h5 className="font-bold" style={{ color: 'hsl(157 71% 38%)' }}>BOFU</h5>
                        <span className="font-bold" style={{ color: 'hsl(157 71% 38%)' }}>{currentFunnelPlan.bofu}%</span>
                     </div>
-                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency((calculated.bofuBudget || 0) / numAccounts)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p></div>
-                      <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{F.formatInt(numAccounts)} บัญชี</p></div>
                     </div>
                   </div>
                 </div>
