@@ -389,9 +389,9 @@ export function ProfitPilotPage() {
   
   const funnelData = useMemo(() => {
     return [
-      { name: 'TOFU', value: currentFunnelPlan.tofu, color: '#4DD0E1' },
+      { name: 'TOFU', value: currentFunnelPlan.tofu, color: '#2196F3' },
       { name: 'MOFU', value: currentFunnelPlan.mofu, color: '#29B6F6' },
-      { name: 'BOFU', value: currentFunnelPlan.bofu, color: '#2196F3' },
+      { name: 'BOFU', value: currentFunnelPlan.bofu, color: '#4DD0E1' },
     ];
   }, [currentFunnelPlan]);
   
