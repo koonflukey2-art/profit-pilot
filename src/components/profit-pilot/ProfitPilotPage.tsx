@@ -151,8 +151,8 @@ export function ProfitPilotPage() {
     s.targetOrders = s.netProfitUnit > 0 ? totalProfitTarget / s.netProfitUnit : 0;
     s.targetRevenue = s.targetOrders * s.sellingPrice;
     s.adBudget = s.targetOrders * targetCpa;
-
     s.targetOrdersDaily = s.targetOrders / 30;
+
     s.adBudgetWithVat = s.adBudget * (1 + (F.num(newInputs.vatProduct) / 100));
   
     const funnelPlan = funnelPlans[newInputs.funnelPlan] || funnelPlans.launch;
@@ -165,24 +165,26 @@ export function ProfitPilotPage() {
     s.mofuBudgetPerAccountDaily = (s.mofuBudget / numAccounts) / 30;
     s.bofuBudgetPerAccountDaily = (s.bofuBudget / numAccounts) / 30;
     
-    let changed = false;
-    if (newInputs.calcDriver !== 'roas' && isFinite(targetRoas) && F.num(newInputs.targetRoas).toFixed(2) !== targetRoas.toFixed(2)) {
-        newInputs.targetRoas = targetRoas > 0 ? targetRoas.toFixed(2) : '';
-        changed = true;
-    }
-    if (newInputs.calcDriver !== 'cpa' && isFinite(targetCpa) && F.num(newInputs.targetCpa).toFixed(2) !== targetCpa.toFixed(2)) {
-        newInputs.targetCpa = targetCpa > 0 ? targetCpa.toFixed(2) : '';
-        changed = true;
-    }
-    if (newInputs.calcDriver !== 'adcost' && isFinite(adCostPercent) && F.num(newInputs.adCostPercent).toFixed(1) !== adCostPercent.toFixed(1)) {
-        newInputs.adCostPercent = adCostPercent > 0 ? adCostPercent.toFixed(1) : '';
-        changed = true;
-    }
-    
     setCalculated(s);
 
+    const updatedInputs = {...newInputs};
+    let changed = false;
+
+    if (newInputs.calcDriver !== 'roas' && isFinite(targetRoas) && F.num(newInputs.targetRoas).toFixed(2) !== targetRoas.toFixed(2)) {
+      updatedInputs.targetRoas = targetRoas > 0 ? targetRoas.toFixed(2) : '';
+      changed = true;
+    }
+    if (newInputs.calcDriver !== 'cpa' && isFinite(targetCpa) && F.num(newInputs.targetCpa).toFixed(2) !== targetCpa.toFixed(2)) {
+      updatedInputs.targetCpa = targetCpa > 0 ? targetCpa.toFixed(2) : '';
+      changed = true;
+    }
+    if (newInputs.calcDriver !== 'adcost' && isFinite(adCostPercent) && F.num(newInputs.adCostPercent).toFixed(1) !== adCostPercent.toFixed(1)) {
+      updatedInputs.adCostPercent = adCostPercent > 0 ? adCostPercent.toFixed(1) : '';
+      changed = true;
+    }
+
     if (changed) {
-        setInputs(newInputs);
+        setInputs(updatedInputs);
     }
   
     if (newInputs.calcDriver === 'roas' && targetRoas > 0 && s.breakevenRoas > 0 && targetRoas < s.breakevenRoas) {
@@ -544,12 +546,37 @@ export function ProfitPilotPage() {
                 <Label htmlFor="fixedCosts" className="block text-sm mb-2 font-medium opacity-80">ค่าใช้จ่ายคงที่/เดือน</Label>
                 <Input id="fixedCosts" value={inputs.fixedCosts} onChange={(e) => handleInputChange('fixedCosts', e.target.value)} type="number" placeholder="" className="neumorphic-input" />
               </div>
-              <div className="space-y-2 pt-4">
-                  <div className="flex justify-between items-center text-sm"><span className="opacity-80">กำไรขั้นต้น/หน่วย</span><span className="font-bold text-primary">{F.formatCurrency(calculated.grossProfitUnit)}</span></div>
-                  <div className="flex justify-between items-center text-sm"><span className="opacity-80">จุดคุ้มทุน ROAS</span><span className="font-bold text-primary">{F.formatNumber(calculated.breakevenRoas)}</span></div>
-                  <div className="flex justify-between items-center text-sm"><span className="opacity-80">ยอดขายเป้าหมาย</span><span className="font-bold text-primary">{F.formatCurrency(calculated.targetRevenue)}</span></div>
-                  <div className="flex justify-between items-center text-sm"><span className="opacity-80">จำนวนออเดอร์</span><span className="font-bold text-primary">{F.formatInt(calculated.targetOrders)} <span className="text-xs opacity-70">({F.formatNumber(calculated.targetOrdersDaily, 1)}/วัน)</span></span></div>
-                  <div className="flex justify-between items-center text-sm"><span className="opacity-80">งบโฆษณา</span><span className="font-bold text-primary">{F.formatCurrency(calculated.adBudget)}</span></div>
+              <div className="space-y-3 pt-4">
+                  <div className="neumorphic-card p-3 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="opacity-80">กำไรขั้นต้น/หน่วย</span>
+                      <span className="font-bold text-primary">{F.formatCurrency(calculated.grossProfitUnit)}</span>
+                    </div>
+                  </div>
+                  <div className="neumorphic-card p-3 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="opacity-80">จุดคุ้มทุน ROAS</span>
+                      <span className="font-bold text-primary">{F.formatNumber(calculated.breakevenRoas)}</span>
+                    </div>
+                  </div>
+                  <div className="neumorphic-card p-3 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="opacity-80">ยอดขายเป้าหมาย</span>
+                      <span className="font-bold text-primary">{F.formatCurrency(calculated.targetRevenue)}</span>
+                    </div>
+                  </div>
+                  <div className="neumorphic-card p-3 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="opacity-80">จำนวนออเดอร์</span>
+                      <span className="font-bold text-primary">{F.formatInt(calculated.targetOrders)} <span className="text-xs opacity-70">({F.formatNumber(calculated.targetOrdersDaily, 1)}/วัน)</span></span>
+                    </div>
+                  </div>
+                  <div className="neumorphic-card p-3 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="opacity-80">งบโฆษณา</span>
+                      <span className="font-bold text-primary">{F.formatCurrency(calculated.adBudget)}</span>
+                    </div>
+                  </div>
               </div>
             </div>
           </div>
@@ -647,22 +674,22 @@ export function ProfitPilotPage() {
                      <div className="space-y-4">
                         <div className="p-4 rounded-lg bg-background/50 shadow-inner neumorphic-card">
                             <div className="flex justify-between items-center">
-                                <p className="font-bold text-red-500">BE ROAS</p>
-                                <p className="font-bold text-xl text-red-500">{F.formatNumber(calculated.breakevenRoas)}</p>
+                                <p className="font-bold text-red-400">BE ROAS</p>
+                                <p className="font-bold text-xl text-red-400">{F.formatNumber(calculated.breakevenRoas)}</p>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">ค่า ROAS ต่ำสุดที่แคมเปญต้องทำให้ได้เพื่อ "เท่าทุน"</p>
                         </div>
                         <div className="p-4 rounded-lg bg-background/50 shadow-inner neumorphic-card">
                             <div className="flex justify-between items-center">
-                                <p className="font-bold text-red-500">BE CPA</p>
-                                <p className="font-bold text-xl text-red-500">{F.formatCurrency(calculated.breakevenCpa)}</p>
+                                <p className="font-bold text-red-400">BE CPA</p>
+                                <p className="font-bold text-xl text-red-400">{F.formatCurrency(calculated.breakevenCpa)}</p>
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">ค่าโฆษณาสูงสุดที่จ่ายได้โดยไม่ขาดทุน</p>
                         </div>
                         <div className="p-4 rounded-lg bg-background/50 shadow-inner neumorphic-card">
                             <div className="flex justify-between items-center">
-                                <p className="font-bold text-red-500">BE Ad Cost %</p>
-                                <p className="font-bold text-xl text-red-500">{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
+                                <p className="font-bold text-red-400">BE Ad Cost %</p>
+                                <p className="font-bold text-xl text-red-400">{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
                             </div>
                              <p className="text-xs text-muted-foreground mt-1">สัดส่วนค่าโฆษณาสูงสุดเมื่อเทียบกับราคาขาย</p>
                         </div>
