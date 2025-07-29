@@ -389,37 +389,40 @@ export function ProfitPilotPage() {
   
   const funnelData = useMemo(() => {
     return [
-      { name: 'TOFU', value: currentFunnelPlan.tofu, color: '#4DD0E1' },
+      { name: 'TOFU', value: currentFunnelPlan.tofu, color: '#2196F3' },
       { name: 'MOFU', value: currentFunnelPlan.mofu, color: '#29B6F6' },
-      { name: 'BOFU', value: currentFunnelPlan.bofu, color: '#2196F3' },
+      { name: 'BOFU', value: currentFunnelPlan.bofu, color: '#4DD0E1' },
     ].sort((a,b) => b.value - a.value);
   }, [currentFunnelPlan]);
   
   const FunnelChart = ({ data }) => {
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
-  
+
     const sortedData = [...data].sort((a, b) => b.value - a.value);
-  
-    const maxPercentage = 100;
-  
+    const maxValue = sortedData[0]?.value || 100;
+
     return (
-      <div className="w-full flex justify-center items-center font-sans my-4">
-        <div className="w-full max-w-xs space-y-[-1px]">
+      <div className="w-full flex justify-center items-center my-4">
+        <div className="w-48 space-y-1.5">
           {sortedData.map((item, index) => {
-            const widthPercentage = Math.max((item.value / maxPercentage) * 100, 15);
-            const clipPath = `polygon(0 0, 100% 0, ${(100 - widthPercentage) / 2 + widthPercentage - 5}% 100%, ${(100 - widthPercentage) / 2 + 5}% 100%)`;
-            const prevWidthPercentage = index > 0 ? Math.max((sortedData[index-1].value / maxPercentage) * 100, 15) : 100;
-            const topClipPath = `polygon(${(100-prevWidthPercentage)/2}% 0, ${(100+prevWidthPercentage)/2}% 0, ${(100+widthPercentage)/2}% 100%, ${(100-widthPercentage)/2}% 100%)`;
+            const widthPercentage = (item.value / maxValue) * 100;
+            const prevWidthPercentage = index > 0 ? (sortedData[index - 1].value / maxValue) * 100 : 100;
             
+            const topWidth = prevWidthPercentage;
+            const bottomWidth = widthPercentage;
+
+            const clipPath = `polygon(${(100 - topWidth) / 2}% 0, ${(100 + topWidth) / 2}% 0, ${(100 + bottomWidth) / 2}% 100%, ${(100 - bottomWidth) / 2}% 100%)`;
+
             return (
               <div
                 key={item.name}
-                className="relative h-12 flex items-center justify-center text-white font-bold text-sm"
+                className="relative h-10 flex items-center justify-center text-white font-bold text-sm shadow-inner"
                 style={{
                   backgroundColor: item.color,
-                  clipPath: topClipPath,
+                  clipPath: clipPath,
                   zIndex: sortedData.length - index,
+                  filter: `brightness(${1 - (index * 0.15)})`,
                 }}
               >
                 {item.name} {item.value}%
