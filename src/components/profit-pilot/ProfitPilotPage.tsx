@@ -123,28 +123,12 @@ export function ProfitPilotPage() {
     s.targetCpa = targetCpa;
     s.adCostPercent = adCostPercent;
     
-    const newInputs = {...inputs};
-    let changed = false;
-    if (i.calcDriver !== 'roas' && targetRoas > 0 && F.num(i.targetRoas).toFixed(2) !== targetRoas.toFixed(2)) {
-      newInputs.targetRoas = targetRoas.toFixed(2);
-      changed = true;
-    }
-    if (i.calcDriver !== 'cpa' && targetCpa > 0 && F.num(i.targetCpa).toFixed(2) !== targetCpa.toFixed(2)) {
-        newInputs.targetCpa = targetCpa.toFixed(2);
-        changed = true;
-    }
-    if (i.calcDriver !== 'adcost' && adCostPercent > 0 && F.num(i.adCostPercent).toFixed(1) !== adCostPercent.toFixed(1)) {
-        newInputs.adCostPercent = adCostPercent.toFixed(1);
-        changed = true;
-    }
-
     s.netProfitUnit = s.grossProfitUnit - targetCpa;
     const profitGoal = F.num(i.profitGoal);
     const fixedCosts = F.num(i.fixedCosts);
     const monthlyProfitGoal = i.profitGoalTimeframe === 'daily' ? profitGoal * 30 : profitGoal;
     const totalProfitTarget = monthlyProfitGoal + fixedCosts;
     s.targetOrders = s.netProfitUnit > 0 ? totalProfitTarget / s.netProfitUnit : 0;
-    s.targetOrdersDaily = s.targetOrders / 30;
     s.targetRevenue = s.targetOrders * s.sellingPrice;
     s.adBudget = s.targetOrders * targetCpa;
     s.adBudgetWithVat = s.adBudget * (1 + (F.num(i.vatProduct) / 100));
@@ -156,6 +140,20 @@ export function ProfitPilotPage() {
     
     setCalculated(s);
 
+    const newInputs = {...inputs};
+    let changed = false;
+    if (i.calcDriver !== 'roas' && isFinite(targetRoas) && F.num(i.targetRoas).toFixed(2) !== targetRoas.toFixed(2)) {
+      newInputs.targetRoas = targetRoas.toFixed(2);
+      changed = true;
+    }
+    if (i.calcDriver !== 'cpa' && isFinite(targetCpa) && F.num(i.targetCpa).toFixed(2) !== targetCpa.toFixed(2)) {
+        newInputs.targetCpa = targetCpa.toFixed(2);
+        changed = true;
+    }
+    if (i.calcDriver !== 'adcost' && isFinite(adCostPercent) && F.num(i.adCostPercent).toFixed(1) !== adCostPercent.toFixed(1)) {
+        newInputs.adCostPercent = adCostPercent.toFixed(1);
+        changed = true;
+    }
     if (changed) {
         setInputs(newInputs);
     }
@@ -169,9 +167,10 @@ export function ProfitPilotPage() {
     }
   }, [inputs, toast]);
 
+
   useEffect(() => {
     calculateAll();
-  }, [inputs.sellingPrice, inputs.vatProduct, inputs.cogs, inputs.platformFee, inputs.paymentFee, inputs.kolFee, inputs.packagingCost, inputs.shippingCost, inputs.profitGoal, inputs.profitGoalTimeframe, inputs.fixedCosts, inputs.targetRoas, inputs.targetCpa, inputs.adCostPercent, inputs.calcDriver, inputs.funnelPlan, inputs.numberOfAccounts, calculateAll]);
+  }, [inputs.sellingPrice, inputs.vatProduct, inputs.cogs, inputs.salesPlatform, inputs.platformFee, inputs.paymentFee, inputs.kolFee, inputs.packagingCost, inputs.shippingCost, inputs.profitGoal, inputs.profitGoalTimeframe, inputs.fixedCosts, inputs.targetRoas, inputs.targetCpa, inputs.adCostPercent, inputs.calcDriver, inputs.funnelPlan, inputs.numberOfAccounts]);
 
   useEffect(() => {
     const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
