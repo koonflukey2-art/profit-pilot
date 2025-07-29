@@ -412,13 +412,29 @@ export function ProfitPilotPage() {
               <h2 className="text-2xl font-bold">{uiTitles.goalsAndResultsTitle}</h2>
             </div>
             <div className="space-y-4">
-              <Input value={inputs.profitGoal} onChange={(e) => handleInputChange('profitGoal', e.target.value)} type="number" placeholder="เป้าหมายกำไร" className="neumorphic-input" />
-              <Input value={inputs.fixedCosts} onChange={(e) => handleInputChange('fixedCosts', e.target.value)} type="number" placeholder="ค่าใช้จ่ายคงที่/เดือน" className="neumorphic-input" />
+              <div>
+                <Label htmlFor="profitGoal" className="block text-sm mb-2 font-medium opacity-80">เป้าหมายกำไร</Label>
+                <div className="grid grid-cols-3 gap-3">
+                  <Input id="profitGoal" value={inputs.profitGoal} onChange={(e) => handleInputChange('profitGoal', e.target.value)} type="number" placeholder="เป้าหมายกำไร" className="neumorphic-input col-span-2" />
+                  <Select value={inputs.profitGoalTimeframe} onValueChange={(val) => handleInputChange('profitGoalTimeframe', val)}>
+                    <SelectTrigger className="neumorphic-select"><SelectValue/></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="monthly">ต่อเดือน</SelectItem>
+                      <SelectItem value="daily">ต่อวัน</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="fixedCosts" className="block text-sm mb-2 font-medium opacity-80">ค่าใช้จ่ายคงที่/เดือน</Label>
+                <Input id="fixedCosts" value={inputs.fixedCosts} onChange={(e) => handleInputChange('fixedCosts', e.target.value)} type="number" placeholder="ค่าใช้จ่ายคงที่/เดือน" className="neumorphic-input" />
+              </div>
               <hr className="border-border my-4 opacity-30" />
               <div className="space-y-2">
                   <div className="mini-value"><span className="label">กำไรขั้นต้น/หน่วย</span><span className="value text-primary">{F.formatCurrency(calculated.grossProfitUnit)}</span></div>
                   <div className="mini-value"><span className="label">จุดคุ้มทุน ROAS</span><span className="value text-primary">{F.formatNumber(calculated.breakevenRoas)}</span></div>
                   <div className="mini-value"><span className="label">ยอดขายเป้าหมาย</span><span className="value text-primary">{F.formatCurrency(calculated.targetRevenue)}</span></div>
+                  <div className="mini-value"><span className="label">จำนวนออเดอร์</span><span className="value text-primary">{F.formatInt(calculated.targetOrders)} ({F.formatNumber(calculated.targetOrdersDaily, 1)}/วัน)</span></div>
                   <div className="mini-value"><span className="label">งบโฆษณา</span><span className="value text-primary">{F.formatCurrency(calculated.adBudget)}</span></div>
               </div>
             </div>
