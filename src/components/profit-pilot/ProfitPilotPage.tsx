@@ -389,11 +389,12 @@ export function ProfitPilotPage() {
   const numAccounts = F.num(inputs.numberOfAccounts) || 1;
   
   const funnelData = useMemo(() => {
+    const baseColor = { h: 195, s: 100, l: 50 }; // A nice blue base
     return [
-      { name: 'TOFU', value: currentFunnelPlan.tofu, color: 'hsl(var(--primary))' },
-      { name: 'MOFU', value: currentFunnelPlan.mofu, color: 'hsl(var(--accent))' },
-      { name: 'BOFU', value: currentFunnelPlan.bofu, color: 'hsl(157 71% 38%)' },
-    ].sort((a, b) => b.value - a.value);
+      { name: 'TOFU', value: currentFunnelPlan.tofu, color: `hsl(${baseColor.h}, ${baseColor.s}%, ${baseColor.l}%)` },
+      { name: 'MOFU', value: currentFunnelPlan.mofu, color: `hsl(${baseColor.h}, ${baseColor.s}%, ${baseColor.l + 10}%)` },
+      { name: 'BOFU', value: currentFunnelPlan.bofu, color: `hsl(${baseColor.h}, ${baseColor.s}%, ${baseColor.l + 20}%)` },
+    ].sort((a, b) => b.value - a.value); // Keep sorting to determine order
   }, [currentFunnelPlan]);
   
   const newFunnelCampaigns = [
@@ -421,6 +422,45 @@ export function ProfitPilotPage() {
   const NewContentLine = ({ className = "" }) => (
     <div className={cn("absolute h-px w-8 bg-gray-400", className)}></div>
   );
+  
+  const FunnelChart = () => {
+    const totalValue = funnelData.reduce((sum, item) => sum + item.value, 0);
+    if (totalValue === 0) return null;
+  
+    const stageOrder = ['TOFU', 'MOFU', 'BOFU'];
+    const sortedData = stageOrder.map(stage => funnelData.find(d => d.name === stage)).filter(Boolean);
+  
+    return (
+      <div className="flex flex-col items-center justify-center w-full max-w-sm space-y-[-1px] relative">
+        {/* Connecting Lines */}
+        {sortedData.length > 1 && (
+          <div className="absolute top-0 bottom-0 left-1/2 w-px bg-gray-400 -z-10" />
+        )}
+  
+        {sortedData.map((item, index) => {
+          const maxWidth = 100; // %
+          const minWidth = 40; // %
+          const width = maxWidth - ((maxWidth - minWidth) / (sortedData.length -1 || 1)) * index;
+          
+          return (
+            <div key={item.name} className="relative flex items-center justify-center w-full group">
+               <div
+                  className="h-16 flex items-center justify-center text-white font-bold"
+                  style={{
+                    backgroundColor: item.color,
+                    width: `${width}%`,
+                    clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0% 100%)',
+                    boxShadow: `0 0 15px ${item.color}`
+                  }}
+              >
+                  <span>{item.name} {item.value}%</span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
   
   return (
     <>
@@ -726,22 +766,7 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8">
-                   <div className="w-full max-w-sm flex flex-col gap-1 items-center">
-                    {funnelData.map(({ name, value, color }, index) => (
-                      <div
-                          key={index}
-                          className="relative h-12 flex items-center justify-center text-white font-bold"
-                          style={{
-                              backgroundColor: color,
-                              width: `${value}%`,
-                              minWidth: '50px',
-                              boxShadow: `0 0 15px ${color}`
-                          }}
-                      >
-                          {name} {value}%
-                      </div>
-                    ))}
-                  </div>
+                  <FunnelChart />
                 </div>
                 
                 <div className="space-y-4">
