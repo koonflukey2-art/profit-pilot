@@ -57,7 +57,7 @@ const initialInputs = {
   calcDriver: 'roas',
   funnelPlan: 'launch',
   numberOfAccounts: '1',
-  metricsPlan: 'fb_ecommerce_growth',
+  metricsPlan: 'fb_s1_plan',
   automationTool: 'facebook',
 };
 
@@ -66,7 +66,7 @@ export function ProfitPilotPage() {
   const [calculated, setCalculated] = useState({});
   const [automationRules, setAutomationRules] = useState([]);
   const [uiTitles, setUiTitles] = useState({ productInfoTitle: 'ข้อมูลสินค้า', costCalculationTitle: 'คำนวณต้นทุน', goalsAndResultsTitle: 'เป้าหมายและผลลัพธ์', advancedPlanningTitle: 'Advanced Planning' });
-  const [activeTab, setActiveTab] = useState('metrics');
+  const [activeTab, setActiveTab] = useState('planning');
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [history, setHistory] = useState([]);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: () => {} });
@@ -313,7 +313,7 @@ export function ProfitPilotPage() {
     }
   };
 
-  const selectedMetricsPlan = metricsPlans[inputs.metricsPlan] || metricsPlans.fb_ecommerce_growth;
+  const selectedMetricsPlan = metricsPlans[inputs.metricsPlan] || metricsPlans.fb_s1_plan;
   const filteredKpis = useMemo(() => {
     if (funnelStageFilter === 'all') {
       return selectedMetricsPlan.kpis;
@@ -324,9 +324,9 @@ export function ProfitPilotPage() {
 
   const getImportanceBadge = (importance) => {
     switch (importance) {
-      case 'สูงสุด': return 'bg-red-500 hover:bg-red-600';
+      case 'สูงมาก': return 'bg-red-500 hover:bg-red-600';
       case 'สูง': return 'bg-orange-500 hover:bg-orange-600';
-      case 'กลาง': return 'bg-yellow-500 hover:bg-yellow-600';
+      case 'กลาง': return 'bg-yellow-500 hover:bg-yellow-600 text-black';
       default: return 'bg-gray-500 hover:bg-gray-600';
     }
   };
@@ -350,7 +350,7 @@ export function ProfitPilotPage() {
   );
 
   const StructureLine = ({ hasArrow = false }) => (
-    <div className="flex-1 flex items-center justify-center">
+    <div className="flex-1 flex items-center justify-center h-full">
       <div className="w-full h-px bg-primary/50 relative">
         {hasArrow && <ArrowRight className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />}
       </div>
@@ -367,7 +367,7 @@ export function ProfitPilotPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-4">
           <div className="neumorphic-card p-6 h-full">
-            <div className="flex items-center gap-3 mb-6 pb-4 border-b">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-primary/20">
               <div className="flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground font-bold text-xl rounded-lg shadow-md">1</div>
               <h2 className="text-2xl font-bold">{uiTitles.productInfoTitle}</h2>
             </div>
@@ -395,8 +395,8 @@ export function ProfitPilotPage() {
                     <SelectValue placeholder="เลือกประเภทธุรกิจ" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(funnelObjectivesData).map(([key, { objectives }]) =>(
-                      <SelectItem key={key} value={key}>{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</SelectItem>
+                    {Object.entries(funnelObjectivesData).map(([key, { name }]) =>(
+                      <SelectItem key={key} value={key}>{name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -407,7 +407,7 @@ export function ProfitPilotPage() {
 
         <div className="lg:col-span-4">
           <div className="neumorphic-card p-6 h-full">
-            <div className="flex items-center gap-3 mb-6 pb-4 border-b">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-primary/20">
               <div className="flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground font-bold text-xl rounded-lg shadow-md">2</div>
               <h2 className="text-2xl font-bold">{uiTitles.costCalculationTitle}</h2>
             </div>
@@ -465,7 +465,7 @@ export function ProfitPilotPage() {
 
         <div className="lg:col-span-4">
           <div className="neumorphic-card p-6 h-full">
-            <div className="flex items-center gap-3 mb-6 pb-4 border-b">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-primary/20">
               <div className="flex items-center justify-center w-10 h-10 bg-primary text-primary-foreground font-bold text-xl rounded-lg shadow-md">3</div>
               <h2 className="text-2xl font-bold">{uiTitles.goalsAndResultsTitle}</h2>
             </div>
@@ -491,7 +491,7 @@ export function ProfitPilotPage() {
                   <div className="flex justify-between items-center text-sm"><span className="opacity-80">กำไรขั้นต้น/หน่วย</span><span className="font-bold text-primary">{F.formatCurrency(calculated.grossProfitUnit)}</span></div>
                   <div className="flex justify-between items-center text-sm"><span className="opacity-80">จุดคุ้มทุน ROAS</span><span className="font-bold text-primary">{F.formatNumber(calculated.breakevenRoas)}</span></div>
                   <div className="flex justify-between items-center text-sm"><span className="opacity-80">ยอดขายเป้าหมาย</span><span className="font-bold text-primary">{F.formatCurrency(calculated.targetRevenue)}</span></div>
-                  <div className="flex justify-between items-center text-sm"><span className="opacity-80">จำนวนออเดอร์</span><span className="font-bold text-primary">{F.formatInt(calculated.targetOrders)} <span className="text-xs opacity-70">(เฉลี่ย {F.formatNumber(calculated.targetOrdersDaily, 1)}/วัน)</span></span></div>
+                  <div className="flex justify-between items-center text-sm"><span className="opacity-80">จำนวนออเดอร์</span><span className="font-bold text-primary">{F.formatInt(calculated.targetOrders)} <span className="text-xs opacity-70">({F.formatNumber(calculated.targetOrdersDaily, 1)}/วัน)</span></span></div>
                   <div className="flex justify-between items-center text-sm"><span className="opacity-80">งบโฆษณา</span><span className="font-bold text-primary">{F.formatCurrency(calculated.adBudget)}</span></div>
               </div>
             </div>
@@ -526,7 +526,15 @@ export function ProfitPilotPage() {
                     </p>
                 </div>
              </div>
-
+             <div className="flex items-center gap-4 mb-4">
+                <Label className="text-sm font-medium opacity-80">กรองตาม Funnel Stage:</Label>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant={funnelStageFilter === 'all' ? 'default' : 'outline'} onClick={() => setFunnelStageFilter('all')}>All</Button>
+                  <Button size="sm" variant={funnelStageFilter === 'TOFU' ? 'default' : 'outline'} onClick={() => setFunnelStageFilter('TOFU')}>TOFU</Button>
+                  <Button size="sm" variant={funnelStageFilter === 'MOFU' ? 'default' : 'outline'} onClick={() => setFunnelStageFilter('MOFU')}>MOFU</Button>
+                  <Button size="sm" variant={funnelStageFilter === 'BOFU' ? 'default' : 'outline'} onClick={() => setFunnelStageFilter('BOFU')}>BOFU</Button>
+                </div>
+              </div>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
@@ -582,27 +590,24 @@ export function ProfitPilotPage() {
                      <div className="space-y-4">
                         <div className="p-4 rounded-lg bg-background shadow-inner">
                             <div className="flex justify-between items-center">
-                                <p className="font-bold text-primary">BE ROAS (Breakeven ROAS)</p>
+                                <p className="font-bold text-primary">BE ROAS</p>
                                 <p className="font-bold text-xl text-primary">{F.formatNumber(calculated.breakevenRoas)}</p>
                             </div>
-                            <p className="text-xs opacity-70 mt-1">ค่า ROAS ต่ำสุดที่แคมเปญต้องทำให้ได้เพื่อ "เท่าทุน" (ไม่ทำกำไร ไม่ขาดทุน)</p>
-                            <p className="text-xs mt-2 p-2 bg-gray-500/10 rounded">สูตร: ราคาขาย (ไม่รวม VAT) ÷ กำไรขั้นต้น/หน่วย</p>
+                            <p className="text-xs opacity-70 mt-1">ค่า ROAS ต่ำสุดที่แคมเปญต้องทำให้ได้เพื่อ "เท่าทุน"</p>
                         </div>
                         <div className="p-4 rounded-lg bg-background shadow-inner">
                             <div className="flex justify-between items-center">
-                                <p className="font-bold text-primary">BE CPA (Breakeven CPA)</p>
+                                <p className="font-bold text-primary">BE CPA</p>
                                 <p className="font-bold text-xl text-primary">{F.formatCurrency(calculated.breakevenCpa)}</p>
                             </div>
                             <p className="text-xs opacity-70 mt-1">ค่าโฆษณาสูงสุดที่จ่ายได้โดยไม่ขาดทุน</p>
-                            <p className="text-xs mt-2 p-2 bg-gray-500/10 rounded">สูตร: กำไรขั้นต้น/หน่วย</p>
                         </div>
                         <div className="p-4 rounded-lg bg-background shadow-inner">
                             <div className="flex justify-between items-center">
-                                <p className="font-bold text-primary">BE Ad Cost % (Breakeven Ad Cost %)</p>
+                                <p className="font-bold text-primary">BE Ad Cost %</p>
                                 <p className="font-bold text-xl text-primary">{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
                             </div>
-                             <p className="text-xs opacity-70 mt-1">สัดส่วนค่าโฆษณาสูงสุดเมื่อเทียบกับราคาขายที่ไม่ขาดทุน</p>
-                            <p className="text-xs mt-2 p-2 bg-gray-500/10 rounded">สูตร: (BE CPA ÷ ราคาขาย (ไม่รวม VAT)) × 100</p>
+                             <p className="text-xs opacity-70 mt-1">สัดส่วนค่าโฆษณาสูงสุดเมื่อเทียบกับราคาขาย</p>
                         </div>
                      </div>
                   </div>
@@ -636,7 +641,9 @@ export function ProfitPilotPage() {
                       <div key={index} className="relative h-12 flex items-center justify-center text-white font-bold"
                         style={{
                           backgroundColor: stage.color,
-                          clipPath: `polygon(${index * 15}% 0, ${100 - index * 15}% 0, ${100 - (index + 1) * 15}% 100%, ${(index + 1) * 15}% 100%)`,
+                          width: `${100 - index * 15}%`,
+                          margin: '0 auto',
+                          clipPath: `polygon(12.5% 0, 87.5% 0, 100% 100%, 0% 100%)`,
                           boxShadow: `0 0 15px ${stage.color}`
                         }}
                       >
@@ -652,11 +659,10 @@ export function ProfitPilotPage() {
                       <h5 className="font-bold text-primary">TOFU</h5>
                       <span className="font-bold text-primary">{currentFunnelPlan.tofu}%</span>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudget)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudget / numAccounts)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudget / numAccounts / 30)}</p></div>
-                      <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{numAccounts} บัญชี</p></div>
                     </div>
                   </div>
                    <div className="neumorphic-card p-4">
@@ -664,11 +670,10 @@ export function ProfitPilotPage() {
                       <h5 className="font-bold text-accent">MOFU</h5>
                        <span className="font-bold text-accent">{currentFunnelPlan.mofu}%</span>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudget)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudget / numAccounts)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudget / numAccounts / 30)}</p></div>
-                      <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{numAccounts} บัญชี</p></div>
                     </div>
                   </div>
                    <div className="neumorphic-card p-4">
@@ -676,11 +681,10 @@ export function ProfitPilotPage() {
                       <h5 className="font-bold" style={{ color: 'hsl(157 71% 38%)' }}>BOFU</h5>
                        <span className="font-bold" style={{ color: 'hsl(157 71% 38%)' }}>{currentFunnelPlan.bofu}%</span>
                     </div>
-                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget / numAccounts)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget / numAccounts / 30)}</p></div>
-                      <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{numAccounts} บัญชี</p></div>
                     </div>
                   </div>
                 </div>
@@ -692,46 +696,40 @@ export function ProfitPilotPage() {
               <div className="neumorphic-card p-6 space-y-8">
                 {/* New Customer Structure */}
                 <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-1/4">
-                      <div className="bg-primary text-primary-foreground p-3 rounded-lg text-center">
+                  <div className="flex items-center gap-4">
+                    <div className="w-1/6 self-stretch">
+                      <div className="bg-primary text-primary-foreground p-3 rounded-lg text-center h-full flex flex-col justify-center">
                         <h4 className="font-bold text-lg">ลูกค้าใหม่</h4>
-                      </div>
-                      <div className="mt-2 text-sm">
-                        <p className="font-bold">ใช้กลุ่มเป้าหมาย</p>
-                        <ul className="list-disc list-inside">
-                          <li>Interest</li>
-                          <li>Lookalike</li>
-                        </ul>
+                         <p className="text-xs mt-2 opacity-80">({F.formatCurrency(budgetPerAccountDay)}/วัน)</p>
                       </div>
                     </div>
-                    <div className="w-1/4 flex items-center justify-center pt-8">
+                    <StructureLine />
+                    <div className="w-1/4">
                       <StructureBox title="Campaign">
                         <div className="bg-background/80 rounded-md p-2 mt-2">
                           <p className="font-bold text-lg">Conversion</p>
                           <p className="font-bold text-2xl text-accent">CBO</p>
                         </div>
-                        <p className="text-xs mt-2 opacity-80">งบ 500 - 5,000</p>
+                        <p className="text-xs mt-2 opacity-80">งบ: {F.formatCurrency(budgetPerAccountDay)}</p>
                       </StructureBox>
                     </div>
-                    <div className="w-1/4 flex items-center justify-center">
-                       <StructureLine />
-                    </div>
-                    <div className="w-1/4 space-y-2">
-                      <StructureBox title="Ad Group" className="p-2">
+                    <StructureLine hasArrow />
+                    <div className="w-1/4">
+                      <StructureBox title="Ad Set">
                         <div className="bg-background/80 rounded-md p-2 mt-1 space-y-1">
-                          {Array(5).fill(0).map((_, i) => <p key={i} className="text-xs p-1 bg-gray-700/50 rounded">กลุ่มเป้าหมาย {i+1}</p>)}
+                          <p className="text-xs p-1 bg-gray-700/50 rounded">Interest</p>
+                          <p className="text-xs p-1 bg-gray-700/50 rounded">Lookalike</p>
                         </div>
+                         <p className="text-xs mt-2 opacity-80">{F.formatInt(numAccounts)} บัญชี</p>
                       </StructureBox>
                     </div>
-                     <div className="w-1/4 space-y-2">
-                      <StructureBox title="Ads" className="p-2">
+                    <StructureLine hasArrow />
+                     <div className="w-1/4">
+                      <StructureBox title="Ads">
                         <div className="bg-background/80 rounded-md p-2 mt-1 space-y-1">
                            <p className="text-xs p-1 bg-gray-700/50 rounded">VDO 1</p>
                            <p className="text-xs p-1 bg-gray-700/50 rounded">VDO 2</p>
-                           <p className="text-xs p-1 bg-gray-700/50 rounded">VDO 3</p>
-                           <p className="text-xs p-1 bg-gray-700/50 rounded">”</p>
-                           <p className="text-xs p-1 bg-gray-700/50 rounded">”</p>
+                           <p className="text-xs p-1 bg-gray-700/50 rounded">Dynamic Creative</p>
                         </div>
                       </StructureBox>
                     </div>
@@ -742,42 +740,39 @@ export function ProfitPilotPage() {
 
                 {/* Retarget Structure */}
                 <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-1/4">
-                      <div className="bg-accent text-accent-foreground p-3 rounded-lg text-center">
+                  <div className="flex items-center gap-4">
+                     <div className="w-1/6 self-stretch">
+                      <div className="bg-accent text-accent-foreground p-3 rounded-lg text-center h-full flex flex-col justify-center">
                         <h4 className="font-bold text-lg">Retarget</h4>
                       </div>
                     </div>
-                    <div className="w-1/4 flex items-center justify-center pt-8">
+                     <StructureLine />
+                    <div className="w-1/4">
                       <StructureBox title="Campaign">
                          <div className="bg-background/80 rounded-md p-2 mt-2">
                           <p className="font-bold text-lg">Conversion</p>
                           <p className="font-bold text-2xl text-accent">CBO</p>
                         </div>
-                        <p className="text-xs mt-2 opacity-80">งบ 500 - 5,000</p>
+                         <p className="text-xs mt-2 opacity-80">แยกตาม Stage</p>
                       </StructureBox>
                     </div>
-                     <div className="w-1/4 flex items-center justify-center">
-                       <StructureLine />
-                    </div>
-                    <div className="w-1/4 space-y-2">
-                      <StructureBox title="Ad Group" className="p-2">
-                        <div className="bg-background/80 rounded-md p-2 mt-1 space-y-1">
-                          <p className="text-xs p-1 bg-gray-700/50 rounded">VDO 25% 7 วัน</p>
-                          <p className="text-xs p-1 bg-gray-700/50 rounded">View Content 7 วัน</p>
-                          <p className="text-xs p-1 bg-gray-700/50 rounded">VDO 25% 14 วัน</p>
-                          <p className="text-xs p-1 bg-gray-700/50 rounded">VDO 25% 30 วัน</p>
+                    <StructureLine hasArrow />
+                    <div className="w-1/4">
+                      <StructureBox title="Ad Set">
+                        <div className="bg-background/80 rounded-md p-2 mt-1 space-y-1 text-xs">
+                          <p className="p-1 bg-gray-700/50 rounded">ATC 7-14 วัน</p>
+                          <p className="p-1 bg-gray-700/50 rounded">View Content 7 วัน</p>
+                          <p className="p-1 bg-gray-700/50 rounded">Page/IG Engage 30 วัน</p>
                         </div>
                       </StructureBox>
                     </div>
-                     <div className="w-1/4 space-y-2">
-                      <StructureBox title="Ads" className="p-2">
-                        <div className="bg-background/80 rounded-md p-2 mt-1 space-y-1">
-                           <p className="text-xs p-1 bg-gray-700/50 rounded">VDO ปัง</p>
-                           <p className="text-xs p-1 bg-gray-700/50 rounded">โปรโมชั่น</p>
-                           <p className="text-xs p-1 bg-gray-700/50 rounded">รีวิว/ผลลัพธ์</p>
-                           <p className="text-xs p-1 bg-gray-700/50 rounded">”</p>
-                           <p className="text-xs p-1 bg-gray-700/50 rounded">”</p>
+                    <StructureLine hasArrow />
+                     <div className="w-1/4">
+                      <StructureBox title="Ads">
+                        <div className="bg-background/80 rounded-md p-2 mt-1 space-y-1 text-xs">
+                           <p className="p-1 bg-gray-700/50 rounded">โปรโมชั่น</p>
+                           <p className="p-1 bg-gray-700/50 rounded">รีวิว/ผลลัพธ์</p>
+                           <p className="p-1 bg-gray-700/50 rounded">คอนเทนต์ใหม่</p>
                         </div>
                       </StructureBox>
                     </div>
@@ -789,7 +784,7 @@ export function ProfitPilotPage() {
 
           </TabsContent>
           <TabsContent value="funnel">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <h5 className="font-bold mb-3 text-primary">TOFU (Top of Funnel)</h5>
                   <ul className="list-disc list-inside space-y-1 text-sm opacity-90">
@@ -803,7 +798,7 @@ export function ProfitPilotPage() {
                   </ul>
                 </div>
                 <div>
-                  <h5 className="font-bold mb-3 text-purple-400">BOFU (Bottom of Funnel)</h5>
+                  <h5 className="font-bold mb-3" style={{color: 'hsl(157 71% 38%)'}}>BOFU (Bottom of Funnel)</h5>
                   <ul className="list-disc list-inside space-y-1 text-sm opacity-90">
                     {funnelObjectives.bofu.map((o, i) => <li key={i}>{o}</li>)}
                   </ul>
@@ -812,18 +807,36 @@ export function ProfitPilotPage() {
           </TabsContent>
           <TabsContent value="automation">
             <div className="flex justify-between items-center mb-6">
+               <div>
+                  <Label htmlFor="automation-tool" className="block text-sm mb-2 font-medium opacity-80">เครื่องมืออัตโนมัติ</Label>
+                   <Select value={inputs.automationTool} onValueChange={(val) => handleInputChange('automationTool', val)}>
+                    <SelectTrigger id="automation-tool" className="neumorphic-select w-48"><SelectValue/></SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(automationToolsConfig).map(([key, {name}]) => <SelectItem key={key} value={key}>{name}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+              </div>
               <Button onClick={addRule} className="neon-button"><Plus className="w-4 h-4"/> เพิ่ม Rule ใหม่</Button>
             </div>
             <div className="space-y-4">
               {automationRules.map(rule => {
                 const toolConfig = automationToolsConfig[inputs.automationTool];
+                const actionConfig = toolConfig.actions.find(a => a.value === rule.action);
+
                 return (
                   <div key={rule.id} className="neumorphic-card p-4">
-                     <div className="flex justify-end"><Button variant="ghost" size="icon" onClick={() => deleteRule(rule.id)}><X className="w-4 h-4 text-red-400"/></Button></div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <Select value={rule.metric} onValueChange={(v) => updateRule(rule.id, 'metric', v)}><SelectTrigger className="neumorphic-select"/><SelectContent>{toolConfig.metrics.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
-                        <Input value={rule.value} onChange={(e) => updateRule(rule.id, 'value', e.target.value)} className="neumorphic-input" placeholder="Value"/>
-                        <Select value={rule.action} onValueChange={(v) => updateRule(rule.id, 'action', v)}><SelectTrigger className="neumorphic-select"/><SelectContent>{toolConfig.actions.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
+                     <div className="flex justify-end -mt-2 -mr-2"><Button variant="ghost" size="icon" onClick={() => deleteRule(rule.id)}><X className="w-4 h-4 text-red-400"/></Button></div>
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <span className="font-bold text-primary">IF</span>
+                        <Select value={rule.metric} onValueChange={(v) => updateRule(rule.id, 'metric', v)}><SelectTrigger className="neumorphic-select w-40"/><SelectContent>{toolConfig.metrics.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
+                        <Select value={rule.operator} onValueChange={(v) => updateRule(rule.id, 'operator', v)}><SelectTrigger className="neumorphic-select w-40"/><SelectContent>{toolConfig.operators.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
+                        <Input value={rule.value} onChange={(e) => updateRule(rule.id, 'value', e.target.value)} className="neumorphic-input w-24" placeholder="Value"/>
+                        <span className="font-bold text-accent">THEN</span>
+                        <Select value={rule.action} onValueChange={(v) => updateRule(rule.id, 'action', v)}><SelectTrigger className="neumorphic-select w-48"/><SelectContent>{toolConfig.actions.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
+                        {actionConfig?.needsValue && (
+                          <Input value={rule.actionValue} onChange={(e) => updateRule(rule.id, 'actionValue', e.target.value)} className="neumorphic-input w-24" placeholder="Action Value"/>
+                        )}
+                        <Select value={rule.timeframe} onValueChange={(v) => updateRule(rule.id, 'timeframe', v)}><SelectTrigger className="neumorphic-select w-40"/><SelectContent>{toolConfig.timeframes.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
                       </div>
                   </div>
                 )
@@ -841,6 +854,7 @@ export function ProfitPilotPage() {
               {n8nWorkflow.loading && <Progress value={50} className="w-full mt-4" />}
               {n8nWorkflow.json && (
                 <div className="mt-4 p-4 bg-background rounded-lg max-h-96 overflow-auto">
+                   <Button size="sm" onClick={() => navigator.clipboard.writeText(n8nWorkflow.json)} className="absolute top-2 right-2">Copy</Button>
                   <pre className="text-xs">{n8nWorkflow.json}</pre>
                 </div>
               )}
@@ -869,12 +883,12 @@ export function ProfitPilotPage() {
         </Tabs>
       </div>
 
-      <AlertDialog open={confirmModal.isOpen} onOpenChange={(isOpen) => !isOpen && setConfirmModal({isOpen: false})}>
+      <AlertDialog open={confirmModal.isOpen} onOpenChange={(isOpen) => !isOpen && setConfirmModal({isOpen: false, message: '', onConfirm: () => {}})}>
         <AlertDialogContent>
           <AlertDialogHeader><AlertDialogTitle>ยืนยันการกระทำ</AlertDialogTitle><AlertDialogDescription>{confirmModal.message}</AlertDialogDescription></AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setConfirmModal({isOpen: false})}>ยกเลิก</AlertDialogCancel>
-            <AlertDialogAction onClick={() => { confirmModal.onConfirm(); setConfirmModal({isOpen: false}); }}>ยืนยัน</AlertDialogAction>
+            <AlertDialogCancel onClick={() => setConfirmModal({isOpen: false, message: '', onConfirm: () => {}})}>ยกเลิก</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { confirmModal.onConfirm(); setConfirmModal({isOpen: false, message: '', onConfirm: () => {}}); }}>ยืนยัน</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
