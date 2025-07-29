@@ -1,11 +1,11 @@
 import type {Metadata} from 'next';
-import { Space_Grotesk } from 'next/font/google'
+import { Noto_Sans_Thai } from 'next/font/google'
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
-const spaceGrotesk = Space_Grotesk({ 
-  subsets: ['latin'],
-  variable: '--font-space-grotesk',
+const notoSansThai = Noto_Sans_Thai({ 
+  subsets: ['latin', 'thai'],
+  variable: '--font-noto-sans-thai',
 })
 
 export const metadata: Metadata = {
@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${spaceGrotesk.variable} font-headline antialiased`}>
+      <body className={`${notoSansThai.variable} font-headline antialiased`}>
         {children}
         <Toaster />
       </body>

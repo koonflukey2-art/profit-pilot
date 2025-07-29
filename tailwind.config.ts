@@ -17,8 +17,8 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        headline: ['var(--font-space-grotesk)', 'sans-serif'],
-        body: ['var(--font-space-grotesk)', 'sans-serif'],
+        headline: ['var(--font-noto-sans-thai)', 'sans-serif'],
+        body: ['var(--font-noto-sans-thai)', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
