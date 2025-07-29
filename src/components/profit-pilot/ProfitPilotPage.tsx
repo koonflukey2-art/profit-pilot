@@ -401,48 +401,40 @@ export function ProfitPilotPage() {
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
   
-    const sortedData = [...data].sort((a, b) => b.value - a.value);
+    // Inverted funnel data (narrowest on top)
+    const sortedData = [...data].sort((a, b) => a.value - b.value);
   
     const FunnelLayer = ({
       value,
       color,
       label,
-      isFirst,
     }: {
       value: number;
       color: string;
       label: string;
-      isFirst: boolean;
     }) => {
-      const baseWidth = 350;
-      const height = 60; 
-      const width = 50 + (baseWidth - 50) * (value / 100);
+      // Base width and how much it scales with value
+      const minWidth = 100; // a bit wider for the narrowest part
+      const maxWidth = 350;
+      const width = minWidth + (maxWidth - minWidth) * (value / 100);
+      const height = 60;
   
       const layerStyle: React.CSSProperties = {
         width: `${width}px`,
         height: `${height}px`,
         backgroundColor: color,
-        clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)',
-        borderRadius: '4px',
-        color: 'white',
-        fontWeight: 'bold',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
+        clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0% 100%)',
         margin: '0 auto',
-        boxShadow: `0 10px 20px -5px ${color}80, 0 4px 5px -2px ${color}50`,
-        transition: 'transform 0.3s ease',
       };
       
       const labelStyle: React.CSSProperties = {
-          position: 'relative',
-          zIndex: 2,
-          textShadow: '1px 1px 3px rgba(0,0,0,0.5)',
+          color: 'white',
+          fontWeight: 'bold',
+          textAlign: 'center',
       }
 
       return (
-        <div style={layerStyle} className="hover:scale-105">
+        <div style={layerStyle} className="flex items-center justify-center">
           <span style={labelStyle}>{label} {value}%</span>
         </div>
       );
@@ -450,14 +442,13 @@ export function ProfitPilotPage() {
   
     return (
       <div className="w-full flex justify-center items-center my-4 py-4 min-h-[300px]">
-        <div className="flex flex-col items-center justify-center space-y-2">
-          {sortedData.map((item, index) => (
+        <div className="flex flex-col items-center justify-center space-y-4">
+          {sortedData.map((item) => (
             <FunnelLayer
               key={item.name}
               value={item.value}
               color={item.color}
               label={item.name}
-              isFirst={index === 0}
             />
           ))}
         </div>
