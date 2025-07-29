@@ -389,60 +389,40 @@ export function ProfitPilotPage() {
   
   const funnelData = useMemo(() => {
     return [
-      { name: 'TOFU', value: currentFunnelPlan.tofu, color: '#2196F3' },
+      { name: 'TOFU', value: currentFunnelPlan.tofu, color: '#4DD0E1' },
       { name: 'MOFU', value: currentFunnelPlan.mofu, color: '#29B6F6' },
-      { name: 'BOFU', value: currentFunnelPlan.bofu, color: '#4DD0E1' },
+      { name: 'BOFU', value: currentFunnelPlan.bofu, color: '#2196F3' },
     ].sort((a,b) => b.value - a.value);
   }, [currentFunnelPlan]);
   
   const FunnelChart = ({ data }) => {
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
-
+  
+    const sortedData = [...data].sort((a, b) => b.value - a.value);
+  
+    const maxPercentage = 100;
+  
     return (
-      <div className="flex justify-center">
-        <div className="relative w-full max-w-[10rem] h-48 font-sans">
-          {data.map((item, index) => {
-            const perspective = 100;
-            const topWidth = 100 - (index * 25);
-            const bottomWidth = 100 - ((index + 1) * 25);
-            const height = 40;
-            const top = index * (height - 10);
-            const zIndex = data.length - index;
-
+      <div className="w-full flex justify-center items-center font-sans my-4">
+        <div className="w-full max-w-xs space-y-[-1px]">
+          {sortedData.map((item, index) => {
+            const widthPercentage = Math.max((item.value / maxPercentage) * 100, 15);
+            const clipPath = `polygon(0 0, 100% 0, ${(100 - widthPercentage) / 2 + widthPercentage - 5}% 100%, ${(100 - widthPercentage) / 2 + 5}% 100%)`;
+            const prevWidthPercentage = index > 0 ? Math.max((sortedData[index-1].value / maxPercentage) * 100, 15) : 100;
+            const topClipPath = `polygon(${(100-prevWidthPercentage)/2}% 0, ${(100+prevWidthPercentage)/2}% 0, ${(100+widthPercentage)/2}% 100%, ${(100-widthPercentage)/2}% 100%)`;
+            
             return (
               <div
                 key={item.name}
-                className="absolute w-full"
+                className="relative h-12 flex items-center justify-center text-white font-bold text-sm"
                 style={{
-                  height: `${height}px`,
-                  top: `${top}px`,
-                  zIndex: zIndex,
-                  transformStyle: 'preserve-3d',
-                  perspective: `${perspective}px`,
+                  backgroundColor: item.color,
+                  clipPath: topClipPath,
+                  zIndex: sortedData.length - index,
                 }}
               >
-                {/* Top face */}
-                <div
-                  className="absolute w-full h-px bg-black opacity-20"
-                  style={{
-                    backgroundColor: item.color,
-                    width: `${topWidth}%`,
-                    left: `${(100-topWidth)/2}%`,
-                    top: 0,
-                    transform: `rotateX(90deg) translateZ(${height / 2}px)`,
-                  }}
-                />
-                {/* Front face */}
-                <div
-                  className="absolute w-full h-full flex items-center justify-center text-white text-sm font-bold"
-                  style={{
-                    backgroundColor: item.color,
-                    clipPath: `polygon(${(100-topWidth)/2}% 0, ${(100+topWidth)/2}% 0, ${(100+bottomWidth)/2}% 100%, ${(100-bottomWidth)/2}% 100%)`,
-                  }}
-                >
-                   {item.name} {item.value}%
-                </div>
+                {item.name} {item.value}%
               </div>
             );
           })}
@@ -1028,5 +1008,3 @@ export function ProfitPilotPage() {
     </>
   );
 }
-
-    
