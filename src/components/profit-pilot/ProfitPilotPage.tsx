@@ -426,17 +426,11 @@ export function ProfitPilotPage() {
     if (totalValue === 0) return null;
   
     const stageOrder = ['TOFU', 'MOFU', 'BOFU'];
-    const sortedData = stageOrder.map(stage => funnelData.find(d => d.name === stage)).filter(Boolean);
+    const sortedData = stageOrder.map(stage => funnelData.find(d => d.name === stage)).filter(d => d && d.value > 0);
   
-    const FunnelSegment = ({ width, color, text, isTop, isBottom }) => {
-      let clipPath;
-      if (isTop) {
-        clipPath = `polygon(0 0, 100% 0, 90% 100%, 10% 100%)`;
-      } else if (isBottom) {
-        clipPath = `polygon(10% 0, 90% 0, 100% 100%, 0% 100%)`;
-      } else {
-        clipPath = `polygon(10% 0, 90% 0, 90% 100%, 10% 100%)`;
-      }
+    const FunnelSegment = ({ width, prevWidth, color, text, isTop, isBottom }) => {
+      const slant = 10; // in percent
+      const clipPath = `polygon(${slant}% 0, ${100 - slant}% 0, 100% 100%, 0% 100%)`;
   
       return (
         <div
@@ -456,20 +450,33 @@ export function ProfitPilotPage() {
     let accumulatedWidth = 100;
   
     return (
-      <div className="flex flex-col items-center justify-center w-full max-w-xs mx-auto gap-1">
+      <div className="flex flex-col items-center justify-center w-full max-w-xs mx-auto gap-0.5">
         {sortedData.map((item, index) => {
           if (item.value === 0) return null;
-          const currentWidth = accumulatedWidth;
-          accumulatedWidth -= 20;
+          
+          const currentWidth = Math.max(20, 100 * (item.value / 100));
+          const prevWidth = index > 0 ? Math.max(20, 100 * (sortedData[index-1].value / 100)) : 100;
+  
+          // A different approach for inverted funnel.
+          const topWidth = 100 - (index * 20);
+          const bottomWidth = 100 - ((index + 1) * 20);
+  
+          const clipPath = `polygon(${100-topWidth/2}% 0, ${topWidth/2}% 0, ${bottomWidth/2}% 100%, ${100-bottomWidth/2}% 100%)`
+          const segmentWidth = 100 - (index * 15);
+  
           return (
-            <FunnelSegment
+            <div
               key={item.name}
-              width={currentWidth}
-              color={item.color}
-              text={`${item.name} ${item.value}%`}
-              isTop={index === 0}
-              isBottom={index === sortedData.length - 1}
-            />
+              className="h-10 flex items-center justify-center text-white font-bold"
+              style={{
+                width: `${segmentWidth}%`,
+                backgroundColor: item.color,
+                clipPath: `polygon(10% 0, 90% 0, 100% 100%, 0% 100%)`,
+                boxShadow: `0 2px 5px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.3)`
+              }}
+            >
+              <span>{`${item.name} ${item.value}%`}</span>
+            </div>
           );
         })}
       </div>
@@ -730,7 +737,7 @@ export function ProfitPilotPage() {
                     </div>
                   </div>
                   <div>
-                     <h4 className="text-lg font-bold mb-4 text-white">ค่า Breakeven</h4>
+                     <h4 className="text-lg font-bold mb-4 text-red-500">ค่า Breakeven</h4>
                      <div className="space-y-4">
                         <div className="neumorphic-card p-4">
                             <div className="flex justify-between items-center">
