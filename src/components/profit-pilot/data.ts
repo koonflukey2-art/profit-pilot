@@ -30,60 +30,59 @@ export const businessTypeKeywords = {
 
 export const metricsPlans = {
   fb_ecommerce_growth: {
-      name: "Facebook - E-commerce (Growth Plan)",
-      summary: 'แผนการเติบโตสำหรับ E-commerce บน Facebook เน้นการเข้าถึง (Reach) และการสร้าง Traffic (CTR) เพื่อขยายฐานลูกค้าใหม่เป็นหลัก',
+      name: "Growth Plan",
+      summary: 'เน้นการขยายตัวอย่างรวดเร็ว เพิ่มการรับรู้และฐานลูกค้า',
       kpis: [
-          { stage: 'TOFU', metric: 'CPM', benchmark: '150-300 ฿', importance: 'กลาง' },
-          { stage: 'TOFU', metric: 'CTR (Link Click)', benchmark: '> 1.5%', importance: 'สูง' },
-          { stage: 'MOFU', metric: 'Cost per View Content (CPVC)', benchmark: '< 15 ฿', importance: 'สูง' },
-          { stage: 'BOFU', metric: 'Cost per Purchase (CPA)', benchmark: 'เป้าหมายที่คำนวณ', importance: 'สูงมาก' },
-          { stage: 'BOFU', metric: 'ROAS', benchmark: '> 3.5x', importance: 'สูงมาก' },
+          { stage: 'BOFU', metric: 'ROAS', benchmark: '3.0+', importance: 'สูง', notes: 'ต้องทำกำไรและขยายตัว' },
+          { stage: 'BOFU', metric: 'CPA', benchmark: '≤30% ของ LTV', importance: 'สูง', notes: 'ควบคุมต้นทุนลูกค้า' },
+          { stage: 'TOFU', metric: 'CTR', benchmark: '1.5%+', importance: 'กลาง', notes: 'วัดความน่าสนใจ' },
+          { stage: 'BOFU', metric: 'Conversion Rate', benchmark: '2%+', importance: 'สูง', notes: 'ประสิทธิภาพการขาย' },
       ]
   },
   fb_ecommerce_profit: {
-      name: "Facebook - E-commerce (Profit Plan)",
+      name: "Profit Plan",
       summary: 'แผนทำกำไรสำหรับ E-commerce บน Facebook เน้นการ Optimize Conversion และ ROAS จากกลุ่มเป้าหมายที่มีคุณภาพสูง (High-Intent) และลูกค้าเก่า',
       kpis: [
-          { stage: 'TOFU', metric: 'Frequency', benchmark: '< 2.5', importance: 'กลาง' },
-          { stage: 'MOFU', metric: 'Cost per Add to Cart (CPATC)', benchmark: '< 120 ฿', importance: 'สูง' },
-          { stage: 'BOFU', metric: 'CVR (Conversion Rate)', benchmark: '> 2.0%', importance: 'สูงมาก' },
-          { stage: 'BOFU', metric: 'ROAS', benchmark: '> 5x', importance: 'สูงมาก' },
-          { stage: 'BOFU', metric: 'AOV (Average Order Value)', benchmark: 'ติดตาม', importance: 'สูง' },
+          { stage: 'TOFU', metric: 'Frequency', benchmark: '< 2.5', importance: 'กลาง', notes: 'ควบคุมความถี่การเห็นโฆษณา' },
+          { stage: 'MOFU', metric: 'Cost per Add to Cart (CPATC)', benchmark: '< 120 ฿', importance: 'สูง', notes: 'ต้นทุนการเพิ่มสินค้าลงตะกร้า' },
+          { stage: 'BOFU', metric: 'CVR (Conversion Rate)', benchmark: '> 2.0%', importance: 'สูงมาก', notes: 'อัตราการปิดการขาย' },
+          { stage: 'BOFU', metric: 'ROAS', benchmark: '> 5x', importance: 'สูงมาก', notes: 'ผลตอบแทนจากค่าโฆษณา' },
+          { stage: 'BOFU', metric: 'AOV (Average Order Value)', benchmark: 'ติดตาม', importance: 'สูง', notes: 'มูลค่าการสั่งซื้อเฉลี่ย' },
       ]
   },
   fb_message_campaign: {
       name: "Facebook - แคมเปญข้อความ",
       summary: 'แผนสำหรับแคมเปญข้อความ (Inbox) เน้นการสร้างปฏิสัมพันธ์และปิดการขายในแชท วัดผลจากต้นทุนต่อการเริ่มสนทนา (CPP) และอัตราการปิดการขายของแอดมินเป็นหลัก',
       kpis: [
-          { stage: 'MOFU', metric: 'ต้นทุนต่อการส่งข้อความเพื่อเริ่มการสนทนา', benchmark: '< 100 ฿', importance: 'สูงมาก' },
-          { stage: 'BOFU', metric: '% ปิดการขาย', benchmark: '> 20%', importance: 'สูงมาก' },
-          { stage: 'BOFU', metric: 'Roas Meta', benchmark: '> 3x', importance: 'สูงมาก' },
+          { stage: 'MOFU', metric: 'ต้นทุนต่อการส่งข้อความเพื่อเริ่มการสนทนา', benchmark: '< 100 ฿', importance: 'สูงมาก', notes: 'Cost per Conversation' },
+          { stage: 'BOFU', metric: '% ปิดการขาย', benchmark: '> 20%', importance: 'สูงมาก', notes: 'วัดประสิทธิภาพแอดมิน' },
+          { stage: 'BOFU', metric: 'Roas Meta', benchmark: '> 3x', importance: 'สูงมาก', notes: 'ผลตอบแทนโดยรวม' },
       ]
   },
   fb_lead_gen: {
       name: "Facebook - Lead Generation",
       summary: 'แผนหา Lead คุณภาพบน Facebook เน้นการลดต้นทุนต่อ Lead (CPL) และเพิ่มอัตราการเปลี่ยนเป็นลูกค้า (Lead to Close Rate)',
       kpis: [
-          { stage: 'MOFU', metric: 'Cost Per Lead (CPL)', benchmark: '< 250 ฿', importance: 'สูงมาก' },
-          { stage: 'MOFU', metric: 'Lead Form Conversion Rate', benchmark: '> 15%', importance: 'สูง' },
-          { stage: 'BOFU', metric: 'Appointment Rate', benchmark: '> 10%', importance: 'สูงมาก' },
+          { stage: 'MOFU', metric: 'Cost Per Lead (CPL)', benchmark: '< 250 ฿', importance: 'สูงมาก', notes: 'ต้นทุนต่อการได้มาซึ่งผู้สนใจ' },
+          { stage: 'MOFU', metric: 'Lead Form Conversion Rate', benchmark: '> 15%', importance: 'สูง', notes: 'อัตราการกรอกฟอร์ม' },
+          { stage: 'BOFU', metric: 'Appointment Rate', benchmark: '> 10%', importance: 'สูงมาก', notes: 'อัตราการนัดหมายสำเร็จ' },
       ]
   },
   tiktok_ecommerce_growth: {
       name: "TikTok - E-commerce (Growth Plan)",
       summary: 'แผนการเติบโตสำหรับ TikTok Shop เน้นการสร้าง Viral และการมีส่วนร่วม (Engagement) เพื่อเพิ่มยอดเข้าชมร้านค้าและผู้ติดตามใหม่',
       kpis: [
-          { stage: 'TOFU', metric: 'CPM', benchmark: '30-80 ฿', importance: 'สูง' },
-          { stage: 'MOFU', metric: 'Cost per Click (CPC)', benchmark: '< 5 ฿', importance: 'สูง' },
-          { stage: 'BOFU', metric: 'ROAS', benchmark: '> 3x', importance: 'สูงมาก' },
+          { stage: 'TOFU', metric: 'CPM', benchmark: '30-80 ฿', importance: 'สูง', notes: 'ต้นทุนการแสดงผล 1,000 ครั้ง' },
+          { stage: 'MOFU', metric: 'Cost per Click (CPC)', benchmark: '< 5 ฿', importance: 'สูง', notes: 'ต้นทุนต่อคลิก' },
+          { stage: 'BOFU', metric: 'ROAS', benchmark: '> 3x', importance: 'สูงมาก', notes: 'ผลตอบแทน' },
       ]
   },
   tiktok_brand_awareness: {
       name: "TikTok - Brand Awareness",
       summary: 'แผนสร้างการรับรู้แบรนด์บน TikTok เน้นการเข้าถึงกลุ่มเป้าหมายในวงกว้างด้วยต้นทุนที่ต่ำ และวัดผลจากการดูวิดีโอและการมีส่วนร่วม',
       kpis: [
-          { stage: 'TOFU', metric: 'CPM', benchmark: '< 50 ฿', importance: 'สูงมาก' },
-          { stage: 'MOFU', metric: 'Engagement Rate', benchmark: '> 5%', importance: 'สูง' },
+          { stage: 'TOFU', metric: 'CPM', benchmark: '< 50 ฿', importance: 'สูงมาก', notes: 'ต้นทุนการเข้าถึง' },
+          { stage: 'MOFU', metric: 'Engagement Rate', benchmark: '> 5%', importance: 'สูง', notes: 'อัตราการมีส่วนร่วม' },
       ]
   }
 };

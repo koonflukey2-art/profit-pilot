@@ -11,6 +11,7 @@ import {
 } from './data';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -71,6 +72,7 @@ export function ProfitPilotPage() {
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: () => {} });
   const [n8nWorkflow, setN8nWorkflow] = useState({ json: null, loading: false });
   const [theme, setTheme] = useState('dark');
+  const [funnelStageFilter, setFunnelStageFilter] = useState('all');
   
   const { toast } = useToast();
 
@@ -312,8 +314,23 @@ export function ProfitPilotPage() {
   };
 
   const selectedMetricsPlan = metricsPlans[inputs.metricsPlan] || metricsPlans.fb_ecommerce_growth;
+  const filteredKpis = useMemo(() => {
+    if (funnelStageFilter === 'all') {
+      return selectedMetricsPlan.kpis;
+    }
+    return selectedMetricsPlan.kpis.filter(kpi => kpi.stage === funnelStageFilter);
+  }, [selectedMetricsPlan, funnelStageFilter]);
   const funnelObjectives = funnelObjectivesData[inputs.businessType]?.objectives || funnelObjectivesData.ecommerce_website_campaign.objectives;
 
+  const getImportanceBadge = (importance) => {
+    switch (importance) {
+      case 'สูงมาก': return 'bg-red-500 hover:bg-red-600';
+      case 'สูง': return 'bg-orange-500 hover:bg-orange-600';
+      case 'กลาง': return 'bg-yellow-500 hover:bg-yellow-600';
+      default: return 'bg-gray-500 hover:bg-gray-600';
+    }
+  };
+  
   return (
     <>
       <header className="text-center mb-8 relative">
@@ -420,26 +437,40 @@ export function ProfitPilotPage() {
           </TabsList>
           
           <TabsContent value="metrics">
-            <p className="p-4 rounded-lg border bg-blue-900/20 border-blue-500/30 mb-6 text-sm">
-              {selectedMetricsPlan.summary}
-            </p>
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="md:col-span-1">
+                    <Label htmlFor="metricsPlan" className="block text-sm mb-2 font-medium opacity-80">แผน Metrics</Label>
+                    <Select value={inputs.metricsPlan} onValueChange={(val) => handleInputChange('metricsPlan', val)}>
+                        <SelectTrigger id="metricsPlan" className="neumorphic-select"><SelectValue/></SelectTrigger>
+                        <SelectContent>
+                            {Object.entries(metricsPlans).map(([key, {name}]) => <SelectItem key={key} value={key}>{name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="md:col-span-2">
+                    <p className="p-4 rounded-lg border bg-blue-900/20 border-primary/50 text-sm h-full flex items-center">
+                        <b>บทสรุปแผน:</b>&nbsp;{selectedMetricsPlan.summary}
+                    </p>
+                </div>
+             </div>
+
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Funnel Stage</TableHead>
-                    <TableHead>Metric</TableHead>
+                    <TableHead>KPIs</TableHead>
                     <TableHead>Benchmark</TableHead>
                     <TableHead>ความสำคัญ</TableHead>
+                    <TableHead>หมายเหตุ</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {selectedMetricsPlan.kpis.map((kpi, index) => (
+                  {filteredKpis.map((kpi, index) => (
                     <TableRow key={index}>
-                      <TableCell>{kpi.stage}</TableCell>
-                      <TableCell>{kpi.metric}</TableCell>
-                      <TableCell className="font-bold text-primary">{kpi.metric.includes('CPA') ? F.formatCurrency(calculated.targetCpa) : kpi.benchmark}</TableCell>
-                      <TableCell>{kpi.importance}</TableCell>
+                      <TableCell className="font-bold">{kpi.metric}</TableCell>
+                      <TableCell className="text-primary font-semibold">{kpi.benchmark}</TableCell>
+                      <TableCell><Badge className={cn("text-white", getImportanceBadge(kpi.importance))}>{kpi.importance}</Badge></TableCell>
+                      <TableCell>{kpi.notes}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
