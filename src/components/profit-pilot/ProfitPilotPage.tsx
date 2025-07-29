@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X } from 'lucide-react';
@@ -35,7 +36,7 @@ const F = {
 
 const initialInputs = {
   productName: '',
-  productCategory: '',
+  productKeywords: '',
   businessType: 'ecommerce_website_campaign',
   sellingPrice: '',
   vatProduct: '7',
@@ -69,6 +70,7 @@ export function ProfitPilotPage() {
   const [history, setHistory] = useState([]);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: () => {} });
   const [n8nWorkflow, setN8nWorkflow] = useState({ json: null, loading: false });
+  const [theme, setTheme] = useState('dark');
   
   const { toast } = useToast();
 
@@ -152,7 +154,19 @@ export function ProfitPilotPage() {
   useEffect(() => {
     const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
     setHistory(savedHistory);
+    const savedTheme = localStorage.getItem('profitPlannerTheme') || 'dark';
+    setTheme(savedTheme);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(theme);
+    localStorage.setItem('profitPlannerTheme', theme);
+  }, [theme]);
+  
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -167,6 +181,25 @@ export function ProfitPilotPage() {
     }, 500);
     return () => clearTimeout(handler);
   }, [inputs.productName, inputs.businessType, inputs.profitGoal, inputs.fixedCosts]);
+
+  const autoDetectBusinessType = useCallback(() => {
+    const combinedText = `${inputs.productName} ${inputs.productKeywords}`.toLowerCase();
+    if (!combinedText.trim()) return;
+
+    for (const [type, keywords] of Object.entries(businessTypeKeywords)) {
+      if (keywords.some(kw => combinedText.includes(kw))) {
+        handleInputChange('businessType', type);
+        return;
+      }
+    }
+  }, [inputs.productName, inputs.productKeywords]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+        autoDetectBusinessType();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [inputs.productName, inputs.productKeywords, autoDetectBusinessType]);
 
   const handlePlatformChange = (value) => {
     const fees = platformFees[value];
@@ -296,9 +329,21 @@ export function ProfitPilotPage() {
               <h2 className="text-2xl font-bold">{uiTitles.productInfoTitle}</h2>
             </div>
             <div className="space-y-4">
+               <div className="flex items-center justify-between">
+                <Label htmlFor="theme-switch" className="text-sm font-medium opacity-80">โหมดธีม</Label>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs opacity-70">สว่าง</span>
+                  <Switch id="theme-switch" checked={theme === 'dark'} onCheckedChange={toggleTheme} />
+                  <span className="text-xs opacity-70">มืด</span>
+                </div>
+              </div>
               <div>
-                <Label htmlFor="productName" className="block text-sm mb-2 font-medium opacity-80">ชื่อสินค้า</Label>
+                <Label htmlFor="productName" className="block text-sm mb-2 font-medium opacity-80">ชื่อสินค้า (ระบบจะเลือกประเภทธุรกิจให้อัตโนมัติ)</Label>
                 <Input id="productName" value={inputs.productName} onChange={(e) => handleInputChange('productName', e.target.value)} className="neumorphic-input" placeholder="เช่น 'ครีมกันแดด SPF50+'" />
+              </div>
+              <div>
+                <Label htmlFor="productKeywords" className="block text-sm mb-2 font-medium opacity-80">คีย์เวิร์ด (ช่วยให้ตรวจจับแม่นยำขึ้น)</Label>
+                <Input id="productKeywords" value={inputs.productKeywords} onChange={(e) => handleInputChange('productKeywords', e.target.value)} className="neumorphic-input" placeholder="เช่น 'skincare', 'กันแดด', 'เครื่องสำอาง'" />
               </div>
               <div>
                 <Label htmlFor="businessType" className="block text-sm mb-2 font-medium opacity-80">ประเภทธุรกิจ</Label>
@@ -332,7 +377,7 @@ export function ProfitPilotPage() {
               <Select value={inputs.salesPlatform} onValueChange={handlePlatformChange}>
                 <SelectTrigger className="neumorphic-select"><SelectValue/></SelectTrigger>
                 <SelectContent>
-                  {Object.keys(platformFees).map(p => <SelectItem key={p} value={p}>{p.replace('_', ' ').toUpperCase()}</SelectItem>)}
+                  {Object.keys(platformFees).map(p => <SelectItem key={p} value={p}>{p.replace(/_/g, ' ').toUpperCase()}</SelectItem>)}
                 </SelectContent>
               </Select>
                <div className="grid grid-cols-2 gap-3">
