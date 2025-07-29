@@ -650,17 +650,9 @@ export function ProfitPilotPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                   <div className="grid grid-cols-2 gap-4">
-                     <div>
-                        <Label htmlFor="numberOfAccounts" className="block text-sm mb-2 font-medium opacity-80">จำนวนบัญชีโฆษณา</Label>
-                        <Input id="numberOfAccounts" value={inputs.numberOfAccounts} onChange={(e) => handleInputChange('numberOfAccounts', e.target.value)} type="number" className="neumorphic-input" />
-                     </div>
-                      <div>
-                        <Label className="block text-sm mb-2 font-medium opacity-80">เฉลี่ยงบ/บัญชี/วัน</Label>
-                        <div className="neumorphic-input h-10 flex items-center justify-center font-bold text-primary bg-background/50">
-                          {F.formatCurrency(budgetPerAccountDay)}
-                        </div>
-                      </div>
+                  <div>
+                    <Label htmlFor="numberOfAccounts" className="block text-sm mb-2 font-medium opacity-80">จำนวนบัญชีโฆษณา</Label>
+                    <Input id="numberOfAccounts" value={inputs.numberOfAccounts} onChange={(e) => handleInputChange('numberOfAccounts', e.target.value)} type="number" className="neumorphic-input" />
                   </div>
                 </div>
 
