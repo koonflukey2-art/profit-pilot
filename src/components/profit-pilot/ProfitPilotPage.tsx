@@ -176,7 +176,8 @@ export function ProfitPilotPage() {
 
 
   useEffect(() => {
-    calculateAll();
+    const calculate = () => calculateAll();
+    calculate();
   }, [inputs, calculateAll]);
 
   useEffect(() => {
@@ -698,7 +699,7 @@ export function ProfitPilotPage() {
                           style={{
                               backgroundColor: color,
                               width: `${100 - (funnelData.length - 1 - index) * 15}%`,
-                              clipPath: `polygon(0 0, 100% 0, ${100 - index * 5}% 100%, ${index * 5}% 100%)`,
+                              clipPath: 'polygon(0 0, 100% 0, 90% 100%, 10% 100%)',
                               boxShadow: `0 0 15px ${color}`
                           }}
                       >
