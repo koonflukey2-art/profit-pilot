@@ -401,7 +401,6 @@ export function ProfitPilotPage() {
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
   
-    // Standard funnel data (widest on top)
     const sortedData = [...data].sort((a, b) => b.value - a.value);
   
     const FunnelLayer = ({
@@ -413,18 +412,22 @@ export function ProfitPilotPage() {
       color: string;
       label: string;
     }) => {
-      // Base width and how much it scales with value
-      const minWidth = 100;
-      const maxWidth = 450; // Increased max width
+      const minWidth = 150;
+      const maxWidth = 500;
       const width = minWidth + (maxWidth - minWidth) * (value / 100);
-      const height = 80; // Increased height
+      const height = 80;
   
       const layerStyle: React.CSSProperties = {
         width: `${width}px`,
         height: `${height}px`,
         backgroundColor: color,
-        clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)', // Adjusted for a wider top
         filter: `drop-shadow(0 0 15px ${color}) drop-shadow(0 0 25px ${color}33)`,
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: '10px 0',
+        borderRadius: '4px',
       };
       
       const labelStyle: React.CSSProperties = {
@@ -435,7 +438,7 @@ export function ProfitPilotPage() {
       }
 
       return (
-        <div style={layerStyle} className="flex items-center justify-center">
+        <div style={layerStyle}>
           <span style={labelStyle}>{label} {value}%</span>
         </div>
       );
@@ -443,7 +446,7 @@ export function ProfitPilotPage() {
   
     return (
       <div className="w-full flex justify-center items-center my-4 py-4 min-h-[400px]">
-        <div className="flex flex-col items-center justify-center space-y-4">
+        <div className="flex flex-col items-center justify-center space-y-2">
           {sortedData.map((item) => (
             <FunnelLayer
               key={item.name}
