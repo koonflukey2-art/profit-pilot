@@ -149,15 +149,15 @@ export function ProfitPilotPage() {
     const newInputs = {...inputs};
     let changed = false;
     if (i.calcDriver !== 'roas' && isFinite(targetRoas) && F.num(i.targetRoas).toFixed(2) !== targetRoas.toFixed(2)) {
-        newInputs.targetRoas = targetRoas.toFixed(2);
+        newInputs.targetRoas = targetRoas > 0 ? targetRoas.toFixed(2) : '';
         changed = true;
     }
     if (i.calcDriver !== 'cpa' && isFinite(targetCpa) && F.num(i.targetCpa).toFixed(2) !== targetCpa.toFixed(2)) {
-        newInputs.targetCpa = targetCpa.toFixed(2);
+        newInputs.targetCpa = targetCpa > 0 ? targetCpa.toFixed(2) : '';
         changed = true;
     }
     if (i.calcDriver !== 'adcost' && isFinite(adCostPercent) && F.num(i.adCostPercent).toFixed(1) !== adCostPercent.toFixed(1)) {
-        newInputs.adCostPercent = adCostPercent.toFixed(1);
+        newInputs.adCostPercent = adCostPercent > 0 ? adCostPercent.toFixed(1) : '';
         changed = true;
     }
     
@@ -645,21 +645,21 @@ export function ProfitPilotPage() {
                         <div className="p-4 rounded-lg bg-background shadow-inner">
                             <div className="flex justify-between items-center">
                                 <p className="font-bold text-primary">BE ROAS</p>
-                                <p className="font-bold text-xl text-primary">{F.formatNumber(calculated.breakevenRoas)}</p>
+                                <p className="font-bold text-xl" style={{color: '#FF0000', textShadow: '0 0 5px #FF0000'}}>{F.formatNumber(calculated.breakevenRoas)}</p>
                             </div>
                             <p className="text-xs opacity-70 mt-1">ค่า ROAS ต่ำสุดที่แคมเปญต้องทำให้ได้เพื่อ "เท่าทุน"</p>
                         </div>
                         <div className="p-4 rounded-lg bg-background shadow-inner">
                             <div className="flex justify-between items-center">
                                 <p className="font-bold text-primary">BE CPA</p>
-                                <p className="font-bold text-xl text-primary">{F.formatCurrency(calculated.breakevenCpa)}</p>
+                                <p className="font-bold text-xl" style={{color: '#FF0000', textShadow: '0 0 5px #FF0000'}}>{F.formatCurrency(calculated.breakevenCpa)}</p>
                             </div>
                             <p className="text-xs opacity-70 mt-1">ค่าโฆษณาสูงสุดที่จ่ายได้โดยไม่ขาดทุน</p>
                         </div>
                         <div className="p-4 rounded-lg bg-background shadow-inner">
                             <div className="flex justify-between items-center">
                                 <p className="font-bold text-primary">BE Ad Cost %</p>
-                                <p className="font-bold text-xl text-primary">{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
+                                <p className="font-bold text-xl" style={{color: '#FF0000', textShadow: '0 0 5px #FF0000'}}>{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
                             </div>
                              <p className="text-xs opacity-70 mt-1">สัดส่วนค่าโฆษณาสูงสุดเมื่อเทียบกับราคาขาย</p>
                         </div>
