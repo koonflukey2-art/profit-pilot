@@ -65,8 +65,25 @@ const initialInputs = {
 export function ProfitPilotPage() {
   const [inputs, setInputs] = useState(initialInputs);
   const [calculated, setCalculated] = useState({
-    adBudget: 0,
+    grossProfitUnit: 0,
+    breakevenRoas: 0,
+    breakevenCpa: 0,
+    breakevenAdCostPercent: 0,
+    targetOrders: 0,
     targetOrdersDaily: 0,
+    targetRevenue: 0,
+    adBudget: 0,
+    adBudgetWithVat: 0,
+    tofuBudget: 0,
+    mofuBudget: 0,
+    bofuBudget: 0,
+    tofuBudgetPerAccountDaily: 0,
+    mofuBudgetPerAccountDaily: 0,
+    bofuBudgetPerAccountDaily: 0,
+    netProfitUnit: 0,
+    targetRoas: 0,
+    targetCpa: 0,
+    adCostPercent: 0,
   });
   const [automationRules, setAutomationRules] = useState([]);
   const [uiTitles, setUiTitles] = useState({ productInfoTitle: 'ข้อมูลสินค้า', costCalculationTitle: 'คำนวณต้นทุน', goalsAndResultsTitle: 'เป้าหมายและผลลัพธ์', advancedPlanningTitle: 'Advanced Planning' });
@@ -85,17 +102,17 @@ export function ProfitPilotPage() {
   }, []);
   
   const calculateAll = useCallback(() => {
-    const i = { ...inputs };
+    const newInputs = { ...inputs };
     const s = {};
   
-    s.sellingPrice = F.num(i.sellingPrice);
-    s.priceBeforeVat = s.sellingPrice / (1 + F.num(i.vatProduct) / 100);
-    s.cogs = F.num(i.cogs);
-    s.platformFeeCost = s.priceBeforeVat * (F.num(i.platformFee) / 100);
-    s.paymentFeeCost = s.sellingPrice * (F.num(i.paymentFee) / 100);
-    s.kolFeeCost = s.priceBeforeVat * (F.num(i.kolFee) / 100);
-    s.packagingCost = F.num(i.packagingCost);
-    s.shippingCost = F.num(i.shippingCost);
+    s.sellingPrice = F.num(newInputs.sellingPrice);
+    s.priceBeforeVat = s.sellingPrice / (1 + F.num(newInputs.vatProduct) / 100);
+    s.cogs = F.num(newInputs.cogs);
+    s.platformFeeCost = s.priceBeforeVat * (F.num(newInputs.platformFee) / 100);
+    s.paymentFeeCost = s.sellingPrice * (F.num(newInputs.paymentFee) / 100);
+    s.kolFeeCost = s.priceBeforeVat * (F.num(newInputs.kolFee) / 100);
+    s.packagingCost = F.num(newInputs.packagingCost);
+    s.shippingCost = F.num(newInputs.shippingCost);
     s.totalVariableCost = s.cogs + s.platformFeeCost + s.paymentFeeCost + s.kolFeeCost + s.packagingCost + s.shippingCost;
     s.grossProfitUnit = s.priceBeforeVat - s.totalVariableCost;
   
@@ -103,15 +120,15 @@ export function ProfitPilotPage() {
     s.breakevenCpa = s.grossProfitUnit;
     s.breakevenAdCostPercent = s.priceBeforeVat > 0 ? (s.breakevenCpa / s.priceBeforeVat) * 100 : 0;
   
-    let targetRoas = F.num(i.targetRoas);
-    let targetCpa = F.num(i.targetCpa);
-    let adCostPercent = F.num(i.adCostPercent);
+    let targetRoas = F.num(newInputs.targetRoas);
+    let targetCpa = F.num(newInputs.targetCpa);
+    let adCostPercent = F.num(newInputs.adCostPercent);
   
     if (s.priceBeforeVat > 0) {
-      if (i.calcDriver === 'roas') {
+      if (newInputs.calcDriver === 'roas') {
         targetCpa = targetRoas > 0 ? s.priceBeforeVat / targetRoas : 0;
         adCostPercent = s.priceBeforeVat > 0 ? (targetCpa / s.priceBeforeVat) * 100 : 0;
-      } else if (i.calcDriver === 'cpa') {
+      } else if (newInputs.calcDriver === 'cpa') {
         targetRoas = targetCpa > 0 ? s.priceBeforeVat / targetCpa : 0;
         adCostPercent = s.priceBeforeVat > 0 ? (targetCpa / s.priceBeforeVat) * 100 : 0;
       } else { // calcDriver === 'adcost'
@@ -127,48 +144,48 @@ export function ProfitPilotPage() {
     s.adCostPercent = adCostPercent;
   
     s.netProfitUnit = s.grossProfitUnit - targetCpa;
-    const profitGoal = F.num(i.profitGoal);
-    const fixedCosts = F.num(i.fixedCosts);
-    const monthlyProfitGoal = i.profitGoalTimeframe === 'daily' ? profitGoal * 30 : profitGoal;
+    const profitGoal = F.num(newInputs.profitGoal);
+    const fixedCosts = F.num(newInputs.fixedCosts);
+    const monthlyProfitGoal = newInputs.profitGoalTimeframe === 'daily' ? profitGoal * 30 : profitGoal;
     const totalProfitTarget = monthlyProfitGoal + fixedCosts;
     s.targetOrders = s.netProfitUnit > 0 ? totalProfitTarget / s.netProfitUnit : 0;
-    s.targetOrdersDaily = s.targetOrders / 30;
     s.targetRevenue = s.targetOrders * s.sellingPrice;
     s.adBudget = s.targetOrders * targetCpa;
-    s.adBudgetWithVat = s.adBudget * (1 + (F.num(i.vatProduct) / 100));
+
+    s.targetOrdersDaily = s.targetOrders / 30;
+    s.adBudgetWithVat = s.adBudget * (1 + (F.num(newInputs.vatProduct) / 100));
   
-    const funnelPlan = funnelPlans[i.funnelPlan] || funnelPlans.launch;
+    const funnelPlan = funnelPlans[newInputs.funnelPlan] || funnelPlans.launch;
     s.tofuBudget = s.adBudget * (funnelPlan.tofu / 100);
     s.mofuBudget = s.adBudget * (funnelPlan.mofu / 100);
     s.bofuBudget = s.adBudget * (funnelPlan.bofu / 100);
 
-    const numAccounts = F.num(i.numberOfAccounts) || 1;
+    const numAccounts = F.num(newInputs.numberOfAccounts) || 1;
     s.tofuBudgetPerAccountDaily = (s.tofuBudget / numAccounts) / 30;
     s.mofuBudgetPerAccountDaily = (s.mofuBudget / numAccounts) / 30;
     s.bofuBudgetPerAccountDaily = (s.bofuBudget / numAccounts) / 30;
     
-    setCalculated(s);
-  
-    const newInputs = {...i};
     let changed = false;
-    if (i.calcDriver !== 'roas' && isFinite(targetRoas) && F.num(i.targetRoas).toFixed(2) !== targetRoas.toFixed(2)) {
+    if (newInputs.calcDriver !== 'roas' && isFinite(targetRoas) && F.num(newInputs.targetRoas).toFixed(2) !== targetRoas.toFixed(2)) {
         newInputs.targetRoas = targetRoas > 0 ? targetRoas.toFixed(2) : '';
         changed = true;
     }
-    if (i.calcDriver !== 'cpa' && isFinite(targetCpa) && F.num(i.targetCpa).toFixed(2) !== targetCpa.toFixed(2)) {
+    if (newInputs.calcDriver !== 'cpa' && isFinite(targetCpa) && F.num(newInputs.targetCpa).toFixed(2) !== targetCpa.toFixed(2)) {
         newInputs.targetCpa = targetCpa > 0 ? targetCpa.toFixed(2) : '';
         changed = true;
     }
-    if (i.calcDriver !== 'adcost' && isFinite(adCostPercent) && F.num(i.adCostPercent).toFixed(1) !== adCostPercent.toFixed(1)) {
+    if (newInputs.calcDriver !== 'adcost' && isFinite(adCostPercent) && F.num(newInputs.adCostPercent).toFixed(1) !== adCostPercent.toFixed(1)) {
         newInputs.adCostPercent = adCostPercent > 0 ? adCostPercent.toFixed(1) : '';
         changed = true;
     }
     
+    setCalculated(s);
+
     if (changed) {
         setInputs(newInputs);
     }
   
-    if (i.calcDriver === 'roas' && targetRoas > 0 && s.breakevenRoas > 0 && targetRoas < s.breakevenRoas) {
+    if (newInputs.calcDriver === 'roas' && targetRoas > 0 && s.breakevenRoas > 0 && targetRoas < s.breakevenRoas) {
       toast({
         variant: "destructive",
         title: "Warning",
@@ -180,7 +197,7 @@ export function ProfitPilotPage() {
 
   useEffect(() => {
     calculateAll();
-  }, [inputs, calculateAll]);
+  }, [inputs.sellingPrice, inputs.vatProduct, inputs.cogs, inputs.platformFee, inputs.paymentFee, inputs.kolFee, inputs.packagingCost, inputs.shippingCost, inputs.profitGoal, inputs.profitGoalTimeframe, inputs.fixedCosts, inputs.targetRoas, inputs.targetCpa, inputs.adCostPercent, inputs.calcDriver, inputs.funnelPlan, inputs.numberOfAccounts]);
 
   useEffect(() => {
     const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
@@ -362,9 +379,7 @@ export function ProfitPilotPage() {
 
   const currentFunnelPlan = funnelPlans[inputs.funnelPlan] || { tofu: 0, mofu: 0, bofu: 0 };
   const numAccounts = F.num(inputs.numberOfAccounts) || 1;
-  const budgetPerAccountMonth = (calculated.adBudget || 0) / numAccounts;
-  const budgetPerAccountDay = budgetPerAccountMonth / 30;
-
+  
   const funnelData = useMemo(() => {
     return [
       { name: 'TOFU', value: currentFunnelPlan.tofu, color: 'hsl(var(--primary))' },
@@ -373,21 +388,6 @@ export function ProfitPilotPage() {
     ].sort((a, b) => b.value - a.value);
   }, [currentFunnelPlan]);
   
-  const StructureBox = ({ title, children, className = '' }) => (
-    <div className={cn("bg-blue-900/50 border border-primary/50 rounded-lg p-3 text-center neumorphic-card", className)}>
-      <p className="text-sm font-bold text-primary">{title}</p>
-      {children}
-    </div>
-  );
-
-  const StructureLine = ({ hasArrow = false }) => (
-    <div className="flex-1 flex items-center justify-center h-full">
-      <div className="w-full h-px bg-primary/50 relative">
-        {hasArrow && <ArrowRight className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />}
-      </div>
-    </div>
-  );
-
   const newFunnelCampaigns = [
     { audience: "ENGAGE 60 วัน", lookalike: "Lookalike 1-10%" },
     { audience: "INBOX 60 วัน", lookalike: "Lookalike 1-10%" },
@@ -693,15 +693,15 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8">
-                   <div className="w-full max-w-sm flex flex-col gap-1.5 items-center">
+                   <div className="w-full max-w-sm flex flex-col gap-1 items-center">
                     {funnelData.map(({ name, value, color }, index) => (
                       <div
                           key={index}
                           className="relative h-12 flex items-center justify-center text-white font-bold"
                           style={{
                               backgroundColor: color,
-                              width: `${100 - (funnelData.length - 1 - index) * 15}%`,
-                              clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0% 100%)',
+                              width: `${value}%`,
+                              minWidth: '50px',
                               boxShadow: `0 0 15px ${color}`
                           }}
                       >
@@ -717,9 +717,8 @@ export function ProfitPilotPage() {
                       <h5 className="font-bold text-primary">TOFU</h5>
                       <span className="font-bold text-primary">{currentFunnelPlan.tofu}%</span>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudget)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency((calculated.tofuBudget || 0) / numAccounts)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}</p></div>
                     </div>
                   </div>
@@ -728,9 +727,8 @@ export function ProfitPilotPage() {
                       <h5 className="font-bold text-accent">MOFU</h5>
                        <span className="font-bold text-accent">{currentFunnelPlan.mofu}%</span>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudget)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency((calculated.mofuBudget || 0) / numAccounts)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudgetPerAccountDaily)}</p></div>
                     </div>
                   </div>
@@ -739,9 +737,8 @@ export function ProfitPilotPage() {
                       <h5 className="font-bold" style={{ color: 'hsl(157 71% 38%)' }}>BOFU</h5>
                        <span className="font-bold" style={{ color: 'hsl(157 71% 38%)' }}>{currentFunnelPlan.bofu}%</span>
                     </div>
-                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                     <div className="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency((calculated.bofuBudget || 0) / numAccounts)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p></div>
                     </div>
                   </div>
