@@ -330,6 +330,17 @@ export function ProfitPilotPage() {
       default: return 'bg-gray-500 hover:bg-gray-600';
     }
   };
+
+  const currentFunnelPlan = funnelPlans[inputs.funnelPlan] || { tofu: 0, mofu: 0, bofu: 0 };
+  const numAccounts = F.num(inputs.numberOfAccounts) || 1;
+  const budgetPerAccountMonth = calculated.adBudget / numAccounts;
+  const budgetPerAccountDay = budgetPerAccountMonth / 30;
+
+  const funnelData = [
+    { name: 'TOFU', value: currentFunnelPlan.tofu, color: 'hsl(var(--primary))' },
+    { name: 'MOFU', value: currentFunnelPlan.mofu, color: 'hsl(var(--accent))' },
+    { name: 'BOFU', value: currentFunnelPlan.bofu, color: 'hsl(157 71% 38%)' },
+  ];
   
   return (
     <>
@@ -583,6 +594,84 @@ export function ProfitPilotPage() {
                 </div>
               </div>
             </div>
+
+            <div className="mt-8">
+              <h3 className="text-xl font-bold mb-4 gradient-text">การแบ่งงบประมาณ</h3>
+              <div className="neumorphic-card p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div>
+                    <Label htmlFor="funnelPlan" className="block text-sm mb-2 font-medium opacity-80">แผนกลยุทธ์ Funnel</Label>
+                    <Select value={inputs.funnelPlan} onValueChange={(val) => handleInputChange('funnelPlan', val)}>
+                      <SelectTrigger id="funnelPlan" className="neumorphic-select"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(funnelPlans).map(([key, { name }]) => <SelectItem key={key} value={key}>{name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="numberOfAccounts" className="block text-sm mb-2 font-medium opacity-80">จำนวนบัญชีโฆษณา</Label>
+                    <Input id="numberOfAccounts" value={inputs.numberOfAccounts} onChange={(e) => handleInputChange('numberOfAccounts', e.target.value)} type="number" className="neumorphic-input" />
+                  </div>
+                </div>
+
+                <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
+                <div className="flex justify-center mb-8">
+                  <div className="w-full max-w-sm space-y-2">
+                    {funnelData.map((stage, index) => (
+                      <div key={index} className="relative h-12 flex items-center justify-center text-white font-bold"
+                        style={{
+                          backgroundColor: stage.color,
+                          clipPath: `polygon(${index * 15}% 0, ${100 - index * 15}% 0, ${100 - (index + 1) * 15}% 100%, ${(index + 1) * 15}% 100%)`,
+                          boxShadow: `0 0 15px ${stage.color}`
+                        }}
+                      >
+                        {stage.name} {stage.value}%
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="neumorphic-card p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <h5 className="font-bold text-primary">TOFU</h5>
+                      <span className="font-bold text-primary">{currentFunnelPlan.tofu}%</span>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudget)}</p></div>
+                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudget / numAccounts)}</p></div>
+                      <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudget / numAccounts / 30)}</p></div>
+                      <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{numAccounts} บัญชี</p></div>
+                    </div>
+                  </div>
+                   <div className="neumorphic-card p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <h5 className="font-bold text-accent">MOFU</h5>
+                       <span className="font-bold text-accent">{currentFunnelPlan.mofu}%</span>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudget)}</p></div>
+                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudget / numAccounts)}</p></div>
+                      <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudget / numAccounts / 30)}</p></div>
+                      <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{numAccounts} บัญชี</p></div>
+                    </div>
+                  </div>
+                   <div className="neumorphic-card p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <h5 className="font-bold" style={{ color: 'hsl(157 71% 38%)' }}>BOFU</h5>
+                       <span className="font-bold" style={{ color: 'hsl(157 71% 38%)' }}>{currentFunnelPlan.bofu}%</span>
+                    </div>
+                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget)}</p></div>
+                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget / numAccounts)}</p></div>
+                      <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget / numAccounts / 30)}</p></div>
+                      <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{numAccounts} บัญชี</p></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </TabsContent>
           <TabsContent value="funnel">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
