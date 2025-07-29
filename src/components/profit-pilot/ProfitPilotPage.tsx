@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import Image from 'next/image';
 import {
   platformFees,
   funnelPlans,
@@ -401,13 +402,14 @@ export function ProfitPilotPage() {
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
 
+    // Invert the funnel logic
     const sortedData = [...data].sort((a, b) => b.value - a.value);
 
     return (
       <div className="w-full flex justify-center items-center my-4 py-4 min-h-[300px]">
         <div className="flex flex-col items-center justify-center space-y-2 w-full max-w-lg">
           {sortedData.map((item, index) => {
-            const widthPercentage = Math.max(15, item.value); // Minimum width of 15%
+            const widthPercentage = Math.max(15, (100 * item.value) / 100); 
             const layerStyle: React.CSSProperties = {
               width: `${widthPercentage}%`,
               height: '80px',
@@ -422,6 +424,7 @@ export function ProfitPilotPage() {
               fontWeight: 'bold',
               fontSize: '1.1rem',
               textShadow: '0 0 5px #000, 0 0 10px #000',
+              marginTop: '8px'
             };
             return <div key={item.name} style={layerStyle}>{item.name} {item.value}%</div>;
           })}
@@ -742,7 +745,7 @@ export function ProfitPilotPage() {
 
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white flex items-center gap-2">
-                <Target className="w-6 h-6 text-primary" />
+                <Image src="https://placehold.co/24x24.png" width={24} height={24} alt="Marketing Icon" data-ai-hint="marketing illustration" />
                 การแบ่งงบประมาณ
               </h3>
               <div className="neumorphic-card p-6">
