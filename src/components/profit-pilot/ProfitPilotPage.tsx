@@ -425,7 +425,7 @@ export function ProfitPilotPage() {
     const totalValue = funnelData.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
 
-    const stageOrder = ['BOFU', 'MOFU', 'TOFU'];
+    const stageOrder = ['TOFU', 'MOFU', 'BOFU'];
     const sortedData = stageOrder.map(stage => funnelData.find(d => d.name === stage)).filter(d => d && d.value > 0);
     
     return (
@@ -433,11 +433,11 @@ export function ProfitPilotPage() {
             {sortedData.map((item, index) => {
                 if (item.value === 0) return null;
 
-                const baseWidth = 40;
-                const maxWidth = 100;
+                const baseWidth = 100;
+                const minWidth = 40;
                 const totalStages = sortedData.length;
-                const widthStep = (maxWidth - baseWidth) / (totalStages - 1 || 1);
-                const segmentWidth = baseWidth + (index * widthStep);
+                const widthStep = (baseWidth - minWidth) / (totalStages - 1 || 1);
+                const segmentWidth = baseWidth - (index * widthStep);
 
                 const clipPath = `polygon(15% 0, 85% 0, 100% 100%, 0% 100%)`;
 
