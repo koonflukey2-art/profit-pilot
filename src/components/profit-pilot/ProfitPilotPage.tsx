@@ -428,34 +428,47 @@ export function ProfitPilotPage() {
     const stageOrder = ['TOFU', 'MOFU', 'BOFU'];
     const sortedData = stageOrder.map(stage => funnelData.find(d => d.name === stage)).filter(Boolean);
   
-    const FunnelSegment = ({ width, color, text }) => (
-      <div
-        className="h-10 flex items-center justify-center text-white font-bold"
-        style={{
-          width: `${width}%`,
-          backgroundColor: color,
-          clipPath: `polygon(15% 0, 85% 0, 100% 100%, 0% 100%)`,
-          boxShadow: `0 2px 5px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.3)`
-        }}
-      >
-        <span>{text}</span>
-      </div>
-    );
+    const FunnelSegment = ({ width, color, text, isTop, isBottom }) => {
+      let clipPath;
+      if (isTop) {
+        clipPath = `polygon(0 0, 100% 0, 90% 100%, 10% 100%)`;
+      } else if (isBottom) {
+        clipPath = `polygon(10% 0, 90% 0, 100% 100%, 0% 100%)`;
+      } else {
+        clipPath = `polygon(10% 0, 90% 0, 90% 100%, 10% 100%)`;
+      }
+  
+      return (
+        <div
+          className="h-10 flex items-center justify-center text-white font-bold"
+          style={{
+            width: `${width}%`,
+            backgroundColor: color,
+            clipPath: clipPath,
+            boxShadow: `0 2px 5px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.3)`
+          }}
+        >
+          <span>{text}</span>
+        </div>
+      );
+    };
   
     let accumulatedWidth = 100;
   
     return (
-      <div className="flex flex-col-reverse items-center justify-center w-full max-w-xs mx-auto gap-1">
-        {sortedData.map((item) => {
+      <div className="flex flex-col items-center justify-center w-full max-w-xs mx-auto gap-1">
+        {sortedData.map((item, index) => {
           if (item.value === 0) return null;
           const currentWidth = accumulatedWidth;
-          accumulatedWidth -= 20; // Decrease width for the next segment
+          accumulatedWidth -= 20;
           return (
             <FunnelSegment
               key={item.name}
               width={currentWidth}
               color={item.color}
               text={`${item.name} ${item.value}%`}
+              isTop={index === 0}
+              isBottom={index === sortedData.length - 1}
             />
           );
         })}
@@ -1013,3 +1026,5 @@ export function ProfitPilotPage() {
     </>
   );
 }
+
+    
