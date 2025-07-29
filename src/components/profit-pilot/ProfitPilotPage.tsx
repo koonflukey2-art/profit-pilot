@@ -400,131 +400,80 @@ export function ProfitPilotPage() {
   
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
-    
+  
     const sortedData = [...data].sort((a, b) => b.value - a.value);
-    
-    const IsometricLayer = ({
+  
+    const FunnelLayer = ({
       value,
       color,
       label,
-      index,
-      total,
+      isFirst,
+      isLast,
     }: {
       value: number;
       color: string;
       label: string;
-      index: number;
-      total: number;
+      isFirst: boolean;
+      isLast: boolean;
     }) => {
-      const maxWidth = 180;
-      const minWidth = 60;
-      const width = minWidth + (maxWidth - minWidth) * (value / 100);
-      const height = width * 0.45;
+      const maxHeight = 80;
+      const minHeight = 40;
+      const height = minHeight + (maxHeight - minHeight) * (value / 100);
   
       const layerStyle: React.CSSProperties = {
-        position: 'relative',
-        width: `${width}px`,
         height: `${height}px`,
-        marginTop: index > 0 ? `-${height * 0.3}px` : '0',
-        zIndex: total - index,
-      };
-  
-      const faceStyle: React.CSSProperties = {
-        position: 'absolute',
-        width: '100%',
-        height: '100%',
-        background: `repeating-linear-gradient(45deg, transparent, transparent 10px, ${color}33 10px, ${color}33 11px), repeating-linear-gradient(-45deg, transparent, transparent 10px, ${color}33 10px, ${color}33 11px)`,
+        backgroundColor: color,
+        color: 'white',
+        fontWeight: 'bold',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: 'white',
-        fontSize: '14px',
-        fontWeight: 'bold',
-        textShadow: '1px 1px 2px rgba(0,0,0,0.4)',
-      };
-  
-      const topStyle: React.CSSProperties = {
-        ...faceStyle,
-        transform: 'skewX(-45deg) scaleY(0.5) translate(50%, -50%)',
-        transformOrigin: 'top left',
-        background: color,
-        border: '1px solid rgba(255, 255, 255, 0.3)',
-      };
-  
-      const leftStyle: React.CSSProperties = {
-        ...faceStyle,
-        transform: 'skewY(-45deg) scaleX(0.5) translate(-50%, 50%)',
-        transformOrigin: 'top left',
-        background: `linear-gradient(to right, ${color}, ${darkenColor(color, 20)})`,
-        clipPath: 'none',
+        position: 'relative',
+        clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)',
+        margin: '0 auto 10px',
+        width: `${60 + value * 1.4}px`, // Adjusted width calculation
       };
       
-       const rightStyle: React.CSSProperties = {
-        ...faceStyle,
-        transform: 'skewY(45deg) scaleX(0.5) translate(50%, 50%)',
-        transformOrigin: 'top right',
-        background: `linear-gradient(to left, ${color}, ${darkenColor(color, 20)})`,
-        clipPath: 'none',
+      const patternStyle: React.CSSProperties = {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: `
+              linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.1) 75%),
+              linear-gradient(-45deg, rgba(0,0,0,0.1) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.1) 75%)`,
+          backgroundSize: '20px 20px',
+          zIndex: 1,
       };
-  
+
+      const labelStyle: React.CSSProperties = {
+          position: 'relative',
+          zIndex: 2,
+          textShadow: '1px 1px 3px rgba(0,0,0,0.5)',
+      }
+
       return (
-        <div style={layerStyle} className="drop-shadow-lg">
-          <div style={topStyle}>{label} {value}%</div>
+        <div style={layerStyle}>
+          <div style={patternStyle}></div>
+          <span style={labelStyle}>{label} {value}%</span>
         </div>
       );
     };
-
-    const darkenColor = (color: string, percent: number) => {
-        let R = parseInt(color.substring(1, 3), 16);
-        let G = parseInt(color.substring(3, 5), 16);
-        let B = parseInt(color.substring(5, 7), 16);
-    
-        R = parseInt(String(R * (100 - percent) / 100));
-        G = parseInt(String(G * (100 - percent) / 100));
-        B = parseInt(String(B * (100 - percent) / 100));
-    
-        R = (R < 255) ? R : 255;  
-        G = (G < 255) ? G : 255;  
-        B = (B < 255) ? B : 255;  
-    
-        const RR = ((R.toString(16).length === 1) ? "0" + R.toString(16) : R.toString(16));
-        const GG = ((G.toString(16).length === 1) ? "0" + G.toString(16) : G.toString(16));
-        const BB = ((B.toString(16).length === 1) ? "0" + B.toString(16) : B.toString(16));
-    
-        return "#" + RR + GG + BB;
-    };
   
     return (
-       <div className="w-full flex justify-center items-center my-4 py-8 h-64">
-        <div className="flex flex-col items-center">
-            {sortedData.map((item, index) => (
-            <div key={item.name} className="relative mb-2">
-                <div
-                className="bg-gray-800 text-white font-bold text-center p-2 rounded-md transition-all duration-300"
-                style={{
-                    width: `${60 + item.value * 0.8}px`,
-                    height: '50px',
-                    backgroundColor: item.color,
-                    clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}
-                >
-                {item.name} {item.value}%
-                </div>
-                <div
-                className="absolute left-0 right-0 mx-auto"
-                style={{
-                    width: `${60 + item.value * 0.8}px`,
-                    height: '15px',
-                    backgroundColor: darkenColor(item.color, 20),
-                    top: '-15px',
-                    clipPath: 'polygon(15% 100%, 85% 100%, 100% 0, 0 0)',
-                }}
-                />
-            </div>
-            ))}
+      <div className="w-full flex justify-center items-center my-4 py-4 min-h-[250px]">
+        <div className="flex flex-col items-center justify-center">
+          {sortedData.map((item, index) => (
+            <FunnelLayer
+              key={item.name}
+              value={item.value}
+              color={item.color}
+              label={item.name}
+              isFirst={index === 0}
+              isLast={index === sortedData.length - 1}
+            />
+          ))}
         </div>
       </div>
     );
