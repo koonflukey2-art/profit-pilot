@@ -396,34 +396,135 @@ export function ProfitPilotPage() {
   }, [currentFunnelPlan]);
 
   const FunnelChart = ({ data }) => {
+    if (!data.length) return null;
+  
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
-  
+    
     const sortedData = [...data].sort((a, b) => b.value - a.value);
+    
+    const IsometricLayer = ({
+      value,
+      color,
+      label,
+      index,
+      total,
+    }: {
+      value: number;
+      color: string;
+      label: string;
+      index: number;
+      total: number;
+    }) => {
+      const maxWidth = 180;
+      const minWidth = 60;
+      const width = minWidth + (maxWidth - minWidth) * (value / 100);
+      const height = width * 0.45;
   
-    const layerBaseWidth = 100; // %
-    const layerBaseHeight = 50; // px
+      const layerStyle: React.CSSProperties = {
+        position: 'relative',
+        width: `${width}px`,
+        height: `${height}px`,
+        marginTop: index > 0 ? `-${height * 0.3}px` : '0',
+        zIndex: total - index,
+      };
+  
+      const faceStyle: React.CSSProperties = {
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        background: `repeating-linear-gradient(45deg, transparent, transparent 10px, ${color}33 10px, ${color}33 11px), repeating-linear-gradient(-45deg, transparent, transparent 10px, ${color}33 10px, ${color}33 11px)`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        fontSize: '14px',
+        fontWeight: 'bold',
+        textShadow: '1px 1px 2px rgba(0,0,0,0.4)',
+      };
+  
+      const topStyle: React.CSSProperties = {
+        ...faceStyle,
+        transform: 'skewX(-45deg) scaleY(0.5) translate(50%, -50%)',
+        transformOrigin: 'top left',
+        background: color,
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+      };
+  
+      const leftStyle: React.CSSProperties = {
+        ...faceStyle,
+        transform: 'skewY(-45deg) scaleX(0.5) translate(-50%, 50%)',
+        transformOrigin: 'top left',
+        background: `linear-gradient(to right, ${color}, ${darkenColor(color, 20)})`,
+        clipPath: 'none',
+      };
+      
+       const rightStyle: React.CSSProperties = {
+        ...faceStyle,
+        transform: 'skewY(45deg) scaleX(0.5) translate(50%, 50%)',
+        transformOrigin: 'top right',
+        background: `linear-gradient(to left, ${color}, ${darkenColor(color, 20)})`,
+        clipPath: 'none',
+      };
+  
+      return (
+        <div style={layerStyle} className="drop-shadow-lg">
+          <div style={topStyle}>{label} {value}%</div>
+        </div>
+      );
+    };
+
+    const darkenColor = (color: string, percent: number) => {
+        let R = parseInt(color.substring(1, 3), 16);
+        let G = parseInt(color.substring(3, 5), 16);
+        let B = parseInt(color.substring(5, 7), 16);
+    
+        R = parseInt(String(R * (100 - percent) / 100));
+        G = parseInt(String(G * (100 - percent) / 100));
+        B = parseInt(String(B * (100 - percent) / 100));
+    
+        R = (R < 255) ? R : 255;  
+        G = (G < 255) ? G : 255;  
+        B = (B < 255) ? B : 255;  
+    
+        const RR = ((R.toString(16).length === 1) ? "0" + R.toString(16) : R.toString(16));
+        const GG = ((G.toString(16).length === 1) ? "0" + G.toString(16) : G.toString(16));
+        const BB = ((B.toString(16).length === 1) ? "0" + B.toString(16) : B.toString(16));
+    
+        return "#" + RR + GG + BB;
+    };
   
     return (
-      <div className="w-full flex justify-center items-center my-4">
-        <div className="w-48 flex flex-col items-center gap-2">
-          {sortedData.map((item) => {
-            const width = (layerBaseWidth * item.value) / 100;
-            return (
-              <div
-                key={item.name}
-                className="relative flex items-center justify-center text-white font-bold text-sm rounded-lg"
+       <div className="w-full flex justify-center items-center my-4 py-8 h-64">
+        <div className="flex flex-col items-center">
+            {sortedData.map((item, index) => (
+            <div key={item.name} className="relative mb-2">
+                <div
+                className="bg-gray-800 text-white font-bold text-center p-2 rounded-md transition-all duration-300"
                 style={{
-                  backgroundColor: item.color,
-                  height: `${layerBaseHeight}px`,
-                  width: `${Math.max(width, 30)}%`, // Minimum width to ensure text is visible
-                  clipPath: 'polygon(0 0, 100% 0, 85% 100%, 15% 100%)',
+                    width: `${60 + item.value * 0.8}px`,
+                    height: '50px',
+                    backgroundColor: item.color,
+                    clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                 }}
-              >
+                >
                 {item.name} {item.value}%
-              </div>
-            );
-          })}
+                </div>
+                <div
+                className="absolute left-0 right-0 mx-auto"
+                style={{
+                    width: `${60 + item.value * 0.8}px`,
+                    height: '15px',
+                    backgroundColor: darkenColor(item.color, 20),
+                    top: '-15px',
+                    clipPath: 'polygon(15% 100%, 85% 100%, 100% 0, 0 0)',
+                }}
+                />
+            </div>
+            ))}
         </div>
       </div>
     );
