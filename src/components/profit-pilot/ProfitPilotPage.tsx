@@ -7,7 +7,8 @@ import {
   metricsPlans,
   funnelObjectivesData,
   automationToolsConfig,
-  businessTypeKeywords
+  businessTypeKeywords,
+  platformFeeLabels
 } from './data';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -39,21 +40,21 @@ const initialInputs = {
   productName: '',
   productKeywords: '',
   businessType: 'ecommerce_website_campaign',
-  sellingPrice: '',
+  sellingPrice: '0',
   vatProduct: '7',
-  cogs: '',
+  cogs: '0',
   salesPlatform: 'own_website',
   platformFee: '0',
   paymentFee: '3.0',
-  kolFee: '10',
-  packagingCost: '10',
-  shippingCost: '35',
-  profitGoal: '100000',
+  kolFee: '0',
+  packagingCost: '0',
+  shippingCost: '0',
+  profitGoal: '0',
   profitGoalTimeframe: 'monthly',
-  fixedCosts: '50000',
-  targetRoas: '4',
-  targetCpa: '',
-  adCostPercent: '',
+  fixedCosts: '0',
+  targetRoas: '0',
+  targetCpa: '0',
+  adCostPercent: '0',
   calcDriver: 'roas',
   funnelPlan: 'launch',
   numberOfAccounts: '1',
@@ -333,7 +334,7 @@ export function ProfitPilotPage() {
 
   const currentFunnelPlan = funnelPlans[inputs.funnelPlan] || { tofu: 0, mofu: 0, bofu: 0 };
   const numAccounts = F.num(inputs.numberOfAccounts) || 1;
-  const budgetPerAccountMonth = calculated.adBudget / numAccounts;
+  const budgetPerAccountMonth = (calculated.adBudget || 0) / numAccounts;
   const budgetPerAccountDay = budgetPerAccountMonth / 30;
 
   const funnelData = [
@@ -415,7 +416,7 @@ export function ProfitPilotPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="sellingPrice" className="block text-sm mb-2 font-medium opacity-80">ราคาขาย</Label>
-                  <Input id="sellingPrice" value={inputs.sellingPrice} onChange={(e) => handleInputChange('sellingPrice', e.target.value)} type="number" placeholder="1000" className="neumorphic-input" />
+                  <Input id="sellingPrice" value={inputs.sellingPrice} onChange={(e) => handleInputChange('sellingPrice', e.target.value)} type="number" placeholder="0" className="neumorphic-input" />
                 </div>
                 <div>
                   <Label htmlFor="vatProduct" className="block text-sm mb-2 font-medium opacity-80">VAT (%)</Label>
@@ -424,14 +425,14 @@ export function ProfitPilotPage() {
               </div>
               <div>
                 <Label htmlFor="cogs" className="block text-sm mb-2 font-medium opacity-80">ต้นทุนสินค้า (COGS)</Label>
-                <Input id="cogs" value={inputs.cogs} onChange={(e) => handleInputChange('cogs', e.target.value)} type="number" placeholder="300" className="neumorphic-input" />
+                <Input id="cogs" value={inputs.cogs} onChange={(e) => handleInputChange('cogs', e.target.value)} type="number" placeholder="0" className="neumorphic-input" />
               </div>
               <div>
                 <Label htmlFor="salesPlatform" className="block text-sm mb-2 font-medium opacity-80">ช่องทางขาย</Label>
                 <Select value={inputs.salesPlatform} onValueChange={handlePlatformChange}>
                   <SelectTrigger id="salesPlatform" className="neumorphic-select"><SelectValue/></SelectTrigger>
                   <SelectContent>
-                    {Object.keys(platformFees).map(p => <SelectItem key={p} value={p}>{p.replace(/_/g, ' ').toUpperCase()}</SelectItem>)}
+                    {Object.keys(platformFees).map(p => <SelectItem key={p} value={p}>{platformFeeLabels[p]}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
@@ -447,16 +448,16 @@ export function ProfitPilotPage() {
               </div>
               <div>
                 <Label htmlFor="kolFee" className="block text-sm mb-2 font-medium opacity-80">ค่าคอมมิชชั่น KOL (%)</Label>
-                <Input id="kolFee" value={inputs.kolFee} onChange={(e) => handleInputChange('kolFee', e.target.value)} type="number" placeholder="10" className="neumorphic-input" />
+                <Input id="kolFee" value={inputs.kolFee} onChange={(e) => handleInputChange('kolFee', e.target.value)} type="number" placeholder="0" className="neumorphic-input" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                  <div>
                     <Label htmlFor="packagingCost" className="block text-sm mb-2 font-medium opacity-80">ค่าแพ็ค</Label>
-                    <Input id="packagingCost" value={inputs.packagingCost} onChange={(e) => handleInputChange('packagingCost', e.target.value)} type="number" placeholder="10" className="neumorphic-input" />
+                    <Input id="packagingCost" value={inputs.packagingCost} onChange={(e) => handleInputChange('packagingCost', e.target.value)} type="number" placeholder="0" className="neumorphic-input" />
                  </div>
                  <div>
                     <Label htmlFor="shippingCost" className="block text-sm mb-2 font-medium opacity-80">ค่าส่ง</Label>
-                    <Input id="shippingCost" value={inputs.shippingCost} onChange={(e) => handleInputChange('shippingCost', e.target.value)} type="number" placeholder="35" className="neumorphic-input" />
+                    <Input id="shippingCost" value={inputs.shippingCost} onChange={(e) => handleInputChange('shippingCost', e.target.value)} type="number" placeholder="0" className="neumorphic-input" />
                  </div>
               </div>
             </div>
@@ -473,7 +474,7 @@ export function ProfitPilotPage() {
               <div>
                 <Label htmlFor="profitGoal" className="block text-sm mb-2 font-medium opacity-80">เป้าหมายกำไร</Label>
                 <div className="grid grid-cols-3 gap-3">
-                  <Input id="profitGoal" value={inputs.profitGoal} onChange={(e) => handleInputChange('profitGoal', e.target.value)} type="number" placeholder="100000" className="neumorphic-input col-span-2" />
+                  <Input id="profitGoal" value={inputs.profitGoal} onChange={(e) => handleInputChange('profitGoal', e.target.value)} type="number" placeholder="0" className="neumorphic-input col-span-2" />
                   <Select value={inputs.profitGoalTimeframe} onValueChange={(val) => handleInputChange('profitGoalTimeframe', val)}>
                     <SelectTrigger className="neumorphic-select"><SelectValue/></SelectTrigger>
                     <SelectContent>
@@ -485,7 +486,7 @@ export function ProfitPilotPage() {
               </div>
               <div>
                 <Label htmlFor="fixedCosts" className="block text-sm mb-2 font-medium opacity-80">ค่าใช้จ่ายคงที่/เดือน</Label>
-                <Input id="fixedCosts" value={inputs.fixedCosts} onChange={(e) => handleInputChange('fixedCosts', e.target.value)} type="number" placeholder="50000" className="neumorphic-input" />
+                <Input id="fixedCosts" value={inputs.fixedCosts} onChange={(e) => handleInputChange('fixedCosts', e.target.value)} type="number" placeholder="0" className="neumorphic-input" />
               </div>
               <div className="space-y-2 pt-4">
                   <div className="flex justify-between items-center text-sm"><span className="opacity-80">กำไรขั้นต้น/หน่วย</span><span className="font-bold text-primary">{F.formatCurrency(calculated.grossProfitUnit)}</span></div>
@@ -636,7 +637,7 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8">
-                  <div className="w-full max-w-sm space-y-2">
+                  <div className="w-full max-w-sm flex flex-col-reverse gap-1">
                     {funnelData.map((stage, index) => (
                       <div key={index} className="relative h-12 flex items-center justify-center text-white font-bold"
                         style={{
@@ -661,8 +662,8 @@ export function ProfitPilotPage() {
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudget)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudget / numAccounts)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudget / numAccounts / 30)}</p></div>
+                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency((calculated.tofuBudget || 0) / numAccounts)}</p></div>
+                      <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency((calculated.tofuBudget || 0) / numAccounts / 30)}</p></div>
                     </div>
                   </div>
                    <div className="neumorphic-card p-4">
@@ -672,8 +673,8 @@ export function ProfitPilotPage() {
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudget)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudget / numAccounts)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudget / numAccounts / 30)}</p></div>
+                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency((calculated.mofuBudget || 0) / numAccounts)}</p></div>
+                      <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency((calculated.mofuBudget || 0) / numAccounts / 30)}</p></div>
                     </div>
                   </div>
                    <div className="neumorphic-card p-4">
@@ -683,8 +684,8 @@ export function ProfitPilotPage() {
                     </div>
                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget / numAccounts)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget / numAccounts / 30)}</p></div>
+                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency((calculated.bofuBudget || 0) / numAccounts)}</p></div>
+                      <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency((calculated.bofuBudget || 0) / numAccounts / 30)}</p></div>
                     </div>
                   </div>
                 </div>

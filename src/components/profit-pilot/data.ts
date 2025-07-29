@@ -7,6 +7,15 @@ export const platformFees = {
   other: { platform: 0, payment: 0 },
 };
 
+export const platformFeeLabels = {
+  own_website: 'เว็บไซต์ตัวเอง',
+  facebook_shop: 'Facebook Shop',
+  tiktok_shop: 'TikTok Shop',
+  shopee: 'Shopee',
+  lazada: 'Lazada',
+  other: 'อื่นๆ',
+};
+
 export const funnelPlans = {
   super_launch: { name: "เปิดตัวครั้งใหญ่ (TOFU 90%)", tofu: 90, mofu: 10, bofu: 0 },
   brand_building: { name: "สร้างแบรนด์จริงจัง (TOFU 80%)", tofu: 80, mofu: 15, bofu: 5 },
@@ -112,23 +121,23 @@ export const metricsPlans = {
 };
 
 export const funnelObjectivesData = {
-  ecommerce_website_campaign: { name: "E-commerce Website Campaign", objectives: { tofu: ['สร้างการรับรู้แบรนด์', 'เพิ่ม Traffic เข้าเว็บไซต์'], mofu: ['สร้างความน่าเชื่อถือ (Reviews)', 'ให้ข้อมูลเชิงลึก'], bofu: ['กระตุ้นการซื้อ (Promotions)', 'ปิดการขาย'] } },
-  ecommerce_message_campaign: { name: "E-commerce Message Campaign", objectives: { tofu: ['เริ่มบทสนทนา', 'สร้างการรับรู้ผ่านแชท'], mofu: ['ให้คำปรึกษา', 'สร้างความสัมพันธ์'], bofu: ['ปิดการขายใน Inbox', 'เสนอดีลพิเศษ'] } },
-  ecommerce_fashion: { name: "E-commerce - Fashion", objectives: { tofu: ['แสดงคอลเลคชั่นใหม่', 'สร้างแรงบันดาลใจ'], mofu: ['Lookbook / Mix & Match', 'รีวิวจาก Influencer'], bofu: ['โปรโมชั่นจำกัดเวลา', 'แจ้งเตือนสินค้า Restock'] } },
-  ecommerce_cosmetic: { name: "E-commerce - Cosmetic", objectives: { tofu: ['Tutorial การใช้งาน', 'สร้าง Awareness'], mofu: ['รีวิวผลลัพธ์ Before/After', 'แจก Sample'], bofu: ['โปรโมชั่นซื้อ 1 แถม 1', 'สร้าง Loyalty Program'] } },
-  ecommerce_supplement: { name: "E-commerce - Supplement", objectives: { tofu: ['ให้ความรู้ด้านสุขภาพ', 'สร้างความน่าเชื่อถือ'], mofu: ['ผลวิจัยรองรับ', 'รีวิวจากผู้ใช้จริง'], bofu: ['โปรแกรมสมัครสมาชิก', 'โปรโมชั่นพิเศษ'] } },
-  ecommerce_gadget: { name: "E-commerce - Gadget", objectives: { tofu: ['Unboxing & First Impression', 'แสดงนวัตกรรม'], mofu: ['เปรียบเทียบฟีเจอร์', 'วิดีโอสาธิตการใช้งาน'], bofu: ['ส่วนลด Pre-order', 'โปรแกรม Trade-in'] } },
-  ecommerce_homedecor: { name: "E-commerce - Home Decor", objectives: { tofu: ['สร้างแรงบันดาลใจในการแต่งบ้าน', 'แสดงสินค้าในบรรยากาศจริง'], mofu: ['แนะนำการจัดวาง', 'รีวิวจากลูกค้า'], bofu: ['ส่วนลดสำหรับ Set สินค้า', 'บริการออกแบบฟรี'] } },
+  ecommerce_website_campaign: { name: "แคมเปญเว็บไซต์ E-commerce", objectives: { tofu: ['สร้างการรับรู้แบรนด์', 'เพิ่ม Traffic เข้าเว็บไซต์'], mofu: ['สร้างความน่าเชื่อถือ (Reviews)', 'ให้ข้อมูลเชิงลึก'], bofu: ['กระตุ้นการซื้อ (Promotions)', 'ปิดการขาย'] } },
+  ecommerce_message_campaign: { name: "แคมเปญข้อความ E-commerce", objectives: { tofu: ['เริ่มบทสนทนา', 'สร้างการรับรู้ผ่านแชท'], mofu: ['ให้คำปรึกษา', 'สร้างความสัมพันธ์'], bofu: ['ปิดการขายใน Inbox', 'เสนอดีลพิเศษ'] } },
+  ecommerce_fashion: { name: "E-commerce - แฟชั่น", objectives: { tofu: ['แสดงคอลเลคชั่นใหม่', 'สร้างแรงบันดาลใจ'], mofu: ['Lookbook / Mix & Match', 'รีวิวจาก Influencer'], bofu: ['โปรโมชั่นจำกัดเวลา', 'แจ้งเตือนสินค้า Restock'] } },
+  ecommerce_cosmetic: { name: "E-commerce - เครื่องสำอาง", objectives: { tofu: ['Tutorial การใช้งาน', 'สร้าง Awareness'], mofu: ['รีวิวผลลัพธ์ Before/After', 'แจก Sample'], bofu: ['โปรโมชั่นซื้อ 1 แถม 1', 'สร้าง Loyalty Program'] } },
+  ecommerce_supplement: { name: "E-commerce - อาหารเสริม", objectives: { tofu: ['ให้ความรู้ด้านสุขภาพ', 'สร้างความน่าเชื่อถือ'], mofu: ['ผลวิจัยรองรับ', 'รีวิวจากผู้ใช้จริง'], bofu: ['โปรแกรมสมัครสมาชิก', 'โปรโมชั่นพิเศษ'] } },
+  ecommerce_gadget: { name: "E-commerce - แกดเจ็ต", objectives: { tofu: ['Unboxing & First Impression', 'แสดงนวัตกรรม'], mofu: ['เปรียบเทียบฟีเจอร์', 'วิดีโอสาธิตการใช้งาน'], bofu: ['ส่วนลด Pre-order', 'โปรแกรม Trade-in'] } },
+  ecommerce_homedecor: { name: "E-commerce - ของแต่งบ้าน", objectives: { tofu: ['สร้างแรงบันดาลใจในการแต่งบ้าน', 'แสดงสินค้าในบรรยากาศจริง'], mofu: ['แนะนำการจัดวาง', 'รีวิวจากลูกค้า'], bofu: ['ส่วนลดสำหรับ Set สินค้า', 'บริการออกแบบฟรี'] } },
   ecommerce_fmcg: { name: "E-commerce - FMCG", objectives: { tofu: ['สร้างการจดจำในวงกว้าง', 'โปรโมทโปรโมชั่น'], mofu: ['เน้นย้ำคุณประโยชน์', 'สร้างสูตรอาหาร/การใช้งาน'], bofu: ['ส่วนลดที่จุดขาย', 'สะสมแต้มแลกของรางวัล'] } },
-  ecommerce_digital: { name: "E-commerce - Digital Product", objectives: { tofu: ['ให้ความรู้ฟรี (Webinar)', 'สร้าง Community'], mofu: ['แสดงตัวอย่างเนื้อหา', 'Testimonials'], bofu: ['ส่วนลด Early Bird', 'เสนอขายคอร์สเรียนขั้นสูง'] } },
+  ecommerce_digital: { name: "E-commerce - สินค้าดิจิทัล", objectives: { tofu: ['ให้ความรู้ฟรี (Webinar)', 'สร้าง Community'], mofu: ['แสดงตัวอย่างเนื้อหา', 'Testimonials'], bofu: ['ส่วนลด Early Bird', 'เสนอขายคอร์สเรียนขั้นสูง'] } },
   leadgen_b2b: { name: "Lead Gen - B2B", objectives: { tofu: ['สร้าง Whitepaper / Case Study', 'สร้าง Thought Leadership'], mofu: ['จัด Webinar ให้ความรู้', 'เสนอ Demo'], bofu: ['เสนอราคาพิเศษ', 'ให้คำปรึกษาฟรี'] } },
-  leadgen_service: { name: "Lead Gen - Service", objectives: { tofu: ['แสดงผลงาน (Portfolio)', 'สร้างความน่าเชื่อถือ'], mofu: ['ให้คำปรึกษาเบื้องต้น', 'รีวิวจากลูกค้า'], bofu: ['ประเมินราคาฟรี', 'โปรโมชั่นสำหรับลูกค้าใหม่'] } },
-  leadgen_high_ticket: { name: "Lead Gen - High Ticket", objectives: { tofu: ['สร้างภาพลักษณ์ที่หรูหรา', 'ให้ข้อมูลภาพรวมโครงการ/บริการ'], mofu: ['นัดหมายเข้าชมโครงการ', 'ให้คำปรึกษาทางการเงิน'], bofu: ['เสนอเงื่อนไขพิเศษ', 'ปิดการขาย'] } },
-  info_product: { name: "Info Product", objectives: { tofu: ['ให้ความรู้ฟรี', 'สร้าง Community'], mofu: ['แสดงตัวอย่างเนื้อหา', 'Testimonials'], bofu: ['ส่วนลด Early Bird', 'เสนอขายคอร์สเรียนขั้นสูง'] } },
+  leadgen_service: { name: "Lead Gen - บริการ", objectives: { tofu: ['แสดงผลงาน (Portfolio)', 'สร้างความน่าเชื่อถือ'], mofu: ['ให้คำปรึกษาเบื้องต้น', 'รีวิวจากลูกค้า'], bofu: ['ประเมินราคาฟรี', 'โปรโมชั่นสำหรับลูกค้าใหม่'] } },
+  leadgen_high_ticket: { name: "Lead Gen - สินค้าราคาสูง", objectives: { tofu: ['สร้างภาพลักษณ์ที่หรูหรา', 'ให้ข้อมูลภาพรวมโครงการ/บริการ'], mofu: ['นัดหมายเข้าชมโครงการ', 'ให้คำปรึกษาทางการเงิน'], bofu: ['เสนอเงื่อนไขพิเศษ', 'ปิดการขาย'] } },
+  info_product: { name: "สินค้าให้ความรู้", objectives: { tofu: ['ให้ความรู้ฟรี', 'สร้าง Community'], mofu: ['แสดงตัวอย่างเนื้อหา', 'Testimonials'], bofu: ['ส่วนลด Early Bird', 'เสนอขายคอร์สเรียนขั้นสูง'] } },
   saas: { name: "SaaS", objectives: { tofu: ['ให้ความรู้เกี่ยวกับปัญหาที่แก้ไขได้', 'สร้าง Awareness'], mofu: ['เสนอ Free Trial / Demo', 'Case Studies'], bofu: ['ส่วนลดสำหรับแผนรายปี', 'Onboarding Support'] } },
-  agency: { name: "Agency", objectives: { tofu: ['แสดงผลงาน (Case Studies)', 'สร้าง Thought Leadership'], mofu: ['ให้คำปรึกษาฟรี', 'Audit เว็บไซต์/แคมเปญ'], bofu: ['เสนอ Proposal', 'แพ็คเกจบริการพิเศษ'] } },
-  event: { name: "Event Promotion", objectives: { tofu: ['โปรโมทงาน', 'สร้าง Hype'], mofu: ['เปิดเผยรายชื่อ Speaker/ศิลปิน', 'ขายบัตรรอบ Early Bird'], bofu: ['โปรโมชั่นนาทีสุดท้าย', 'ขายสินค้าหน้างาน'] } },
-  awareness: { name: "Brand Awareness", objectives: { tofu: ['สร้างการรับรู้ในวงกว้าง (Reach)', 'สร้างการจดจำแบรนด์ (Ad Recall)'], mofu: ['สร้างการมีส่วนร่วม (Engagement)', 'สื่อสารข้อความหลักของแบรนด์'], bofu: ['กระตุ้นให้เกิดการค้นหาแบรนด์', 'สร้างทัศนคติที่ดีต่อแบรนด์'] } }
+  agency: { name: "เอเจนซี่", objectives: { tofu: ['แสดงผลงาน (Case Studies)', 'สร้าง Thought Leadership'], mofu: ['ให้คำปรึกษาฟรี', 'Audit เว็บไซต์/แคมเปญ'], bofu: ['เสนอ Proposal', 'แพ็คเกจบริการพิเศษ'] } },
+  event: { name: "โปรโมทอีเวนต์", objectives: { tofu: ['โปรโมทงาน', 'สร้าง Hype'], mofu: ['เปิดเผยรายชื่อ Speaker/ศิลปิน', 'ขายบัตรรอบ Early Bird'], bofu: ['โปรโมชั่นนาทีสุดท้าย', 'ขายสินค้าหน้างาน'] } },
+  awareness: { name: "สร้างการรับรู้แบรนด์", objectives: { tofu: ['สร้างการรับรู้ในวงกว้าง (Reach)', 'สร้างการจดจำแบรนด์ (Ad Recall)'], mofu: ['สร้างการมีส่วนร่วม (Engagement)', 'สื่อสารข้อความหลักของแบรนด์'], bofu: ['กระตุ้นให้เกิดการค้นหาแบรนด์', 'สร้างทัศนคติที่ดีต่อแบรนด์'] } }
 };
 
 export const automationToolsConfig = {
