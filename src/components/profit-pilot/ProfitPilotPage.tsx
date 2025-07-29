@@ -25,7 +25,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, ArrowRight } from 'lucide-react';
+import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, ArrowRight, Target } from 'lucide-react';
 import { generateUiTitles, generateAutomationWorkflow, getMetricsAdvice } from './actions';
 import { Progress } from '../ui/progress';
 
@@ -397,64 +397,34 @@ export function ProfitPilotPage() {
 
   const FunnelChart = ({ data }) => {
     if (!data.length) return null;
-  
+
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
-  
-    const sortedData = [...data].sort((a, b) => b.value - a.value);
-  
-    const FunnelLayer = ({
-      value,
-      color,
-      label,
-    }: {
-      value: number;
-      color: string;
-      label: string;
-    }) => {
-      const minWidth = 150;
-      const maxWidth = 500;
-      const width = minWidth + (maxWidth - minWidth) * (value / 100);
-      const height = 80;
-  
-      const layerStyle: React.CSSProperties = {
-        width: `${width}px`,
-        height: `${height}px`,
-        backgroundColor: color,
-        filter: `drop-shadow(0 0 15px ${color}) drop-shadow(0 0 25px ${color}33)`,
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        margin: '10px 0',
-        borderRadius: '4px',
-      };
-      
-      const labelStyle: React.CSSProperties = {
-          color: 'white',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          textShadow: '0 0 5px #000, 0 0 10px #000',
-      }
 
-      return (
-        <div style={layerStyle}>
-          <span style={labelStyle}>{label} {value}%</span>
-        </div>
-      );
-    };
-  
+    const sortedData = [...data].sort((a, b) => b.value - a.value);
+
     return (
-      <div className="w-full flex justify-center items-center my-4 py-4 min-h-[400px]">
-        <div className="flex flex-col items-center justify-center space-y-2">
-          {sortedData.map((item) => (
-            <FunnelLayer
-              key={item.name}
-              value={item.value}
-              color={item.color}
-              label={item.name}
-            />
-          ))}
+      <div className="w-full flex justify-center items-center my-4 py-4 min-h-[300px]">
+        <div className="flex flex-col items-center justify-center space-y-2 w-full max-w-lg">
+          {sortedData.map((item, index) => {
+            const widthPercentage = Math.max(15, item.value); // Minimum width of 15%
+            const layerStyle: React.CSSProperties = {
+              width: `${widthPercentage}%`,
+              height: '80px',
+              backgroundColor: item.color,
+              filter: `drop-shadow(0 0 10px ${item.color}) drop-shadow(0 0 20px ${item.color}33)`,
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: '8px',
+              color: 'white',
+              fontWeight: 'bold',
+              fontSize: '1.1rem',
+              textShadow: '0 0 5px #000, 0 0 10px #000',
+            };
+            return <div key={item.name} style={layerStyle}>{item.name} {item.value}%</div>;
+          })}
         </div>
       </div>
     );
@@ -771,7 +741,10 @@ export function ProfitPilotPage() {
             </div>
 
             <div className="mt-8">
-              <h3 className="text-xl font-bold mb-4 text-white">การแบ่งงบประมาณ</h3>
+              <h3 className="text-xl font-bold mb-4 text-white flex items-center gap-2">
+                <Target className="w-6 h-6 text-primary" />
+                การแบ่งงบประมาณ
+              </h3>
               <div className="neumorphic-card p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
