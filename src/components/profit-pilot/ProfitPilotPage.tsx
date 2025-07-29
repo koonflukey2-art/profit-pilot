@@ -40,21 +40,21 @@ const initialInputs = {
   productName: '',
   productKeywords: '',
   businessType: 'ecommerce_website_campaign',
-  sellingPrice: '0',
+  sellingPrice: '',
   vatProduct: '7',
-  cogs: '0',
+  cogs: '',
   salesPlatform: 'own_website',
   platformFee: '0',
   paymentFee: '3.0',
-  kolFee: '0',
-  packagingCost: '0',
-  shippingCost: '0',
-  profitGoal: '0',
+  kolFee: '',
+  packagingCost: '',
+  shippingCost: '',
+  profitGoal: '',
   profitGoalTimeframe: 'monthly',
-  fixedCosts: '0',
-  targetRoas: '0',
-  targetCpa: '0',
-  adCostPercent: '0',
+  fixedCosts: '',
+  targetRoas: '',
+  targetCpa: '',
+  adCostPercent: '',
   calcDriver: 'roas',
   funnelPlan: 'launch',
   numberOfAccounts: '1',
@@ -111,7 +111,7 @@ export function ProfitPilotPage() {
         } else if (i.calcDriver === 'cpa') {
             targetRoas = targetCpa > 0 ? s.priceBeforeVat / targetCpa : 0;
             adCostPercent = (targetCpa / s.priceBeforeVat) * 100;
-        } else {
+        } else { // calcDriver === 'adcost'
             targetCpa = s.priceBeforeVat * (adCostPercent / 100);
             targetRoas = targetCpa > 0 ? s.priceBeforeVat / targetCpa : 0;
         }
@@ -363,7 +363,7 @@ export function ProfitPilotPage() {
   return (
     <>
       <header className="text-center mb-8 relative">
-        <h1 className="text-3xl md:text-4xl font-bold gradient-text mb-2">Profit Pilot</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Profit Pilot</h1>
         <p className="text-base opacity-80">Profit & Metrics Planner v5.3</p>
       </header>
 
@@ -576,15 +576,15 @@ export function ProfitPilotPage() {
                      <div className="grid grid-cols-3 gap-4 mt-6">
                       <div>
                         <Label htmlFor="targetRoas" className="block text-sm mb-2 opacity-80">ROAS</Label>
-                        <Input value={inputs.calcDriver === 'roas' ? inputs.targetRoas : F.formatNumber(calculated.targetRoas || 0)} onChange={(e) => handleInputChange('targetRoas', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'roas'} className="neumorphic-input" />
+                        <Input value={inputs.calcDriver === 'roas' ? inputs.targetRoas : (calculated.targetRoas ? F.formatNumber(calculated.targetRoas, 2) : '')} onChange={(e) => handleInputChange('targetRoas', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'roas'} className="neumorphic-input" />
                       </div>
                       <div>
                         <Label htmlFor="targetCpa" className="block text-sm mb-2 opacity-80">CPA (฿)</Label>
-                        <Input value={inputs.calcDriver === 'cpa' ? inputs.targetCpa : F.formatNumber(calculated.targetCpa || 0)} onChange={(e) => handleInputChange('targetCpa', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'cpa'} className="neumorphic-input" />
+                        <Input value={inputs.calcDriver === 'cpa' ? inputs.targetCpa : (calculated.targetCpa ? F.formatNumber(calculated.targetCpa, 2) : '')} onChange={(e) => handleInputChange('targetCpa', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'cpa'} className="neumorphic-input" />
                       </div>
                       <div>
                         <Label htmlFor="adCostPercent" className="block text-sm mb-2 opacity-80">Ad% (%)</Label>
-                        <Input value={inputs.calcDriver === 'adcost' ? inputs.adCostPercent : F.formatNumber(calculated.adCostPercent || 0, 1)} onChange={(e) => handleInputChange('adCostPercent', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'adcost'} className="neumorphic-input" />
+                        <Input value={inputs.calcDriver === 'adcost' ? inputs.adCostPercent : (calculated.adCostPercent ? F.formatNumber(calculated.adCostPercent, 1) : '')} onChange={(e) => handleInputChange('adCostPercent', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'adcost'} className="neumorphic-input" />
                       </div>
                     </div>
                   </div>
@@ -631,24 +631,30 @@ export function ProfitPilotPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                   <div className="grid grid-cols-1 gap-4">
+                   <div className="grid grid-cols-2 gap-4">
                      <div>
                         <Label htmlFor="numberOfAccounts" className="block text-sm mb-2 font-medium opacity-80">จำนวนบัญชีโฆษณา</Label>
                         <Input id="numberOfAccounts" value={inputs.numberOfAccounts} onChange={(e) => handleInputChange('numberOfAccounts', e.target.value)} type="number" className="neumorphic-input" />
                      </div>
+                      <div>
+                        <Label className="block text-sm mb-2 font-medium opacity-80">เฉลี่ยงบ/บัญชี/วัน</Label>
+                        <div className="neumorphic-input h-10 flex items-center justify-center font-bold text-primary bg-background/50">
+                          {F.formatCurrency(budgetPerAccountDay)}
+                        </div>
+                      </div>
                   </div>
                 </div>
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8">
-                  <div className="w-full max-w-sm flex flex-col gap-1.5">
+                  <div className="w-full max-w-sm flex flex-col-reverse gap-1.5">
                     {funnelData.map((stage, index) => (
                       <div key={index} className="relative h-12 flex items-center justify-center text-white font-bold"
                         style={{
                           backgroundColor: stage.color,
                           width: `${100 - index * 15}%`,
                           margin: '0 auto',
-                          clipPath: 'polygon(0 0, 100% 0, 87.5% 100%, 12.5% 100%)',
+                          clipPath: 'polygon(12.5% 0, 87.5% 0, 100% 100%, 0% 100%)',
                           boxShadow: `0 0 15px ${stage.color}`
                         }}
                       >
