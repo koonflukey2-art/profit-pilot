@@ -424,40 +424,54 @@ export function ProfitPilotPage() {
   const FunnelChart = () => {
     const totalValue = funnelData.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
-    
-    // Ensure the order is always TOFU -> MOFU -> BOFU
+
     const stageOrder = ['TOFU', 'MOFU', 'BOFU'];
     const sortedData = stageOrder.map(stage => funnelData.find(d => d.name === stage)).filter(Boolean);
 
-    const FunnelSegment = ({ width, color, text }) => (
-      <div
-        className="h-10 flex items-center justify-center text-white font-bold"
-        style={{
-          width: `${width}%`,
-          backgroundColor: color,
-          clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0% 100%)',
-          boxShadow: `0 2px 5px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.3)`
-        }}
-      >
-        <span>{text}</span>
-      </div>
-    );
+    const FunnelSegment = ({ width, color, text, isFirst, isLast }) => {
+        const clipPath = `polygon(${isFirst ? '0% 0, 100% 0,' : '10% 0, 90% 0,'} ${isLast ? '90% 100%, 10% 100%' : '100% 100%, 0% 100%'})`;
+        const topClipPath = `polygon(0% 0, 100% 0, 90% 100%, 10% 100%)`;
+        const middleClipPath = `polygon(10% 0, 90% 0, 80% 100%, 20% 100%)`;
+        const bottomClipPath = `polygon(20% 0, 80% 0, 70% 100%, 30% 100%)`;
+
+        let segmentClipPath;
+        if (isFirst) segmentClipPath = topClipPath;
+        else if (isLast) segmentClipPath = bottomClipPath;
+        else segmentClipPath = middleClipPath;
+
+
+        return (
+            <div
+                className="h-10 flex items-center justify-center text-white font-bold"
+                style={{
+                    width: `${width}%`,
+                    backgroundColor: color,
+                    clipPath: segmentClipPath,
+                    boxShadow: `0 2px 5px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.3)`
+                }}
+            >
+                <span>{text}</span>
+            </div>
+        );
+    };
 
     return (
-      <div className="flex flex-col items-center justify-center w-full max-w-xs mx-auto gap-1">
-        {sortedData.map((item, index) => {
-          if (item.value === 0) return null;
-          const width = 100 - index * 20; // Example: 100%, 80%, 60%
-          return (
-            <FunnelSegment
-              key={item.name}
-              width={width}
-              color={item.color}
-              text={`${item.name} ${item.value}%`}
-            />
-          );
-        })}
-      </div>
+        <div className="flex flex-col items-center justify-center w-full max-w-xs mx-auto gap-1">
+            {sortedData.map((item, index) => {
+                if (item.value === 0) return null;
+                const width = 100 - (index * 15);
+                return (
+                    <FunnelSegment
+                        key={item.name}
+                        width={width}
+                        color={item.color}
+                        text={`${item.name} ${item.value}%`}
+                        isFirst={index === 0}
+                        isLast={index === sortedData.length - 1}
+                    />
+                );
+            })}
+        </div>
     );
   };
   
@@ -717,21 +731,21 @@ export function ProfitPilotPage() {
                   <div>
                      <h4 className="text-lg font-bold mb-4 text-white">ค่า Breakeven</h4>
                      <div className="space-y-4">
-                        <div className="p-4 rounded-lg bg-red-900/50 shadow-inner">
+                        <div className="neumorphic-card p-4">
                             <div className="flex justify-between items-center">
                                 <p className="font-bold text-red-400">BE ROAS</p>
                                 <p className="font-bold text-xl text-white">{F.formatNumber(calculated.breakevenRoas)}</p>
                             </div>
                             <p className="text-xs text-red-200 mt-1">ค่า ROAS ต่ำสุดที่แคมเปญต้องทำให้ได้เพื่อ "เท่าทุน"</p>
                         </div>
-                        <div className="p-4 rounded-lg bg-red-900/50 shadow-inner">
+                        <div className="neumorphic-card p-4">
                             <div className="flex justify-between items-center">
                                 <p className="font-bold text-red-400">BE CPA</p>
                                 <p className="font-bold text-xl text-white">{F.formatCurrency(calculated.breakevenCpa)}</p>
                             </div>
                             <p className="text-xs text-red-200 mt-1">ค่าโฆษณาสูงสุดที่จ่ายได้โดยไม่ขาดทุน</p>
                         </div>
-                        <div className="p-4 rounded-lg bg-red-900/50 shadow-inner">
+                        <div className="neumorphic-card p-4">
                             <div className="flex justify-between items-center">
                                 <p className="font-bold text-red-400">BE Ad Cost %</p>
                                 <p className="font-bold text-xl text-white">{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
@@ -1011,5 +1025,3 @@ export function ProfitPilotPage() {
     </>
   );
 }
-
-    
