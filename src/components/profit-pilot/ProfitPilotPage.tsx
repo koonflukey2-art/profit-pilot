@@ -77,9 +77,9 @@ export function ProfitPilotPage() {
   
   const { toast } = useToast();
 
-  const handleInputChange = (key, value) => {
+  const handleInputChange = useCallback((key, value) => {
     setInputs(prev => ({ ...prev, [key]: value }));
-  };
+  }, []);
   
   const calculateAll = useCallback(() => {
     const i = { ...inputs };
@@ -177,7 +177,7 @@ export function ProfitPilotPage() {
 
   useEffect(() => {
     calculateAll();
-  }, [calculateAll]);
+  }, [inputs, calculateAll]);
 
   useEffect(() => {
     const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
@@ -220,7 +220,7 @@ export function ProfitPilotPage() {
         return;
       }
     }
-  }, [inputs.productName, inputs.productKeywords]);
+  }, [inputs.productName, inputs.productKeywords, handleInputChange]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -642,26 +642,26 @@ export function ProfitPilotPage() {
                   <div>
                      <h4 className="text-lg font-bold mb-4 gradient-text">ค่า Breakeven</h4>
                      <div className="space-y-4">
-                        <div className="p-4 rounded-lg bg-background shadow-inner">
+                        <div className="p-4 rounded-lg bg-white shadow-inner">
                             <div className="flex justify-between items-center">
-                                <p className="font-bold text-primary">BE ROAS</p>
-                                <p className="font-bold text-xl" style={{color: '#FF0000', textShadow: '0 0 5px #FF0000'}}>{F.formatNumber(calculated.breakevenRoas)}</p>
+                                <p className="font-bold text-red-600">BE ROAS</p>
+                                <p className="font-bold text-xl text-red-600">{F.formatNumber(calculated.breakevenRoas)}</p>
                             </div>
-                            <p className="text-xs opacity-70 mt-1">ค่า ROAS ต่ำสุดที่แคมเปญต้องทำให้ได้เพื่อ "เท่าทุน"</p>
+                            <p className="text-xs text-gray-500 mt-1">ค่า ROAS ต่ำสุดที่แคมเปญต้องทำให้ได้เพื่อ "เท่าทุน"</p>
                         </div>
-                        <div className="p-4 rounded-lg bg-background shadow-inner">
+                        <div className="p-4 rounded-lg bg-white shadow-inner">
                             <div className="flex justify-between items-center">
-                                <p className="font-bold text-primary">BE CPA</p>
-                                <p className="font-bold text-xl" style={{color: '#FF0000', textShadow: '0 0 5px #FF0000'}}>{F.formatCurrency(calculated.breakevenCpa)}</p>
+                                <p className="font-bold text-red-600">BE CPA</p>
+                                <p className="font-bold text-xl text-red-600">{F.formatCurrency(calculated.breakevenCpa)}</p>
                             </div>
-                            <p className="text-xs opacity-70 mt-1">ค่าโฆษณาสูงสุดที่จ่ายได้โดยไม่ขาดทุน</p>
+                            <p className="text-xs text-gray-500 mt-1">ค่าโฆษณาสูงสุดที่จ่ายได้โดยไม่ขาดทุน</p>
                         </div>
-                        <div className="p-4 rounded-lg bg-background shadow-inner">
+                        <div className="p-4 rounded-lg bg-white shadow-inner">
                             <div className="flex justify-between items-center">
-                                <p className="font-bold text-primary">BE Ad Cost %</p>
-                                <p className="font-bold text-xl" style={{color: '#FF0000', textShadow: '0 0 5px #FF0000'}}>{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
+                                <p className="font-bold text-red-600">BE Ad Cost %</p>
+                                <p className="font-bold text-xl text-red-600">{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
                             </div>
-                             <p className="text-xs opacity-70 mt-1">สัดส่วนค่าโฆษณาสูงสุดเมื่อเทียบกับราคาขาย</p>
+                             <p className="text-xs text-gray-500 mt-1">สัดส่วนค่าโฆษณาสูงสุดเมื่อเทียบกับราคาขาย</p>
                         </div>
                      </div>
                   </div>
@@ -691,23 +691,20 @@ export function ProfitPilotPage() {
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8">
                    <div className="w-full max-w-sm flex flex-col gap-1.5 items-center">
-                    {funnelData.map(({ name, value, color }, index) => {
-                      const clipPath = `polygon(0 ${index * 15}%, 100% ${index * 15}%, ${100 - index * 10}% 100%, ${index * 10}% 100%)`;
-                      return (
-                        <div
+                    {funnelData.map(({ name, value, color }, index) => (
+                      <div
                           key={index}
                           className="relative h-12 flex items-center justify-center text-white font-bold"
                           style={{
-                            backgroundColor: color,
-                            width: `${100 - index * 15}%`,
-                            boxShadow: `0 0 15px ${color}`,
-                            clipPath: `polygon(${index * 5}% 0, ${100 - index * 5}% 0, 100% 100%, 0% 100%)`
+                              backgroundColor: color,
+                              width: `${100 - (funnelData.length - 1 - index) * 15}%`,
+                              clipPath: `polygon(0 0, 100% 0, ${100 - index * 5}% 100%, ${index * 5}% 100%)`,
+                              boxShadow: `0 0 15px ${color}`
                           }}
-                        >
+                      >
                           {name} {value}%
-                        </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                   </div>
                 </div>
                 
@@ -755,6 +752,22 @@ export function ProfitPilotPage() {
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white">Funnel Structure</h3>
               <div className="neumorphic-card p-6 space-y-6">
+                
+                <div className="flex items-center justify-around text-center">
+                    <div className="w-1/3">
+                        <p className="font-bold text-primary">TOFU</p>
+                        <p className="text-sm font-semibold">{F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}<span className="text-xs opacity-70">/วัน/บัญชี</span></p>
+                    </div>
+                    <div className="w-1/3">
+                        <p className="font-bold text-accent">MOFU</p>
+                        <p className="text-sm font-semibold">{F.formatCurrency(calculated.mofuBudgetPerAccountDaily)}<span className="text-xs opacity-70">/วัน/บัญชี</span></p>
+                    </div>
+                     <div className="w-1/3">
+                        <p className="font-bold" style={{ color: 'hsl(157 71% 38%)' }}>BOFU</p>
+                        <p className="text-sm font-semibold">{F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}<span className="text-xs opacity-70">/วัน/บัญชี</span></p>
+                    </div>
+                </div>
+                <hr className="border-primary/20"/>
                 <div className="text-center mb-4">
                   <h4 className="text-2xl font-bold text-white bg-blue-600 inline-block px-6 py-2 rounded">หาลูกค้าใหม่</h4>
                 </div>
