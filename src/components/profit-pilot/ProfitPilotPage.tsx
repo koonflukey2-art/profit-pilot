@@ -24,7 +24,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X } from 'lucide-react';
+import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, ArrowRight } from 'lucide-react';
 import { generateUiTitles, generateAutomationWorkflow, getMetricsAdvice } from './actions';
 import { Progress } from '../ui/progress';
 
@@ -341,6 +341,21 @@ export function ProfitPilotPage() {
     { name: 'MOFU', value: currentFunnelPlan.mofu, color: 'hsl(var(--accent))' },
     { name: 'BOFU', value: currentFunnelPlan.bofu, color: 'hsl(157 71% 38%)' },
   ];
+  
+  const StructureBox = ({ title, children, className = '' }) => (
+    <div className={cn("bg-blue-900/50 border border-primary/50 rounded-lg p-3 text-center neumorphic-card", className)}>
+      <p className="text-sm font-bold text-primary">{title}</p>
+      {children}
+    </div>
+  );
+
+  const StructureLine = ({ hasArrow = false }) => (
+    <div className="flex-1 flex items-center justify-center">
+      <div className="w-full h-px bg-primary/50 relative">
+        {hasArrow && <ArrowRight className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />}
+      </div>
+    </div>
+  );
   
   return (
     <>
@@ -669,6 +684,106 @@ export function ProfitPilotPage() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <h3 className="text-xl font-bold mb-4 gradient-text">Funnel Structure</h3>
+              <div className="neumorphic-card p-6 space-y-8">
+                {/* New Customer Structure */}
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4">
+                    <div className="w-1/4">
+                      <div className="bg-primary text-primary-foreground p-3 rounded-lg text-center">
+                        <h4 className="font-bold text-lg">ลูกค้าใหม่</h4>
+                      </div>
+                      <div className="mt-2 text-sm">
+                        <p className="font-bold">ใช้กลุ่มเป้าหมาย</p>
+                        <ul className="list-disc list-inside">
+                          <li>Interest</li>
+                          <li>Lookalike</li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div className="w-1/4 flex items-center justify-center pt-8">
+                      <StructureBox title="Campaign">
+                        <div className="bg-background/80 rounded-md p-2 mt-2">
+                          <p className="font-bold text-lg">Conversion</p>
+                          <p className="font-bold text-2xl text-accent">CBO</p>
+                        </div>
+                        <p className="text-xs mt-2 opacity-80">งบ 500 - 5,000</p>
+                      </StructureBox>
+                    </div>
+                    <div className="w-1/4 flex items-center justify-center">
+                       <StructureLine />
+                    </div>
+                    <div className="w-1/4 space-y-2">
+                      <StructureBox title="Ad Group" className="p-2">
+                        <div className="bg-background/80 rounded-md p-2 mt-1 space-y-1">
+                          {Array(5).fill(0).map((_, i) => <p key={i} className="text-xs p-1 bg-gray-700/50 rounded">กลุ่มเป้าหมาย {i+1}</p>)}
+                        </div>
+                      </StructureBox>
+                    </div>
+                     <div className="w-1/4 space-y-2">
+                      <StructureBox title="Ads" className="p-2">
+                        <div className="bg-background/80 rounded-md p-2 mt-1 space-y-1">
+                           <p className="text-xs p-1 bg-gray-700/50 rounded">VDO 1</p>
+                           <p className="text-xs p-1 bg-gray-700/50 rounded">VDO 2</p>
+                           <p className="text-xs p-1 bg-gray-700/50 rounded">VDO 3</p>
+                           <p className="text-xs p-1 bg-gray-700/50 rounded">”</p>
+                           <p className="text-xs p-1 bg-gray-700/50 rounded">”</p>
+                        </div>
+                      </StructureBox>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t border-primary/30 my-8"></div>
+
+                {/* Retarget Structure */}
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4">
+                    <div className="w-1/4">
+                      <div className="bg-accent text-accent-foreground p-3 rounded-lg text-center">
+                        <h4 className="font-bold text-lg">Retarget</h4>
+                      </div>
+                    </div>
+                    <div className="w-1/4 flex items-center justify-center pt-8">
+                      <StructureBox title="Campaign">
+                         <div className="bg-background/80 rounded-md p-2 mt-2">
+                          <p className="font-bold text-lg">Conversion</p>
+                          <p className="font-bold text-2xl text-accent">CBO</p>
+                        </div>
+                        <p className="text-xs mt-2 opacity-80">งบ 500 - 5,000</p>
+                      </StructureBox>
+                    </div>
+                     <div className="w-1/4 flex items-center justify-center">
+                       <StructureLine />
+                    </div>
+                    <div className="w-1/4 space-y-2">
+                      <StructureBox title="Ad Group" className="p-2">
+                        <div className="bg-background/80 rounded-md p-2 mt-1 space-y-1">
+                          <p className="text-xs p-1 bg-gray-700/50 rounded">VDO 25% 7 วัน</p>
+                          <p className="text-xs p-1 bg-gray-700/50 rounded">View Content 7 วัน</p>
+                          <p className="text-xs p-1 bg-gray-700/50 rounded">VDO 25% 14 วัน</p>
+                          <p className="text-xs p-1 bg-gray-700/50 rounded">VDO 25% 30 วัน</p>
+                        </div>
+                      </StructureBox>
+                    </div>
+                     <div className="w-1/4 space-y-2">
+                      <StructureBox title="Ads" className="p-2">
+                        <div className="bg-background/80 rounded-md p-2 mt-1 space-y-1">
+                           <p className="text-xs p-1 bg-gray-700/50 rounded">VDO ปัง</p>
+                           <p className="text-xs p-1 bg-gray-700/50 rounded">โปรโมชั่น</p>
+                           <p className="text-xs p-1 bg-gray-700/50 rounded">รีวิว/ผลลัพธ์</p>
+                           <p className="text-xs p-1 bg-gray-700/50 rounded">”</p>
+                           <p className="text-xs p-1 bg-gray-700/50 rounded">”</p>
+                        </div>
+                      </StructureBox>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
 
