@@ -394,35 +394,30 @@ export function ProfitPilotPage() {
       { name: 'BOFU', value: currentFunnelPlan.bofu, color: '#4DD0E1' },
     ].sort((a,b) => b.value - a.value);
   }, [currentFunnelPlan]);
-  
+
   const FunnelChart = ({ data }) => {
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
-
+  
     const sortedData = [...data].sort((a, b) => b.value - a.value);
-    const maxValue = sortedData[0]?.value || 100;
-
+  
+    const layerBaseWidth = 100; // %
+    const layerBaseHeight = 50; // px
+  
     return (
       <div className="w-full flex justify-center items-center my-4">
-        <div className="w-48 space-y-1.5">
-          {sortedData.map((item, index) => {
-            const widthPercentage = (item.value / maxValue) * 100;
-            const prevWidthPercentage = index > 0 ? (sortedData[index - 1].value / maxValue) * 100 : 100;
-            
-            const topWidth = prevWidthPercentage;
-            const bottomWidth = widthPercentage;
-
-            const clipPath = `polygon(${(100 - topWidth) / 2}% 0, ${(100 + topWidth) / 2}% 0, ${(100 + bottomWidth) / 2}% 100%, ${(100 - bottomWidth) / 2}% 100%)`;
-
+        <div className="w-48 flex flex-col items-center gap-2">
+          {sortedData.map((item) => {
+            const width = (layerBaseWidth * item.value) / 100;
             return (
               <div
                 key={item.name}
-                className="relative h-10 flex items-center justify-center text-white font-bold text-sm shadow-inner"
+                className="relative flex items-center justify-center text-white font-bold text-sm rounded-lg"
                 style={{
                   backgroundColor: item.color,
-                  clipPath: clipPath,
-                  zIndex: sortedData.length - index,
-                  filter: `brightness(${1 - (index * 0.15)})`,
+                  height: `${layerBaseHeight}px`,
+                  width: `${Math.max(width, 30)}%`, // Minimum width to ensure text is visible
+                  clipPath: 'polygon(0 0, 100% 0, 85% 100%, 15% 100%)',
                 }}
               >
                 {item.name} {item.value}%
