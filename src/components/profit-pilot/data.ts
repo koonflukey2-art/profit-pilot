@@ -59,6 +59,29 @@ export const metricsPlans = {
           { stage: 'BOFU', metric: 'Roas Meta', benchmark: '> 3x', importance: 'สูงมาก', notes: 'ผลตอบแทนโดยรวม' },
       ]
   },
+  fb_s1_plan: {
+    name: "Facebook (S1 Plan)",
+    summary: "แผนการตลาดบน Facebook โฟกัสการสร้างข้อความส่วนตัวและการปิดการขาย",
+    kpis: [
+      { stage: 'TOFU', metric: 'การเข้าถึง', benchmark: '50K+/เดือน', importance: 'กลาง', notes: 'จํานวนคนที่เห็นโฆษณา' },
+      { stage: 'TOFU', metric: 'อิมเพรสชั่น', benchmark: '200K+/เดือน', importance: 'กลาง', notes: 'จํานวนครั้งที่แสดงโฆษณา' },
+      { stage: 'TOFU', metric: 'ความถี่', benchmark: '3-5 ครั้ง', importance: 'กลาง', notes: 'จํานวนครั้งเฉลี่ยที่คนเดียวกันเห็น' },
+      { stage: 'TOFU', metric: 'CPM', benchmark: '≤25฿', importance: 'กลาง', notes: 'ต้นทุนต่อ 1,000 การแสดงผล' },
+      { stage: 'MOFU', metric: 'จํานวนการคลิกลิงก์', benchmark: '1,000+/เดือน', importance: 'สูง', notes: 'การคลิกเข้าสู่แชท' },
+      { stage: 'MOFU', metric: 'ค่าใช้จ่ายต่อผู้ติดต่อผ่านการส่งข้อความรายใหม่', benchmark: '≤50฿', importance: 'สูง', notes: 'ต้นทุนต่อการเริ่มสนทนาใหม่' },
+      { stage: 'MOFU', metric: 'ผู้ติดต่อผ่านการส่งข้อความรายใหม่', benchmark: '200+/เดือน', importance: 'สูง', notes: 'จํานวนคนที่เริ่มสนทนาใหม่' },
+      { stage: 'MOFU', metric: 'ต้นทุนต่อการส่งข้อความเพื่อเริ่มการสนทนา', benchmark: '≤30฿', importance: 'สูง', notes: 'ต้นทุนต่อข้อความแรก' },
+      { stage: 'MOFU', metric: 'การส่งข้อความเพื่อเริ่มการสนทนา', benchmark: '300+/เดือน', importance: 'สูง', notes: 'จํานวนข้อความที่เริ่มสนทนา' },
+      { stage: 'MOFU', metric: '%ทักใหม่', benchmark: '20%+', importance: 'กลาง', notes: 'เปอร์เซ็นต์การเริ่มสนทนาใหม่' },
+      { stage: 'BOFU', metric: 'ผลลัพธ์', benchmark: '50+/เดือน', importance: 'สูงสุด', notes: 'จํานวนการขายที่เกิดขึ้น' },
+      { stage: 'BOFU', metric: 'การซื้อบน Meta', benchmark: '30+/เดือน', importance: 'สูง', notes: 'การซื้อผ่านระบบ Meta' },
+      { stage: 'BOFU', metric: 'ต้นทุนต่อการซื้อบน Meta', benchmark: '≤200฿', importance: 'สูง', notes: 'ต้นทุนต่อการขาย Meta' },
+      { stage: 'BOFU', metric: '%ปิดการขาย', benchmark: '15%+', importance: 'สูงสุด', notes: 'เปอร์เซ็นต์การปิดการขาย' },
+      { stage: 'BOFU', metric: '%ค่า Ads', benchmark: '≤30%', importance: 'สูง', notes: 'เปอร์เซ็นต์ต้นทุนโฆษณา' },
+      { stage: 'BOFU', metric: 'ROAS Meta', benchmark: '3.5+', importance: 'สูงสุด', notes: 'ผลตอบแทนการลงทุนโฆษณา' },
+      { stage: 'BOFU', metric: 'จํานวนเงินที่ใช้จ่ายไป', benchmark: 'ตามงบ', importance: 'กลาง', notes: 'การควบคุมงบประมาณ' },
+    ]
+  },
   fb_lead_gen: {
       name: "Facebook - Lead Generation",
       summary: 'แผนหา Lead คุณภาพบน Facebook เน้นการลดต้นทุนต่อ Lead (CPL) และเพิ่มอัตราการเปลี่ยนเป็นลูกค้า (Lead to Close Rate)',
