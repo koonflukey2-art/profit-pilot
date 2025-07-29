@@ -424,54 +424,42 @@ export function ProfitPilotPage() {
   const FunnelChart = () => {
     const totalValue = funnelData.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
-
+  
     const stageOrder = ['TOFU', 'MOFU', 'BOFU'];
     const sortedData = stageOrder.map(stage => funnelData.find(d => d.name === stage)).filter(Boolean);
-
-    const FunnelSegment = ({ width, color, text, isFirst, isLast }) => {
-        const clipPath = `polygon(${isFirst ? '0% 0, 100% 0,' : '10% 0, 90% 0,'} ${isLast ? '90% 100%, 10% 100%' : '100% 100%, 0% 100%'})`;
-        const topClipPath = `polygon(0% 0, 100% 0, 90% 100%, 10% 100%)`;
-        const middleClipPath = `polygon(10% 0, 90% 0, 80% 100%, 20% 100%)`;
-        const bottomClipPath = `polygon(20% 0, 80% 0, 70% 100%, 30% 100%)`;
-
-        let segmentClipPath;
-        if (isFirst) segmentClipPath = topClipPath;
-        else if (isLast) segmentClipPath = bottomClipPath;
-        else segmentClipPath = middleClipPath;
-
-
-        return (
-            <div
-                className="h-10 flex items-center justify-center text-white font-bold"
-                style={{
-                    width: `${width}%`,
-                    backgroundColor: color,
-                    clipPath: segmentClipPath,
-                    boxShadow: `0 2px 5px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.3)`
-                }}
-            >
-                <span>{text}</span>
-            </div>
-        );
-    };
-
+  
+    const FunnelSegment = ({ width, color, text }) => (
+      <div
+        className="h-10 flex items-center justify-center text-white font-bold"
+        style={{
+          width: `${width}%`,
+          backgroundColor: color,
+          clipPath: `polygon(15% 0, 85% 0, 100% 100%, 0% 100%)`,
+          boxShadow: `0 2px 5px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.3)`
+        }}
+      >
+        <span>{text}</span>
+      </div>
+    );
+  
+    let accumulatedWidth = 100;
+  
     return (
-        <div className="flex flex-col items-center justify-center w-full max-w-xs mx-auto gap-1">
-            {sortedData.map((item, index) => {
-                if (item.value === 0) return null;
-                const width = 100 - (index * 15);
-                return (
-                    <FunnelSegment
-                        key={item.name}
-                        width={width}
-                        color={item.color}
-                        text={`${item.name} ${item.value}%`}
-                        isFirst={index === 0}
-                        isLast={index === sortedData.length - 1}
-                    />
-                );
-            })}
-        </div>
+      <div className="flex flex-col-reverse items-center justify-center w-full max-w-xs mx-auto gap-1">
+        {sortedData.map((item) => {
+          if (item.value === 0) return null;
+          const currentWidth = accumulatedWidth;
+          accumulatedWidth -= 20; // Decrease width for the next segment
+          return (
+            <FunnelSegment
+              key={item.name}
+              width={currentWidth}
+              color={item.color}
+              text={`${item.name} ${item.value}%`}
+            />
+          );
+        })}
+      </div>
     );
   };
   
@@ -733,22 +721,22 @@ export function ProfitPilotPage() {
                      <div className="space-y-4">
                         <div className="neumorphic-card p-4">
                             <div className="flex justify-between items-center">
-                                <p className="font-bold text-red-400">BE ROAS</p>
-                                <p className="font-bold text-xl text-white">{F.formatNumber(calculated.breakevenRoas)}</p>
+                                <p className="font-bold text-red-500">BE ROAS</p>
+                                <p className="font-bold text-xl text-red-500">{F.formatNumber(calculated.breakevenRoas)}</p>
                             </div>
                             <p className="text-xs text-red-200 mt-1">ค่า ROAS ต่ำสุดที่แคมเปญต้องทำให้ได้เพื่อ "เท่าทุน"</p>
                         </div>
                         <div className="neumorphic-card p-4">
                             <div className="flex justify-between items-center">
-                                <p className="font-bold text-red-400">BE CPA</p>
-                                <p className="font-bold text-xl text-white">{F.formatCurrency(calculated.breakevenCpa)}</p>
+                                <p className="font-bold text-red-500">BE CPA</p>
+                                <p className="font-bold text-xl text-red-500">{F.formatCurrency(calculated.breakevenCpa)}</p>
                             </div>
                             <p className="text-xs text-red-200 mt-1">ค่าโฆษณาสูงสุดที่จ่ายได้โดยไม่ขาดทุน</p>
                         </div>
                         <div className="neumorphic-card p-4">
                             <div className="flex justify-between items-center">
-                                <p className="font-bold text-red-400">BE Ad Cost %</p>
-                                <p className="font-bold text-xl text-white">{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
+                                <p className="font-bold text-red-500">BE Ad Cost %</p>
+                                <p className="font-bold text-xl text-red-500">{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
                             </div>
                              <p className="text-xs text-red-200 mt-1">สัดส่วนค่าโฆษณาสูงสุดเมื่อเทียบกับราคาขาย</p>
                         </div>
@@ -785,8 +773,8 @@ export function ProfitPilotPage() {
                 <div className="space-y-4">
                   <div className="neumorphic-card p-4 relative">
                     <div className="flex justify-between items-center mb-2">
-                      <h5 className="font-bold text-primary">TOFU</h5>
-                      <span className="font-bold text-primary">{currentFunnelPlan.tofu}%</span>
+                      <h5 className="font-bold" style={{ color: funnelData.find(d => d.name === 'TOFU')?.color }}>TOFU</h5>
+                      <span className="font-bold" style={{ color: funnelData.find(d => d.name === 'TOFU')?.color }}>{currentFunnelPlan.tofu}%</span>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-center">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudget)}</p></div>
@@ -797,8 +785,8 @@ export function ProfitPilotPage() {
                   </div>
                    <div className="neumorphic-card p-4 relative">
                     <div className="flex justify-between items-center mb-2">
-                      <h5 className="font-bold text-accent">MOFU</h5>
-                       <span className="font-bold text-accent">{currentFunnelPlan.mofu}%</span>
+                      <h5 className="font-bold" style={{ color: funnelData.find(d => d.name === 'MOFU')?.color }}>MOFU</h5>
+                       <span className="font-bold" style={{ color: funnelData.find(d => d.name === 'MOFU')?.color }}>{currentFunnelPlan.mofu}%</span>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-center">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudget)}</p></div>
@@ -809,8 +797,8 @@ export function ProfitPilotPage() {
                   </div>
                    <div className="neumorphic-card p-4 relative">
                     <div className="flex justify-between items-center mb-2">
-                      <h5 className="font-bold" style={{ color: 'hsl(157 71% 38%)' }}>BOFU</h5>
-                       <span className="font-bold" style={{ color: 'hsl(157 71% 38%)' }}>{currentFunnelPlan.bofu}%</span>
+                      <h5 className="font-bold" style={{ color: funnelData.find(d => d.name === 'BOFU')?.color }}>BOFU</h5>
+                       <span className="font-bold" style={{ color: funnelData.find(d => d.name === 'BOFU')?.color }}>{currentFunnelPlan.bofu}%</span>
                     </div>
                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-center">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget)}</p></div>
@@ -829,15 +817,15 @@ export function ProfitPilotPage() {
                 
                 <div className="flex items-center justify-around text-center">
                     <div className="w-1/3">
-                        <p className="font-bold text-primary">TOFU</p>
+                        <p className="font-bold" style={{ color: funnelData.find(d => d.name === 'TOFU')?.color }}>TOFU</p>
                         <p className="text-sm font-semibold">{F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}<span className="text-xs opacity-70">/วัน/บัญชี</span></p>
                     </div>
                     <div className="w-1/3">
-                        <p className="font-bold text-accent">MOFU</p>
+                        <p className="font-bold" style={{ color: funnelData.find(d => d.name === 'MOFU')?.color }}>MOFU</p>
                         <p className="text-sm font-semibold">{F.formatCurrency(calculated.mofuBudgetPerAccountDaily)}<span className="text-xs opacity-70">/วัน/บัญชี</span></p>
                     </div>
                      <div className="w-1/3">
-                        <p className="font-bold" style={{ color: 'hsl(157 71% 38%)' }}>BOFU</p>
+                        <p className="font-bold" style={{ color: funnelData.find(d => d.name === 'BOFU')?.color }}>BOFU</p>
                         <p className="text-sm font-semibold">{F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}<span className="text-xs opacity-70">/วัน/บัญชี</span></p>
                     </div>
                 </div>
@@ -894,19 +882,19 @@ export function ProfitPilotPage() {
           <TabsContent value="funnel">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <h5 className="font-bold mb-3 text-primary">TOFU (Top of Funnel)</h5>
+                  <h5 className="font-bold mb-3" style={{ color: funnelData.find(d => d.name === 'TOFU')?.color }}>TOFU (Top of Funnel)</h5>
                   <ul className="list-disc list-inside space-y-1 text-sm opacity-90">
                     {funnelObjectives.tofu.map((o, i) => <li key={i}>{o}</li>)}
                   </ul>
                 </div>
                 <div>
-                  <h5 className="font-bold mb-3 text-accent">MOFU (Middle of Funnel)</h5>
+                  <h5 className="font-bold mb-3" style={{ color: funnelData.find(d => d.name === 'MOFU')?.color }}>MOFU (Middle of Funnel)</h5>
                   <ul className="list-disc list-inside space-y-1 text-sm opacity-90">
                     {funnelObjectives.mofu.map((o, i) => <li key={i}>{o}</li>)}
                   </ul>
                 </div>
                 <div>
-                  <h5 className="font-bold mb-3" style={{color: 'hsl(157 71% 38%)'}}>BOFU (Bottom of Funnel)</h5>
+                  <h5 className="font-bold mb-3" style={{ color: funnelData.find(d => d.name === 'BOFU')?.color }}>BOFU (Bottom of Funnel)</h5>
                   <ul className="list-disc list-inside space-y-1 text-sm opacity-90">
                     {funnelObjectives.bofu.map((o, i) => <li key={i}>{o}</li>)}
                   </ul>
