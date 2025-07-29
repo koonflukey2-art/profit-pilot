@@ -80,11 +80,11 @@ export function ProfitPilotPage() {
   const handleInputChange = (key, value) => {
     setInputs(prev => ({ ...prev, [key]: value }));
   };
-
+  
   const calculateAll = useCallback(() => {
     const i = { ...inputs };
     const s = {};
-
+  
     s.sellingPrice = F.num(i.sellingPrice);
     s.priceBeforeVat = s.sellingPrice / (1 + F.num(i.vatProduct) / 100);
     s.cogs = F.num(i.cogs);
@@ -95,34 +95,34 @@ export function ProfitPilotPage() {
     s.shippingCost = F.num(i.shippingCost);
     s.totalVariableCost = s.cogs + s.platformFeeCost + s.paymentFeeCost + s.kolFeeCost + s.packagingCost + s.shippingCost;
     s.grossProfitUnit = s.priceBeforeVat - s.totalVariableCost;
-
+  
     s.breakevenRoas = s.grossProfitUnit > 0 ? s.priceBeforeVat / s.grossProfitUnit : 0;
     s.breakevenCpa = s.grossProfitUnit;
     s.breakevenAdCostPercent = s.priceBeforeVat > 0 ? (s.breakevenCpa / s.priceBeforeVat) * 100 : 0;
-
+  
     let targetRoas = F.num(i.targetRoas);
     let targetCpa = F.num(i.targetCpa);
     let adCostPercent = F.num(i.adCostPercent);
-
+  
     if (s.priceBeforeVat > 0) {
-        if (i.calcDriver === 'roas') {
-            targetCpa = targetRoas > 0 ? s.priceBeforeVat / targetRoas : 0;
-            adCostPercent = targetCpa > 0 ? (targetCpa / s.priceBeforeVat) * 100 : 0;
-        } else if (i.calcDriver === 'cpa') {
-            targetRoas = targetCpa > 0 ? s.priceBeforeVat / targetCpa : 0;
-            adCostPercent = targetCpa > 0 ? (targetCpa / s.priceBeforeVat) * 100 : 0;
-        } else { // calcDriver === 'adcost'
-            targetCpa = s.priceBeforeVat * (adCostPercent / 100);
-            targetRoas = targetCpa > 0 ? s.priceBeforeVat / targetCpa : 0;
-        }
+      if (i.calcDriver === 'roas') {
+        targetCpa = targetRoas > 0 ? s.priceBeforeVat / targetRoas : 0;
+        adCostPercent = s.priceBeforeVat > 0 ? (targetCpa / s.priceBeforeVat) * 100 : 0;
+      } else if (i.calcDriver === 'cpa') {
+        targetRoas = targetCpa > 0 ? s.priceBeforeVat / targetCpa : 0;
+        adCostPercent = s.priceBeforeVat > 0 ? (targetCpa / s.priceBeforeVat) * 100 : 0;
+      } else { // calcDriver === 'adcost'
+        targetCpa = s.priceBeforeVat * (adCostPercent / 100);
+        targetRoas = targetCpa > 0 ? s.priceBeforeVat / targetCpa : 0;
+      }
     } else {
-        targetRoas = 0; targetCpa = 0; adCostPercent = 0;
+      targetRoas = 0; targetCpa = 0; adCostPercent = 0;
     }
-
+    
     s.targetRoas = targetRoas;
     s.targetCpa = targetCpa;
     s.adCostPercent = adCostPercent;
-    
+  
     s.netProfitUnit = s.grossProfitUnit - targetCpa;
     const profitGoal = F.num(i.profitGoal);
     const fixedCosts = F.num(i.fixedCosts);
@@ -133,19 +133,19 @@ export function ProfitPilotPage() {
     s.targetRevenue = s.targetOrders * s.sellingPrice;
     s.adBudget = s.targetOrders * targetCpa;
     s.adBudgetWithVat = s.adBudget * (1 + (F.num(i.vatProduct) / 100));
-
+  
     const funnelPlan = funnelPlans[i.funnelPlan] || funnelPlans.launch;
     s.tofuBudget = s.adBudget * (funnelPlan.tofu / 100);
     s.mofuBudget = s.adBudget * (funnelPlan.mofu / 100);
     s.bofuBudget = s.adBudget * (funnelPlan.bofu / 100);
     
     setCalculated(s);
-
+  
     const newInputs = {...inputs};
     let changed = false;
     if (i.calcDriver !== 'roas' && isFinite(targetRoas) && F.num(i.targetRoas).toFixed(2) !== targetRoas.toFixed(2)) {
-      newInputs.targetRoas = targetRoas.toFixed(2);
-      changed = true;
+        newInputs.targetRoas = targetRoas.toFixed(2);
+        changed = true;
     }
     if (i.calcDriver !== 'cpa' && isFinite(targetCpa) && F.num(i.targetCpa).toFixed(2) !== targetCpa.toFixed(2)) {
         newInputs.targetCpa = targetCpa.toFixed(2);
@@ -155,10 +155,11 @@ export function ProfitPilotPage() {
         newInputs.adCostPercent = adCostPercent.toFixed(1);
         changed = true;
     }
+    
     if (changed) {
         setInputs(newInputs);
     }
-
+  
     if (i.calcDriver === 'roas' && targetRoas > 0 && s.breakevenRoas > 0 && targetRoas < s.breakevenRoas) {
       toast({
         variant: "destructive",
@@ -377,6 +378,32 @@ export function ProfitPilotPage() {
         {hasArrow && <ArrowRight className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />}
       </div>
     </div>
+  );
+
+  const newFunnelCampaigns = [
+    { audience: "ENGAGE 60 วัน", lookalike: "Lookalike 1-10%" },
+    { audience: "INBOX 60 วัน", lookalike: "Lookalike 1-10%" },
+    { audience: "VDO 95% (60 วัน)", lookalike: "Lookalike 1-10%" },
+    { audience: "PURCHASE LTV 60 วัน", lookalike: "Lookalike 1-10%" },
+    { audience: "Tel 1,000 + LTV", lookalike: "Lookalike 1-10%" },
+  ];
+
+  const NewStructureBox = ({ children, className = '' }) => (
+    <div className={cn("rounded-md p-4 flex items-center justify-center text-center", className)}>
+      {children}
+    </div>
+  );
+  
+  const NewStructureLine = ({ className = "" }) => (
+    <div className={cn("flex items-center justify-center h-full w-16", className)}>
+      <div className="w-full h-0.5 bg-gray-400 relative">
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 border-solid border-y-4 border-y-transparent border-l-8 border-l-gray-400"></div>
+      </div>
+    </div>
+  );
+  
+  const NewContentLine = ({ className = "" }) => (
+    <div className={cn("absolute h-px w-8 bg-gray-400", className)}></div>
   );
   
   return (
@@ -660,16 +687,14 @@ export function ProfitPilotPage() {
                 <div className="flex justify-center mb-8">
                    <div className="w-full max-w-sm flex flex-col gap-1.5 items-center">
                     {funnelData.map(({ name, value, color }, index) => {
-                      const scale = 1 - index * 0.15;
                       return (
                         <div
                           key={index}
                           className="relative h-12 flex items-center justify-center text-white font-bold"
                           style={{
                             backgroundColor: color,
-                            width: `${scale * 100}%`,
+                            width: '100%',
                             boxShadow: `0 0 15px ${color}`,
-                            clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0% 100%)',
                           }}
                         >
                           {name} {value}%
@@ -685,10 +710,9 @@ export function ProfitPilotPage() {
                       <h5 className="font-bold text-primary">TOFU</h5>
                       <span className="font-bold text-primary">{currentFunnelPlan.tofu}%</span>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudget)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency((calculated.tofuBudget || 0) / numAccounts)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency((calculated.tofuBudget || 0) / numAccounts / 30)}</p></div>
                       <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{F.formatInt(numAccounts)} บัญชี</p></div>
                     </div>
                   </div>
@@ -697,10 +721,9 @@ export function ProfitPilotPage() {
                       <h5 className="font-bold text-accent">MOFU</h5>
                        <span className="font-bold text-accent">{currentFunnelPlan.mofu}%</span>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudget)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency((calculated.mofuBudget || 0) / numAccounts)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency((calculated.mofuBudget || 0) / numAccounts / 30)}</p></div>
                       <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{F.formatInt(numAccounts)} บัญชี</p></div>
                     </div>
                   </div>
@@ -709,105 +732,64 @@ export function ProfitPilotPage() {
                       <h5 className="font-bold" style={{ color: 'hsl(157 71% 38%)' }}>BOFU</h5>
                        <span className="font-bold" style={{ color: 'hsl(157 71% 38%)' }}>{currentFunnelPlan.bofu}%</span>
                     </div>
-                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency((calculated.bofuBudget || 0) / numAccounts)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency((calculated.bofuBudget || 0) / numAccounts / 30)}</p></div>
                       <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{F.formatInt(numAccounts)} บัญชี</p></div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-
+            
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white">Funnel Structure</h3>
-              <div className="neumorphic-card p-6 space-y-8">
-                {/* New Customer Structure */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-1/6 self-stretch">
-                      <div className="bg-primary text-primary-foreground p-3 rounded-lg text-center h-full flex flex-col justify-center">
-                        <h4 className="font-bold text-lg">ลูกค้าใหม่</h4>
-                         <p className="text-xs mt-2 opacity-80">({F.formatCurrency(budgetPerAccountDay)}/วัน)</p>
-                      </div>
+              <div className="neumorphic-card p-6 space-y-6">
+                <div className="text-center mb-4">
+                  <h4 className="text-2xl font-bold text-white bg-blue-600 inline-block px-6 py-2 rounded">หาลูกค้าใหม่</h4>
+                </div>
+                {newFunnelCampaigns.map((campaign, index) => (
+                  <div key={index} className="flex items-center justify-between text-sm">
+                    {/* Campaign CBO */}
+                    <NewStructureBox className="bg-white/10 text-white w-48 h-20">
+                      CAMPAIGN CBO
+                    </NewStructureBox>
+
+                    <NewStructureLine />
+
+                    {/* Audience */}
+                    <NewStructureBox className="bg-blue-600 text-white w-64 h-20 flex-col">
+                      <p className="font-bold">{campaign.audience}</p>
+                      <p>{campaign.lookalike}</p>
+                    </NewStructureBox>
+
+                    {/* Content Lines */}
+                    <div className="relative w-16 h-20 flex items-center justify-center">
+                      <div className="w-0.5 h-full bg-transparent"></div>
+                      <NewContentLine className="left-0 top-1/2 -translate-y-2.5" />
+                      <NewContentLine className="left-0 bottom-1/2 translate-y-2.5" />
+                      <div className="absolute left-8 h-10 w-0.5 bg-gray-400"></div>
+                       <div className="absolute right-0 top-[calc(50%-10px)] -translate-y-1/2 border-solid border-y-4 border-y-transparent border-l-8 border-l-gray-400"></div>
+                       <div className="absolute right-0 bottom-[calc(50%-10px)] translate-y-1/2 border-solid border-y-4 border-y-transparent border-l-8 border-l-gray-400"></div>
                     </div>
-                    <StructureLine />
-                    <div className="w-1/4">
-                      <StructureBox title="Campaign">
-                        <div className="bg-background/80 rounded-md p-2 mt-2">
-                          <p className="font-bold text-lg">Conversion</p>
-                          <p className="font-bold text-2xl text-accent">CBO</p>
+                    
+                    {/* Content */}
+                    <div className="flex flex-col gap-4">
+                       <NewStructureBox className="bg-gray-400/30 text-white w-48 h-12 text-xs">
+                        <div>
+                          <p>CONTENT 1</p>
+                          <p>(VDO,PIC)</p>
                         </div>
-                        <p className="text-xs mt-2 opacity-80">งบ: {F.formatCurrency(budgetPerAccountDay)}</p>
-                      </StructureBox>
-                    </div>
-                    <StructureLine hasArrow />
-                    <div className="w-1/4">
-                      <StructureBox title="Ad Set">
-                        <div className="bg-background/80 rounded-md p-2 mt-1 space-y-1">
-                          <p className="text-xs p-1 bg-gray-700/50 rounded">Interest</p>
-                          <p className="text-xs p-1 bg-gray-700/50 rounded">Lookalike</p>
+                      </NewStructureBox>
+                      <NewStructureBox className="bg-gray-400/30 text-white w-48 h-12 text-xs">
+                        <div>
+                          <p>CONTENT 2</p>
+                          <p>(VDO,PIC)</p>
                         </div>
-                         <p className="text-xs mt-2 opacity-80">{F.formatInt(numAccounts)} บัญชี</p>
-                      </StructureBox>
-                    </div>
-                    <StructureLine hasArrow />
-                     <div className="w-1/4">
-                      <StructureBox title="Ads">
-                        <div className="bg-background/80 rounded-md p-2 mt-1 space-y-1">
-                           <p className="text-xs p-1 bg-gray-700/50 rounded">VDO 1</p>
-                           <p className="text-xs p-1 bg-gray-700/50 rounded">VDO 2</p>
-                           <p className="text-xs p-1 bg-gray-700/50 rounded">Dynamic Creative</p>
-                        </div>
-                      </StructureBox>
+                      </NewStructureBox>
                     </div>
                   </div>
-                </div>
-
-                <div className="border-t border-primary/30 my-8"></div>
-
-                {/* Retarget Structure */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4">
-                     <div className="w-1/6 self-stretch">
-                      <div className="bg-accent text-accent-foreground p-3 rounded-lg text-center h-full flex flex-col justify-center">
-                        <h4 className="font-bold text-lg">Retarget</h4>
-                      </div>
-                    </div>
-                     <StructureLine />
-                    <div className="w-1/4">
-                      <StructureBox title="Campaign">
-                         <div className="bg-background/80 rounded-md p-2 mt-2">
-                          <p className="font-bold text-lg">Conversion</p>
-                          <p className="font-bold text-2xl text-accent">CBO</p>
-                        </div>
-                         <p className="text-xs mt-2 opacity-80">แยกตาม Stage</p>
-                      </StructureBox>
-                    </div>
-                    <StructureLine hasArrow />
-                    <div className="w-1/4">
-                      <StructureBox title="Ad Set">
-                        <div className="bg-background/80 rounded-md p-2 mt-1 space-y-1 text-xs">
-                          <p className="p-1 bg-gray-700/50 rounded">ATC 7-14 วัน</p>
-                          <p className="p-1 bg-gray-700/50 rounded">View Content 7 วัน</p>
-                          <p className="p-1 bg-gray-700/50 rounded">Page/IG Engage 30 วัน</p>
-                        </div>
-                      </StructureBox>
-                    </div>
-                    <StructureLine hasArrow />
-                     <div className="w-1/4">
-                      <StructureBox title="Ads">
-                        <div className="bg-background/80 rounded-md p-2 mt-1 space-y-1 text-xs">
-                           <p className="p-1 bg-gray-700/50 rounded">โปรโมชั่น</p>
-                           <p className="p-1 bg-gray-700/50 rounded">รีวิว/ผลลัพธ์</p>
-                           <p className="p-1 bg-gray-700/50 rounded">คอนเทนต์ใหม่</p>
-                        </div>
-                      </StructureBox>
-                    </div>
-                  </div>
-                </div>
-
+                ))}
               </div>
             </div>
 
@@ -946,5 +928,3 @@ export function ProfitPilotPage() {
     </>
   );
 }
-
-    
