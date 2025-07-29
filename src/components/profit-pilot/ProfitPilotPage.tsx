@@ -392,7 +392,7 @@ export function ProfitPilotPage() {
       { name: 'TOFU', value: currentFunnelPlan.tofu, color: '#2196F3' },
       { name: 'MOFU', value: currentFunnelPlan.mofu, color: '#29B6F6' },
       { name: 'BOFU', value: currentFunnelPlan.bofu, color: '#4DD0E1' },
-    ].sort((a,b) => b.value - a.value);
+    ];
   }, [currentFunnelPlan]);
 
   const FunnelChart = ({ data }) => {
@@ -408,45 +408,33 @@ export function ProfitPilotPage() {
       color,
       label,
       isFirst,
-      isLast,
     }: {
       value: number;
       color: string;
       label: string;
       isFirst: boolean;
-      isLast: boolean;
     }) => {
-      const maxHeight = 80;
-      const minHeight = 40;
-      const height = minHeight + (maxHeight - minHeight) * (value / 100);
+      const baseWidth = 350;
+      const height = 60; 
+      const width = 50 + (baseWidth - 50) * (value / 100);
   
       const layerStyle: React.CSSProperties = {
+        width: `${width}px`,
         height: `${height}px`,
         backgroundColor: color,
+        clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)',
+        borderRadius: '4px',
         color: 'white',
         fontWeight: 'bold',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)',
-        margin: '0 auto 10px',
-        width: `${60 + value * 1.4}px`, // Adjusted width calculation
+        margin: '0 auto',
+        boxShadow: `0 10px 20px -5px ${color}80, 0 4px 5px -2px ${color}50`,
+        transition: 'transform 0.3s ease',
       };
       
-      const patternStyle: React.CSSProperties = {
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: `
-              linear-gradient(45deg, rgba(0,0,0,0.1) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.1) 75%),
-              linear-gradient(-45deg, rgba(0,0,0,0.1) 25%, transparent 25%, transparent 75%, rgba(0,0,0,0.1) 75%)`,
-          backgroundSize: '20px 20px',
-          zIndex: 1,
-      };
-
       const labelStyle: React.CSSProperties = {
           position: 'relative',
           zIndex: 2,
@@ -454,16 +442,15 @@ export function ProfitPilotPage() {
       }
 
       return (
-        <div style={layerStyle}>
-          <div style={patternStyle}></div>
+        <div style={layerStyle} className="hover:scale-105">
           <span style={labelStyle}>{label} {value}%</span>
         </div>
       );
     };
   
     return (
-      <div className="w-full flex justify-center items-center my-4 py-4 min-h-[250px]">
-        <div className="flex flex-col items-center justify-center">
+      <div className="w-full flex justify-center items-center my-4 py-4 min-h-[300px]">
+        <div className="flex flex-col items-center justify-center space-y-2">
           {sortedData.map((item, index) => (
             <FunnelLayer
               key={item.name}
@@ -471,14 +458,13 @@ export function ProfitPilotPage() {
               color={item.color}
               label={item.name}
               isFirst={index === 0}
-              isLast={index === sortedData.length - 1}
             />
           ))}
         </div>
       </div>
     );
   };
-  
+
   const newFunnelCampaigns = [
     { audience: "ENGAGE 60 วัน", lookalike: "Lookalike 1-10%" },
     { audience: "INBOX 60 วัน", lookalike: "Lookalike 1-10%" },
