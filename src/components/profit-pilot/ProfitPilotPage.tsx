@@ -146,7 +146,7 @@ export function ProfitPilotPage() {
     
     setCalculated(s);
   
-    const newInputs = {...inputs};
+    const newInputs = {...i};
     let changed = false;
     if (i.calcDriver !== 'roas' && isFinite(targetRoas) && F.num(i.targetRoas).toFixed(2) !== targetRoas.toFixed(2)) {
         newInputs.targetRoas = targetRoas > 0 ? targetRoas.toFixed(2) : '';
@@ -176,9 +176,8 @@ export function ProfitPilotPage() {
 
 
   useEffect(() => {
-    const calculate = () => calculateAll();
-    calculate();
-  }, [inputs, calculateAll]);
+    calculateAll();
+  }, [calculateAll]);
 
   useEffect(() => {
     const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
@@ -643,26 +642,26 @@ export function ProfitPilotPage() {
                   <div>
                      <h4 className="text-lg font-bold mb-4 gradient-text">ค่า Breakeven</h4>
                      <div className="space-y-4">
-                        <div className="p-4 rounded-lg bg-white shadow-inner">
+                        <div className="p-4 rounded-lg bg-card shadow-inner neumorphic-card">
                             <div className="flex justify-between items-center">
-                                <p className="font-bold text-red-600">BE ROAS</p>
-                                <p className="font-bold text-xl text-red-600">{F.formatNumber(calculated.breakevenRoas)}</p>
+                                <p className="font-bold text-red-500">BE ROAS</p>
+                                <p className="font-bold text-xl text-red-500">{F.formatNumber(calculated.breakevenRoas)}</p>
                             </div>
-                            <p className="text-xs text-gray-500 mt-1">ค่า ROAS ต่ำสุดที่แคมเปญต้องทำให้ได้เพื่อ "เท่าทุน"</p>
+                            <p className="text-xs text-muted-foreground mt-1">ค่า ROAS ต่ำสุดที่แคมเปญต้องทำให้ได้เพื่อ "เท่าทุน"</p>
                         </div>
-                        <div className="p-4 rounded-lg bg-white shadow-inner">
+                        <div className="p-4 rounded-lg bg-card shadow-inner neumorphic-card">
                             <div className="flex justify-between items-center">
-                                <p className="font-bold text-red-600">BE CPA</p>
-                                <p className="font-bold text-xl text-red-600">{F.formatCurrency(calculated.breakevenCpa)}</p>
+                                <p className="font-bold text-red-500">BE CPA</p>
+                                <p className="font-bold text-xl text-red-500">{F.formatCurrency(calculated.breakevenCpa)}</p>
                             </div>
-                            <p className="text-xs text-gray-500 mt-1">ค่าโฆษณาสูงสุดที่จ่ายได้โดยไม่ขาดทุน</p>
+                            <p className="text-xs text-muted-foreground mt-1">ค่าโฆษณาสูงสุดที่จ่ายได้โดยไม่ขาดทุน</p>
                         </div>
-                        <div className="p-4 rounded-lg bg-white shadow-inner">
+                        <div className="p-4 rounded-lg bg-card shadow-inner neumorphic-card">
                             <div className="flex justify-between items-center">
-                                <p className="font-bold text-red-600">BE Ad Cost %</p>
-                                <p className="font-bold text-xl text-red-600">{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
+                                <p className="font-bold text-red-500">BE Ad Cost %</p>
+                                <p className="font-bold text-xl text-red-500">{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
                             </div>
-                             <p className="text-xs text-gray-500 mt-1">สัดส่วนค่าโฆษณาสูงสุดเมื่อเทียบกับราคาขาย</p>
+                             <p className="text-xs text-muted-foreground mt-1">สัดส่วนค่าโฆษณาสูงสุดเมื่อเทียบกับราคาขาย</p>
                         </div>
                      </div>
                   </div>
@@ -699,7 +698,7 @@ export function ProfitPilotPage() {
                           style={{
                               backgroundColor: color,
                               width: `${100 - (funnelData.length - 1 - index) * 15}%`,
-                              clipPath: 'polygon(0 0, 100% 0, 90% 100%, 10% 100%)',
+                              clipPath: 'polygon(10% 0, 90% 0, 100% 100%, 0% 100%)',
                               boxShadow: `0 0 15px ${color}`
                           }}
                       >
