@@ -424,64 +424,41 @@ export function ProfitPilotPage() {
   const FunnelChart = () => {
     const totalValue = funnelData.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
-  
-    const stageOrder = ['TOFU', 'MOFU', 'BOFU'];
+
+    const stageOrder = ['BOFU', 'MOFU', 'TOFU'];
     const sortedData = stageOrder.map(stage => funnelData.find(d => d.name === stage)).filter(d => d && d.value > 0);
-  
-    const FunnelSegment = ({ width, prevWidth, color, text, isTop, isBottom }) => {
-      const slant = 10; // in percent
-      const clipPath = `polygon(${slant}% 0, ${100 - slant}% 0, 100% 100%, 0% 100%)`;
-  
-      return (
-        <div
-          className="h-10 flex items-center justify-center text-white font-bold"
-          style={{
-            width: `${width}%`,
-            backgroundColor: color,
-            clipPath: clipPath,
-            boxShadow: `0 2px 5px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.3)`
-          }}
-        >
-          <span>{text}</span>
-        </div>
-      );
-    };
-  
-    let accumulatedWidth = 100;
-  
+    
     return (
-      <div className="flex flex-col items-center justify-center w-full max-w-xs mx-auto gap-0.5">
-        {sortedData.map((item, index) => {
-          if (item.value === 0) return null;
-          
-          const currentWidth = Math.max(20, 100 * (item.value / 100));
-          const prevWidth = index > 0 ? Math.max(20, 100 * (sortedData[index-1].value / 100)) : 100;
-  
-          // A different approach for inverted funnel.
-          const topWidth = 100 - (index * 20);
-          const bottomWidth = 100 - ((index + 1) * 20);
-  
-          const clipPath = `polygon(${100-topWidth/2}% 0, ${topWidth/2}% 0, ${bottomWidth/2}% 100%, ${100-bottomWidth/2}% 100%)`
-          const segmentWidth = 100 - (index * 15);
-  
-          return (
-            <div
-              key={item.name}
-              className="h-10 flex items-center justify-center text-white font-bold"
-              style={{
-                width: `${segmentWidth}%`,
-                backgroundColor: item.color,
-                clipPath: `polygon(10% 0, 90% 0, 100% 100%, 0% 100%)`,
-                boxShadow: `0 2px 5px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.3)`
-              }}
-            >
-              <span>{`${item.name} ${item.value}%`}</span>
-            </div>
-          );
-        })}
-      </div>
+        <div className="flex flex-col items-center justify-center w-full max-w-xs mx-auto gap-0.5">
+            {sortedData.map((item, index) => {
+                if (item.value === 0) return null;
+
+                const baseWidth = 40;
+                const maxWidth = 100;
+                const totalStages = sortedData.length;
+                const widthStep = (maxWidth - baseWidth) / (totalStages - 1 || 1);
+                const segmentWidth = baseWidth + (index * widthStep);
+
+                const clipPath = `polygon(15% 0, 85% 0, 100% 100%, 0% 100%)`;
+
+                return (
+                    <div
+                        key={item.name}
+                        className="h-10 flex items-center justify-center text-white font-bold"
+                        style={{
+                            width: `${segmentWidth}%`,
+                            backgroundColor: item.color,
+                            clipPath: clipPath,
+                            boxShadow: `0 2px 5px rgba(0,0,0,0.2), inset 0 1px 1px rgba(255,255,255,0.3)`
+                        }}
+                    >
+                        <span>{`${item.name} ${item.value}%`}</span>
+                    </div>
+                );
+            })}
+        </div>
     );
-  };
+};
   
   return (
     <>
