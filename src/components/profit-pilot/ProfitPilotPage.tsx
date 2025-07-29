@@ -107,10 +107,10 @@ export function ProfitPilotPage() {
     if (s.priceBeforeVat > 0) {
         if (i.calcDriver === 'roas') {
             targetCpa = targetRoas > 0 ? s.priceBeforeVat / targetRoas : 0;
-            adCostPercent = (targetCpa / s.priceBeforeVat) * 100;
+            adCostPercent = targetCpa > 0 ? (targetCpa / s.priceBeforeVat) * 100 : 0;
         } else if (i.calcDriver === 'cpa') {
             targetRoas = targetCpa > 0 ? s.priceBeforeVat / targetCpa : 0;
-            adCostPercent = (targetCpa / s.priceBeforeVat) * 100;
+            adCostPercent = targetCpa > 0 ? (targetCpa / s.priceBeforeVat) * 100 : 0;
         } else { // calcDriver === 'adcost'
             targetCpa = s.priceBeforeVat * (adCostPercent / 100);
             targetRoas = targetCpa > 0 ? s.priceBeforeVat / targetCpa : 0;
@@ -122,6 +122,10 @@ export function ProfitPilotPage() {
     s.targetRoas = targetRoas;
     s.targetCpa = targetCpa;
     s.adCostPercent = adCostPercent;
+    
+    handleInputChange('targetRoas', i.calcDriver !== 'roas' && targetRoas > 0 ? targetRoas.toFixed(2) : i.targetRoas);
+    handleInputChange('targetCpa', i.calcDriver !== 'cpa' && targetCpa > 0 ? targetCpa.toFixed(2) : i.targetCpa);
+    handleInputChange('adCostPercent', i.calcDriver !== 'adcost' && adCostPercent > 0 ? adCostPercent.toFixed(1) : i.adCostPercent);
 
     s.netProfitUnit = s.grossProfitUnit - s.targetCpa;
     const profitGoal = F.num(i.profitGoal);
@@ -141,7 +145,7 @@ export function ProfitPilotPage() {
     
     setCalculated(s);
 
-    if (targetRoas > 0 && s.breakevenRoas > 0 && targetRoas < s.breakevenRoas) {
+    if (i.calcDriver === 'roas' && targetRoas > 0 && s.breakevenRoas > 0 && targetRoas < s.breakevenRoas) {
       toast({
         variant: "destructive",
         title: "Warning",
@@ -152,7 +156,7 @@ export function ProfitPilotPage() {
 
   useEffect(() => {
     calculateAll();
-  }, [inputs, calculateAll]);
+  }, [inputs.sellingPrice, inputs.vatProduct, inputs.cogs, inputs.platformFee, inputs.paymentFee, inputs.kolFee, inputs.packagingCost, inputs.shippingCost, inputs.profitGoal, inputs.profitGoalTimeframe, inputs.fixedCosts, inputs.targetRoas, inputs.targetCpa, inputs.adCostPercent, inputs.calcDriver, inputs.funnelPlan, inputs.numberOfAccounts, calculateAll]);
 
   useEffect(() => {
     const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
@@ -339,9 +343,9 @@ export function ProfitPilotPage() {
 
   const funnelData = useMemo(() => {
     return [
-      { name: 'TOFU', value: currentFunnelPlan.tofu, color: 'hsl(var(--primary))' },
-      { name: 'MOFU', value: currentFunnelPlan.mofu, color: 'hsl(var(--accent))' },
-      { name: 'BOFU', value: currentFunnelPlan.bofu, color: 'hsl(157 71% 38%)' },
+      { name: 'TOFU', value: currentFunnelPlan.tofu, color: 'hsl(var(--primary))', clipPath: 'polygon(0 0, 100% 0, 85% 100%, 15% 100%)' },
+      { name: 'MOFU', value: currentFunnelPlan.mofu, color: 'hsl(var(--accent))', clipPath: 'polygon(15% 0, 85% 0, 70% 100%, 30% 100%)' },
+      { name: 'BOFU', value: currentFunnelPlan.bofu, color: 'hsl(157 71% 38%)', clipPath: 'polygon(30% 0, 70% 0, 55% 100%, 45% 100%)' },
     ].sort((a, b) => b.value - a.value);
   }, [currentFunnelPlan]);
   
@@ -576,15 +580,15 @@ export function ProfitPilotPage() {
                      <div className="grid grid-cols-3 gap-4 mt-6">
                       <div>
                         <Label htmlFor="targetRoas" className="block text-sm mb-2 opacity-80">ROAS</Label>
-                        <Input value={inputs.calcDriver === 'roas' ? inputs.targetRoas : (calculated.targetRoas ? F.formatNumber(calculated.targetRoas, 2) : '')} onChange={(e) => handleInputChange('targetRoas', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'roas'} className="neumorphic-input" placeholder="" />
+                        <Input value={inputs.targetRoas} onChange={(e) => handleInputChange('targetRoas', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'roas'} className="neumorphic-input" placeholder="" />
                       </div>
                       <div>
                         <Label htmlFor="targetCpa" className="block text-sm mb-2 opacity-80">CPA (฿)</Label>
-                        <Input value={inputs.calcDriver === 'cpa' ? inputs.targetCpa : (calculated.targetCpa ? F.formatNumber(calculated.targetCpa, 2) : '')} onChange={(e) => handleInputChange('targetCpa', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'cpa'} className="neumorphic-input" placeholder="" />
+                        <Input value={inputs.targetCpa} onChange={(e) => handleInputChange('targetCpa', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'cpa'} className="neumorphic-input" placeholder="" />
                       </div>
                       <div>
                         <Label htmlFor="adCostPercent" className="block text-sm mb-2 opacity-80">Ad% (%)</Label>
-                        <Input value={inputs.calcDriver === 'adcost' ? inputs.adCostPercent : (calculated.adCostPercent ? F.formatNumber(calculated.adCostPercent, 1) : '')} onChange={(e) => handleInputChange('adCostPercent', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'adcost'} className="neumorphic-input" placeholder="" />
+                        <Input value={inputs.adCostPercent} onChange={(e) => handleInputChange('adCostPercent', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'adcost'} className="neumorphic-input" placeholder="" />
                       </div>
                     </div>
                   </div>
@@ -653,7 +657,8 @@ export function ProfitPilotPage() {
                         style={{
                           backgroundColor: stage.color,
                           width: '100%',
-                          boxShadow: `0 0 15px ${stage.color}`
+                          boxShadow: `0 0 15px ${stage.color}`,
+                          clipPath: stage.clipPath,
                         }}
                       >
                         {stage.name} {stage.value}%

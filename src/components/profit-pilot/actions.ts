@@ -10,9 +10,9 @@ export async function generateUiTitles(input: UiTitlesInput) {
     } catch (error) {
         console.error("Error generating UI titles:", error);
         return {
-            productInfoTitle: 'Product Info',
-            costCalculationTitle: 'Cost Calculation',
-            goalsAndResultsTitle: 'Goals & Results',
+            productInfoTitle: 'ข้อมูลสินค้า',
+            costCalculationTitle: 'คำนวณต้นทุน',
+            goalsAndResultsTitle: 'เป้าหมายและผลลัพธ์',
             advancedPlanningTitle: 'Advanced Planning',
         };
     }
