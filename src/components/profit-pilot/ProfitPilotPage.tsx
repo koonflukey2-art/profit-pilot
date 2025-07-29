@@ -525,30 +525,64 @@ export function ProfitPilotPage() {
             </div>
           </TabsContent>
           <TabsContent value="planning">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <h3 className="font-bold text-lg mb-4">คำนวณ Metrics เป้าหมาย</h3>
-                     <RadioGroup value={inputs.calcDriver} onValueChange={(val) => handleInputChange('calcDriver', val)} className="flex gap-2 mb-4">
-                        <div className="flex items-center space-x-2"><RadioGroupItem value="roas" id="r-roas" /><Label htmlFor="r-roas">ROAS</Label></div>
-                        <div className="flex items-center space-x-2"><RadioGroupItem value="cpa" id="r-cpa" /><Label htmlFor="r-cpa">CPA</Label></div>
-                        <div className="flex items-center space-x-2"><RadioGroupItem value="adcost" id="r-adcost" /><Label htmlFor="r-adcost">Ad Cost %</Label></div>
+            <div>
+              <h3 className="text-xl font-bold mb-4 gradient-text">Metrics Calculator</h3>
+              <div className="neumorphic-card p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <Label className="block text-base mb-3 font-medium">เลือกตัวตั้งต้น</Label>
+                    <RadioGroup value={inputs.calcDriver} onValueChange={(val) => handleInputChange('calcDriver', val)} className="space-y-2">
+                        <div className="flex items-center space-x-2"><RadioGroupItem value="roas" id="r-roas" /><Label htmlFor="r-roas">ROAS (Return on Ad Spend)</Label></div>
+                        <div className="flex items-center space-x-2"><RadioGroupItem value="cpa" id="r-cpa" /><Label htmlFor="r-cpa">CPA (Cost per Acquisition)</Label></div>
+                        <div className="flex items-center space-x-2"><RadioGroupItem value="adcost" id="r-adcost" /><Label htmlFor="r-adcost">Ad% (Ad Spend Percentage)</Label></div>
                     </RadioGroup>
-                    <div className="grid grid-cols-3 gap-3 mb-4">
-                      <Input value={F.formatNumber(calculated.targetRoas || 0)} onChange={(e) => handleInputChange('targetRoas', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'roas'} className="neumorphic-input" />
-                      <Input value={F.formatNumber(calculated.targetCpa || 0)} onChange={(e) => handleInputChange('targetCpa', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'cpa'} className="neumorphic-input" />
-                      <Input value={F.formatNumber(calculated.adCostPercent || 0, 1)} onChange={(e) => handleInputChange('adCostPercent', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'adcost'} className="neumorphic-input" />
+                     <div className="grid grid-cols-3 gap-4 mt-6">
+                      <div>
+                        <Label htmlFor="targetRoas" className="block text-sm mb-2 opacity-80">ROAS</Label>
+                        <Input value={inputs.calcDriver === 'roas' ? inputs.targetRoas : F.formatNumber(calculated.targetRoas || 0)} onChange={(e) => handleInputChange('targetRoas', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'roas'} className="neumorphic-input" />
+                      </div>
+                      <div>
+                        <Label htmlFor="targetCpa" className="block text-sm mb-2 opacity-80">CPA (฿)</Label>
+                        <Input value={inputs.calcDriver === 'cpa' ? inputs.targetCpa : F.formatNumber(calculated.targetCpa || 0)} onChange={(e) => handleInputChange('targetCpa', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'cpa'} className="neumorphic-input" />
+                      </div>
+                      <div>
+                        <Label htmlFor="adCostPercent" className="block text-sm mb-2 opacity-80">Ad% (%)</Label>
+                        <Input value={inputs.calcDriver === 'adcost' ? inputs.adCostPercent : F.formatNumber(calculated.adCostPercent || 0, 1)} onChange={(e) => handleInputChange('adCostPercent', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'adcost'} className="neumorphic-input" />
+                      </div>
                     </div>
+                  </div>
+                  <div>
+                     <h4 className="text-lg font-bold mb-4 gradient-text">ค่า Breakeven</h4>
+                     <div className="space-y-4">
+                        <div className="p-4 rounded-lg bg-background shadow-inner">
+                            <div className="flex justify-between items-center">
+                                <p className="font-bold text-primary">BE ROAS (Breakeven ROAS)</p>
+                                <p className="font-bold text-xl text-primary">{F.formatNumber(calculated.breakevenRoas)}</p>
+                            </div>
+                            <p className="text-xs opacity-70 mt-1">ค่า ROAS ต่ำสุดที่แคมเปญต้องทำให้ได้เพื่อ "เท่าทุน" (ไม่ทำกำไร ไม่ขาดทุน)</p>
+                            <p className="text-xs mt-2 p-2 bg-gray-500/10 rounded">สูตร: ราคาขาย (ไม่รวม VAT) ÷ กำไรขั้นต้น/หน่วย</p>
+                        </div>
+                        <div className="p-4 rounded-lg bg-background shadow-inner">
+                            <div className="flex justify-between items-center">
+                                <p className="font-bold text-primary">BE CPA (Breakeven CPA)</p>
+                                <p className="font-bold text-xl text-primary">{F.formatCurrency(calculated.breakevenCpa)}</p>
+                            </div>
+                            <p className="text-xs opacity-70 mt-1">ค่าโฆษณาสูงสุดที่จ่ายได้โดยไม่ขาดทุน</p>
+                            <p className="text-xs mt-2 p-2 bg-gray-500/10 rounded">สูตร: กำไรขั้นต้น/หน่วย</p>
+                        </div>
+                        <div className="p-4 rounded-lg bg-background shadow-inner">
+                            <div className="flex justify-between items-center">
+                                <p className="font-bold text-primary">BE Ad Cost % (Breakeven Ad Cost %)</p>
+                                <p className="font-bold text-xl text-primary">{F.formatNumber(calculated.breakevenAdCostPercent, 0)}%</p>
+                            </div>
+                             <p className="text-xs opacity-70 mt-1">สัดส่วนค่าโฆษณาสูงสุดเมื่อเทียบกับราคาขายที่ไม่ขาดทุน</p>
+                            <p className="text-xs mt-2 p-2 bg-gray-500/10 rounded">สูตร: (BE CPA ÷ ราคาขาย (ไม่รวม VAT)) × 100</p>
+                        </div>
+                     </div>
+                  </div>
                 </div>
-                <div>
-                     <h3 className="font-bold text-lg mb-4">การแบ่งงบประมาณ</h3>
-                    <Select value={inputs.funnelPlan} onValueChange={(val) => handleInputChange('funnelPlan', val)}>
-                      <SelectTrigger className="neumorphic-select"><SelectValue/></SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(funnelPlans).map(([key, {name}]) => <SelectItem key={key} value={key}>{name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                </div>
-             </div>
+              </div>
+            </div>
           </TabsContent>
           <TabsContent value="funnel">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
