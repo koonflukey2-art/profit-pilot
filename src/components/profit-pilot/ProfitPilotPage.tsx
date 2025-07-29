@@ -123,11 +123,22 @@ export function ProfitPilotPage() {
     s.targetCpa = targetCpa;
     s.adCostPercent = adCostPercent;
     
-    handleInputChange('targetRoas', i.calcDriver !== 'roas' && targetRoas > 0 ? targetRoas.toFixed(2) : i.targetRoas);
-    handleInputChange('targetCpa', i.calcDriver !== 'cpa' && targetCpa > 0 ? targetCpa.toFixed(2) : i.targetCpa);
-    handleInputChange('adCostPercent', i.calcDriver !== 'adcost' && adCostPercent > 0 ? adCostPercent.toFixed(1) : i.adCostPercent);
+    const newInputs = {...inputs};
+    let changed = false;
+    if (i.calcDriver !== 'roas' && targetRoas > 0 && F.num(i.targetRoas).toFixed(2) !== targetRoas.toFixed(2)) {
+      newInputs.targetRoas = targetRoas.toFixed(2);
+      changed = true;
+    }
+    if (i.calcDriver !== 'cpa' && targetCpa > 0 && F.num(i.targetCpa).toFixed(2) !== targetCpa.toFixed(2)) {
+        newInputs.targetCpa = targetCpa.toFixed(2);
+        changed = true;
+    }
+    if (i.calcDriver !== 'adcost' && adCostPercent > 0 && F.num(i.adCostPercent).toFixed(1) !== adCostPercent.toFixed(1)) {
+        newInputs.adCostPercent = adCostPercent.toFixed(1);
+        changed = true;
+    }
 
-    s.netProfitUnit = s.grossProfitUnit - s.targetCpa;
+    s.netProfitUnit = s.grossProfitUnit - targetCpa;
     const profitGoal = F.num(i.profitGoal);
     const fixedCosts = F.num(i.fixedCosts);
     const monthlyProfitGoal = i.profitGoalTimeframe === 'daily' ? profitGoal * 30 : profitGoal;
@@ -135,7 +146,7 @@ export function ProfitPilotPage() {
     s.targetOrders = s.netProfitUnit > 0 ? totalProfitTarget / s.netProfitUnit : 0;
     s.targetOrdersDaily = s.targetOrders / 30;
     s.targetRevenue = s.targetOrders * s.sellingPrice;
-    s.adBudget = s.targetOrders * s.targetCpa;
+    s.adBudget = s.targetOrders * targetCpa;
     s.adBudgetWithVat = s.adBudget * (1 + (F.num(i.vatProduct) / 100));
 
     const funnelPlan = funnelPlans[i.funnelPlan] || funnelPlans.launch;
@@ -144,6 +155,10 @@ export function ProfitPilotPage() {
     s.bofuBudget = s.adBudget * (funnelPlan.bofu / 100);
     
     setCalculated(s);
+
+    if (changed) {
+        setInputs(newInputs);
+    }
 
     if (i.calcDriver === 'roas' && targetRoas > 0 && s.breakevenRoas > 0 && targetRoas < s.breakevenRoas) {
       toast({
@@ -934,3 +949,5 @@ export function ProfitPilotPage() {
     </>
   );
 }
+
+    
