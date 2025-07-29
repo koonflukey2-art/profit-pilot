@@ -389,52 +389,64 @@ export function ProfitPilotPage() {
   
   const funnelData = useMemo(() => {
     return [
-      { name: 'TOFU', value: currentFunnelPlan.tofu, color: '#4DD0E1', darkColor: '#3a9da9', lightColor: '#6fe7f5' },
-      { name: 'MOFU', value: currentFunnelPlan.mofu, color: '#29B6F6', darkColor: '#1e83af', lightColor: '#53c5f8' },
-      { name: 'BOFU', value: currentFunnelPlan.bofu, color: '#2196F3', darkColor: '#1769aa', lightColor: '#4dabf5' },
-    ];
+      { name: 'TOFU', value: currentFunnelPlan.tofu, color: '#2196F3' },
+      { name: 'MOFU', value: currentFunnelPlan.mofu, color: '#29B6F6' },
+      { name: 'BOFU', value: currentFunnelPlan.bofu, color: '#4DD0E1' },
+    ].sort((a,b) => b.value - a.value);
   }, [currentFunnelPlan]);
   
   const FunnelChart = ({ data }) => {
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
-  
-    const chartHeight = 150; // Total height of the chart area in px
-    const gapHeight = 4; // Height of the gap between segments
-    const totalGaps = (data.length - 1) * gapHeight;
-    const availableHeight = chartHeight - totalGaps;
-  
-    const segments = data
-      .filter(item => item.value > 0)
-      .map((item, index, arr) => ({ ...item, height: (availableHeight * (item.value / totalValue)) }));
-  
-    let accumulatedWidth = 0;
-    const maxTopWidth = 100; // in percent
-    const minBottomWidth = 30; // in percent
-  
+
     return (
-      <div className="relative w-full flex flex-col items-center" style={{ height: `${chartHeight}px` }}>
-        {segments.map((item, index) => {
-          const topWidth = maxTopWidth - (accumulatedWidth / totalValue) * (maxTopWidth - minBottomWidth);
-          accumulatedWidth += item.value;
-          const bottomWidth = maxTopWidth - (accumulatedWidth / totalValue) * (maxTopWidth - minBottomWidth);
-          const clipPath = `polygon(${(100 - topWidth) / 2}% 0, ${(100 + topWidth) / 2}% 0, ${(100 + bottomWidth) / 2}% 100%, ${(100 - bottomWidth) / 2}% 100%)`;
-          
-          return (
-            <div key={item.name} className="relative" style={{ width: '100%', height: `${item.height}px`, marginBottom: index < segments.length - 1 ? `${gapHeight}px` : '0' }}>
-              <div 
-                className="w-full h-full"
+      <div className="flex justify-center">
+        <div className="relative w-full max-w-[12rem] h-48 font-sans">
+          {data.map((item, index) => {
+            const perspective = 100;
+            const topWidth = 100 - (index * 20);
+            const bottomWidth = 100 - ((index + 1) * 20);
+            const height = 40;
+            const top = index * (height - 10);
+            const zIndex = data.length - index;
+
+            return (
+              <div
+                key={item.name}
+                className="absolute w-full"
                 style={{
-                  background: `linear-gradient(to right, ${item.lightColor}, ${item.color}, ${item.darkColor})`,
-                  clipPath: clipPath,
+                  height: `${height}px`,
+                  top: `${top}px`,
+                  zIndex: zIndex,
+                  transformStyle: 'preserve-3d',
+                  perspective: `${perspective}px`,
                 }}
-              ></div>
-               <div className="absolute inset-0 flex items-center justify-center text-white text-sm font-bold pointer-events-none" style={{ clipPath: clipPath }}>
-                {item.name} {item.value}%
+              >
+                {/* Top face */}
+                <div
+                  className="absolute w-full h-px bg-black opacity-20"
+                  style={{
+                    backgroundColor: item.color,
+                    width: `${topWidth}%`,
+                    left: `${(100-topWidth)/2}%`,
+                    top: 0,
+                    transform: `rotateX(90deg) translateZ(${height / 2}px)`,
+                  }}
+                />
+                {/* Front face */}
+                <div
+                  className="absolute w-full h-full flex items-center justify-center text-white text-sm font-bold"
+                  style={{
+                    backgroundColor: item.color,
+                    clipPath: `polygon(${(100-topWidth)/2}% 0, ${(100+topWidth)/2}% 0, ${(100+bottomWidth)/2}% 100%, ${(100-bottomWidth)/2}% 100%)`,
+                  }}
+                >
+                   {item.name} {item.value}%
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     );
   };
