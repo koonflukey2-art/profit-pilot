@@ -337,11 +337,13 @@ export function ProfitPilotPage() {
   const budgetPerAccountMonth = (calculated.adBudget || 0) / numAccounts;
   const budgetPerAccountDay = budgetPerAccountMonth / 30;
 
-  const funnelData = [
-    { name: 'TOFU', value: currentFunnelPlan.tofu, color: 'hsl(var(--primary))' },
-    { name: 'MOFU', value: currentFunnelPlan.mofu, color: 'hsl(var(--accent))' },
-    { name: 'BOFU', value: currentFunnelPlan.bofu, color: 'hsl(157 71% 38%)' },
-  ];
+  const funnelData = useMemo(() => {
+    return [
+      { name: 'TOFU', value: currentFunnelPlan.tofu, color: 'hsl(var(--primary))' },
+      { name: 'MOFU', value: currentFunnelPlan.mofu, color: 'hsl(var(--accent))' },
+      { name: 'BOFU', value: currentFunnelPlan.bofu, color: 'hsl(157 71% 38%)' },
+    ].sort((a, b) => b.value - a.value);
+  }, [currentFunnelPlan]);
   
   const StructureBox = ({ title, children, className = '' }) => (
     <div className={cn("bg-blue-900/50 border border-primary/50 rounded-lg p-3 text-center neumorphic-card", className)}>
@@ -643,14 +645,14 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8">
-                  <div className="w-full max-w-sm flex flex-col gap-1.5">
+                  <div className="w-full max-w-sm flex flex-col-reverse gap-1.5">
                     {funnelData.map((stage, index) => (
                       <div key={index} className="relative h-12 flex items-center justify-center text-white font-bold"
                         style={{
                           backgroundColor: stage.color,
-                          width: `${100 - (funnelData.length - 1 - index) * 15}%`,
+                          width: `${100 - index * 15}%`,
                           margin: '0 auto',
-                          clipPath: 'polygon(0 0, 100% 0, 87.5% 100%, 12.5% 100%)',
+                          clipPath: 'polygon(12.5% 0, 87.5% 0, 100% 100%, 0% 100%)',
                           boxShadow: `0 0 15px ${stage.color}`
                         }}
                       >
