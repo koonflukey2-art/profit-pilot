@@ -666,7 +666,7 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8">
-                  <div className="w-full max-w-sm flex flex-col gap-1.5 items-center">
+                   <div className="w-full max-w-sm flex flex-col gap-1.5 items-center">
                     {funnelData.map(({ name, value, color }, index) => {
                       const scale = 1 - index * 0.15;
                       return (
