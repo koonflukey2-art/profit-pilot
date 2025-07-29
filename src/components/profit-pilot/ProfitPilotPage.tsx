@@ -629,22 +629,28 @@ export function ProfitPilotPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div>
-                    <Label htmlFor="numberOfAccounts" className="block text-sm mb-2 font-medium opacity-80">จำนวนบัญชีโฆษณา</Label>
-                    <Input id="numberOfAccounts" value={inputs.numberOfAccounts} onChange={(e) => handleInputChange('numberOfAccounts', e.target.value)} type="number" className="neumorphic-input" />
+                   <div className="grid grid-cols-2 gap-4">
+                     <div>
+                        <Label htmlFor="numberOfAccounts" className="block text-sm mb-2 font-medium opacity-80">จำนวนบัญชีโฆษณา</Label>
+                        <Input id="numberOfAccounts" value={inputs.numberOfAccounts} onChange={(e) => handleInputChange('numberOfAccounts', e.target.value)} type="number" className="neumorphic-input" />
+                     </div>
+                      <div>
+                        <Label className="block text-sm mb-2 font-medium opacity-80">งบ/บัญชี/วัน</Label>
+                        <Input value={F.formatCurrency(budgetPerAccountDay)} readOnly className="neumorphic-input" />
+                     </div>
                   </div>
                 </div>
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8">
-                  <div className="w-full max-w-sm flex flex-col-reverse gap-1">
+                  <div className="w-full max-w-sm flex flex-col gap-1.5">
                     {funnelData.map((stage, index) => (
                       <div key={index} className="relative h-12 flex items-center justify-center text-white font-bold"
                         style={{
                           backgroundColor: stage.color,
-                          width: `${100 - index * 15}%`,
+                          width: `${100 - (funnelData.length - 1 - index) * 15}%`,
                           margin: '0 auto',
-                          clipPath: `polygon(12.5% 0, 87.5% 0, 100% 100%, 0% 100%)`,
+                          clipPath: 'polygon(0 0, 100% 0, 87.5% 100%, 12.5% 100%)',
                           boxShadow: `0 0 15px ${stage.color}`
                         }}
                       >
