@@ -401,11 +401,11 @@ export function ProfitPilotPage() {
 
     return (
       <div className="flex justify-center">
-        <div className="relative w-full max-w-[12rem] h-48 font-sans">
+        <div className="relative w-full max-w-[10rem] h-48 font-sans">
           {data.map((item, index) => {
             const perspective = 100;
-            const topWidth = 100 - (index * 20);
-            const bottomWidth = 100 - ((index + 1) * 20);
+            const topWidth = 100 - (index * 25);
+            const bottomWidth = 100 - ((index + 1) * 25);
             const height = 40;
             const top = index * (height - 10);
             const zIndex = data.length - index;
