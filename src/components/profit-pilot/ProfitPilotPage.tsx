@@ -670,7 +670,7 @@ export function ProfitPilotPage() {
                     </div>
                   </div>
                   <div>
-                     <h4 className="text-lg font-bold mb-4 gradient-text">ค่า Breakeven</h4>
+                     <h4 className="text-lg font-bold mb-4 text-white">ค่า Breakeven</h4>
                      <div className="space-y-4">
                         <div className="p-4 rounded-lg bg-background/50 shadow-inner neumorphic-card">
                             <div className="flex justify-between items-center">
