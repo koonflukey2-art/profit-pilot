@@ -44,8 +44,8 @@ const initialInputs = {
   vatProduct: '7',
   cogs: '',
   salesPlatform: 'own_website',
-  platformFee: '0',
-  paymentFee: '3.0',
+  platformFee: '',
+  paymentFee: '',
   kolFee: '',
   packagingCost: '',
   shippingCost: '',
@@ -441,11 +441,11 @@ export function ProfitPilotPage() {
                <div className="grid grid-cols-2 gap-4">
                  <div>
                     <Label htmlFor="platformFee" className="block text-sm mb-2 font-medium opacity-80">ค่าแพลตฟอร์ม (%)</Label>
-                    <Input id="platformFee" value={inputs.platformFee} onChange={(e) => handleInputChange('platformFee', e.target.value)} type="number" className="neumorphic-input" readOnly={inputs.salesPlatform !== 'other'} />
+                    <Input id="platformFee" value={inputs.platformFee} onChange={(e) => handleInputChange('platformFee', e.target.value)} type="number" className="neumorphic-input" readOnly={inputs.salesPlatform !== 'other'} placeholder="0" />
                  </div>
                  <div>
                     <Label htmlFor="paymentFee" className="block text-sm mb-2 font-medium opacity-80">ค่าชำระเงิน (%)</Label>
-                    <Input id="paymentFee" value={inputs.paymentFee} onChange={(e) => handleInputChange('paymentFee', e.target.value)} type="number" className="neumorphic-input" readOnly={inputs.salesPlatform !== 'other'} />
+                    <Input id="paymentFee" value={inputs.paymentFee} onChange={(e) => handleInputChange('paymentFee', e.target.value)} type="number" className="neumorphic-input" readOnly={inputs.salesPlatform !== 'other'} placeholder="0" />
                  </div>
               </div>
               <div>
@@ -563,7 +563,7 @@ export function ProfitPilotPage() {
           </TabsContent>
           <TabsContent value="planning">
             <div>
-              <h3 className="text-xl font-bold mb-4 gradient-text">Metrics Calculator</h3>
+              <h3 className="text-xl font-bold mb-4 text-white">Metrics Calculator</h3>
               <div className="neumorphic-card p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div>
@@ -576,15 +576,15 @@ export function ProfitPilotPage() {
                      <div className="grid grid-cols-3 gap-4 mt-6">
                       <div>
                         <Label htmlFor="targetRoas" className="block text-sm mb-2 opacity-80">ROAS</Label>
-                        <Input value={inputs.calcDriver === 'roas' ? inputs.targetRoas : (calculated.targetRoas ? F.formatNumber(calculated.targetRoas, 2) : '')} onChange={(e) => handleInputChange('targetRoas', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'roas'} className="neumorphic-input" />
+                        <Input value={inputs.calcDriver === 'roas' ? inputs.targetRoas : (calculated.targetRoas ? F.formatNumber(calculated.targetRoas, 2) : '')} onChange={(e) => handleInputChange('targetRoas', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'roas'} className="neumorphic-input" placeholder="" />
                       </div>
                       <div>
                         <Label htmlFor="targetCpa" className="block text-sm mb-2 opacity-80">CPA (฿)</Label>
-                        <Input value={inputs.calcDriver === 'cpa' ? inputs.targetCpa : (calculated.targetCpa ? F.formatNumber(calculated.targetCpa, 2) : '')} onChange={(e) => handleInputChange('targetCpa', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'cpa'} className="neumorphic-input" />
+                        <Input value={inputs.calcDriver === 'cpa' ? inputs.targetCpa : (calculated.targetCpa ? F.formatNumber(calculated.targetCpa, 2) : '')} onChange={(e) => handleInputChange('targetCpa', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'cpa'} className="neumorphic-input" placeholder="" />
                       </div>
                       <div>
                         <Label htmlFor="adCostPercent" className="block text-sm mb-2 opacity-80">Ad% (%)</Label>
-                        <Input value={inputs.calcDriver === 'adcost' ? inputs.adCostPercent : (calculated.adCostPercent ? F.formatNumber(calculated.adCostPercent, 1) : '')} onChange={(e) => handleInputChange('adCostPercent', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'adcost'} className="neumorphic-input" />
+                        <Input value={inputs.calcDriver === 'adcost' ? inputs.adCostPercent : (calculated.adCostPercent ? F.formatNumber(calculated.adCostPercent, 1) : '')} onChange={(e) => handleInputChange('adCostPercent', e.target.value)} type="number" readOnly={inputs.calcDriver !== 'adcost'} className="neumorphic-input" placeholder="" />
                       </div>
                     </div>
                   </div>
@@ -619,7 +619,7 @@ export function ProfitPilotPage() {
             </div>
 
             <div className="mt-8">
-              <h3 className="text-xl font-bold mb-4 gradient-text">การแบ่งงบประมาณ</h3>
+              <h3 className="text-xl font-bold mb-4 text-white">การแบ่งงบประมาณ</h3>
               <div className="neumorphic-card p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
@@ -647,14 +647,12 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8">
-                  <div className="w-full max-w-sm flex flex-col-reverse gap-1.5">
+                  <div className="w-full max-w-sm flex flex-col gap-1.5">
                     {funnelData.map((stage, index) => (
                       <div key={index} className="relative h-12 flex items-center justify-center text-white font-bold"
                         style={{
                           backgroundColor: stage.color,
-                          width: `${100 - index * 15}%`,
-                          margin: '0 auto',
-                          clipPath: 'polygon(12.5% 0, 87.5% 0, 100% 100%, 0% 100%)',
+                          width: '100%',
                           boxShadow: `0 0 15px ${stage.color}`
                         }}
                       >
@@ -706,7 +704,7 @@ export function ProfitPilotPage() {
             </div>
 
             <div className="mt-8">
-              <h3 className="text-xl font-bold mb-4 gradient-text">Funnel Structure</h3>
+              <h3 className="text-xl font-bold mb-4 text-white">Funnel Structure</h3>
               <div className="neumorphic-card p-6 space-y-8">
                 {/* New Customer Structure */}
                 <div className="space-y-4">
