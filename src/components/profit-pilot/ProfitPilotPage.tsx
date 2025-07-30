@@ -222,8 +222,6 @@ export function ProfitPilotPage() {
         
         savedTheme = localStorage.getItem('profitPlannerTheme') || 'dark';
         setTheme(savedTheme);
-        document.documentElement.classList.remove('light', 'dark');
-        document.documentElement.classList.add(savedTheme);
       }
     } catch (error) {
         console.error("Could not access localStorage:", error);
@@ -429,10 +427,12 @@ export function ProfitPilotPage() {
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
   
+    const sortedData = [...data].sort((a, b) => b.value - a.value);
+
     return (
       <div className="w-full flex justify-center items-end my-4 py-4 min-h-[300px]">
         <div className="flex flex-col items-center justify-end w-full max-w-sm space-y-2">
-          {data.map((item) => {
+          {sortedData.map((item, index) => {
             const layerStyle: React.CSSProperties = {
                 width: `${item.value}%`,
                 clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)',
@@ -820,7 +820,7 @@ export function ProfitPilotPage() {
                    <div className="relative w-full max-w-2xl min-h-[400px] flex items-center justify-center">
                     {/* Floating Icons */}
                     <FloatingIcon icon={Tv} className="top-10 left-0 md:left-10 animate-bounce" size="lg" />
-                    <FloatingIcon icon={Target} className="top-5 right-5 opacity-80" size="lg"/>
+                    <Image src="https://placehold.co/100x100.png" alt="Marketing Icon" width={100} height={100} className="absolute top-5 right-5 opacity-80" data-ai-hint="business target" />
                     <FloatingIcon icon={Users} className="absolute top-1/2 -right-4 md:right-0 -translate-y-1/2" size="lg" />
                     <FloatingIcon icon={LineChart} className="bottom-10 left-0 md:left-10" size="lg"/>
                     <FloatingIcon icon={Percent} className="bottom-5 right-5 md:right-16 animate-pulse" size="md" />
@@ -902,7 +902,7 @@ export function ProfitPilotPage() {
                   <div className="flex items-center h-60"> <StructureBranch /> </div>
 
                   <div className="flex flex-col justify-around h-60 flex-shrink-0">
-                    <StructureBox header="Ad Group"><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
+                     <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
                      <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
                      <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
                      <StructureBox><p>Lookalike</p></StructureBox>
@@ -951,16 +951,14 @@ export function ProfitPilotPage() {
                   <div className="flex items-center h-60"> <StructureBranch /> </div>
 
                   <div className="flex flex-col justify-around h-60 flex-shrink-0">
-                    <StructureBox header="Ad Group"><p>VDO 25% 7 วัน</p></StructureBox>
-                    <StructureBox><p>View Content 7 วัน</p></StructureBox>
-                    <StructureBox><p>VDO 25% 14 วัน</p></StructureBox>
-                    <StructureBox><p>VDO 25% 30 วัน</p></StructureBox>
+                    <StructureBox><p>INBOX 7,15,30 วัน</p></StructureBox>
+                    <StructureBox><p>VDO75% 3,7,15,30 วัน</p></StructureBox>
+                    <StructureBox><p>ENGAGE 3,7,15,30 วัน</p></StructureBox>
                   </div>
 
                    <div className="flex items-center h-60">
                       <div className="flex flex-col h-full w-16">
                           <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
-                           <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
                            <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
                            <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
                       </div>
@@ -972,7 +970,6 @@ export function ProfitPilotPage() {
                       <p className="bg-white/10 rounded px-2 py-0.5">โปรโมชั่น</p>
                       <p className="bg-white/10 rounded px-2 py-0.5">รีวิว/ผลลัพธ์</p>
                     </StructureBox>
-                    <p className="text-center text-xl font-bold">,,</p>
                     <p className="text-center text-xl font-bold">,,</p>
                     <p className="text-center text-xl font-bold">,,</p>
                   </div>
