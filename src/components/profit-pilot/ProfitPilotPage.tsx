@@ -26,7 +26,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, ArrowRight, Target, Heart, ThumbsUp, Hash, DollarSign } from 'lucide-react';
+import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, ArrowRight, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv } from 'lucide-react';
 import { generateUiTitles, generateAutomationWorkflow, getMetricsAdvice } from './actions';
 import { Progress } from '../ui/progress';
 
@@ -404,24 +404,22 @@ export function ProfitPilotPage() {
 
     return (
       <div className="w-full flex justify-center items-center my-4 py-4 min-h-[300px]">
-        <div className="flex flex-col items-center justify-center space-y-2 w-full max-w-lg">
+        <div className="flex flex-col items-center justify-center w-full max-w-xs space-y-4">
           {data.map((item, index) => {
-            const widthPercentage = Math.max(25, (100 * item.value) / 100) * 0.9;
-            const layerStyle: React.CSSProperties = {
-              width: `${widthPercentage}%`,
-              height: '80px',
-              backgroundColor: item.color,
-              boxShadow: `0 0 15px ${item.color}, 0 0 25px ${item.color}66`,
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              borderRadius: '4px',
-              color: 'white',
-              fontWeight: 'bold',
-              fontSize: '1.1rem',
-              textShadow: '0 0 5px #000, 0 0 10px #000',
-              marginTop: '8px'
+             const widthPercentage = Math.max(30, 100 - (index * 25));
+             const layerStyle: React.CSSProperties = {
+                width: `${widthPercentage}%`,
+                height: '80px',
+                backgroundColor: item.color,
+                boxShadow: `0 0 15px ${item.color}, 0 0 25px ${item.color}66`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '4px',
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: '1.1rem',
+                textShadow: '0 0 5px #000, 0 0 10px #000',
             };
             return <div key={item.name} style={layerStyle}>{item.name} {item.value}%</div>;
           })}
@@ -430,11 +428,16 @@ export function ProfitPilotPage() {
     );
   };
   
-  const FloatingIcon = ({ icon, className }) => {
+  const FloatingIcon = ({ icon, className, size = 'md' }) => {
     const IconComponent = icon;
+    const sizeClasses = {
+      sm: 'w-5 h-5',
+      md: 'w-6 h-6',
+      lg: 'w-8 h-8',
+    };
     return (
-      <div className={cn("absolute bg-card/80 backdrop-blur-sm p-3 rounded-full shadow-lg border border-primary/20", className)}>
-        <IconComponent className="w-6 h-6 text-primary" />
+      <div className={cn("absolute bg-card/50 backdrop-blur-sm p-2 md:p-3 rounded-full shadow-lg border border-primary/20", className)}>
+        <IconComponent className={cn(sizeClasses[size], "text-primary opacity-90")} />
       </div>
     );
   };
@@ -751,8 +754,8 @@ export function ProfitPilotPage() {
 
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white flex items-center gap-2">
-                <Image src="https://placehold.co/24x24.png" width={24} height={24} alt="Marketing Icon" data-ai-hint="banana marketing" />
-                การแบ่งงบประมาณ
+                <Image src="https://placehold.co/80x80.png" width={24} height={24} alt="Marketing Icon" data-ai-hint="banana marketing" />
+                การกระจายงบประมาณ
               </h3>
               <div className="neumorphic-card p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -773,20 +776,34 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8 px-4">
-                  <div className="relative w-full max-w-xl h-[400px] flex items-center justify-center">
-                    <FloatingIcon icon={DollarSign} className="top-10 left-10 animate-bounce" />
-                    <FloatingIcon icon={Heart} className="top-10 right-10 animate-pulse" />
+                  <div className="relative w-full max-w-2xl min-h-[400px] flex items-center justify-center">
+                    {/* Floating Icons */}
+                    <FloatingIcon icon={Tv} className="top-10 left-0 md:left-10 animate-bounce" size="lg" />
+                    <FloatingIcon icon={Target} className="hidden md:flex top-5 right-5 animate-pulse" size="lg" />
                     <Image 
                       src="https://placehold.co/120x80.png"
                       width={120}
                       height={80}
                       alt="Target Icon"
                       data-ai-hint="target dart"
-                      className="absolute top-1/2 right-0 -translate-y-1/2"
+                      className="absolute top-1/2 -right-4 md:right-0 -translate-y-1/2 opacity-80"
                     />
+                    <div className="absolute top-20 right-0 md:right-10 transform -translate-y-1/2">
+                       <Image src="https://placehold.co/80x80.png" width={60} height={60} alt="Ads Icon" data-ai-hint="megaphone social" />
+                    </div>
+                     <Image 
+                      src="https://placehold.co/100x100.png"
+                      width={80}
+                      height={80}
+                      alt="Chart Icon"
+                      data-ai-hint="chart growth"
+                      className="absolute bottom-10 left-0 md:left-10"
+                    />
+                    <FloatingIcon icon={Percent} className="bottom-5 right-5 md:right-16 animate-pulse" size="md" />
+                    <FloatingIcon icon={DollarSign} className="bottom-20 right-2 md:right-8 animate-bounce" size="lg" />
+                    
+                    {/* Funnel Chart */}
                     <FunnelChart data={funnelData} />
-                    <FloatingIcon icon={ThumbsUp} className="bottom-10 left-10 animate-spin" />
-                    <FloatingIcon icon={Hash} className="bottom-10 right-10 animate-bounce" />
                   </div>
                 </div>
                 
