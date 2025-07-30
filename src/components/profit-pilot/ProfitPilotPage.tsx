@@ -27,7 +27,9 @@ import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, ArrowRight, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users } from 'lucide-react';
-import { generateUiTitles, generateAutomationWorkflow, getMetricsAdvice } from './actions';
+import { generateUiTitles } from './actions';
+import { generateAutomationWorkflow } from './actions';
+import { getMetricsAdvice } from './actions';
 import { Progress } from '../ui/progress';
 
 const F = {
@@ -214,10 +216,10 @@ export function ProfitPilotPage() {
     let savedHistory = [];
     let savedTheme = 'dark';
     try {
-        savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
-        savedTheme = localStorage.getItem('profitPlannerTheme') || 'dark';
+      savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
+      savedTheme = localStorage.getItem('profitPlannerTheme') || 'dark';
     } catch (error) {
-        console.error("Could not access localStorage. Running on server?");
+        console.error("Could not access localStorage:", error);
     }
     setHistory(savedHistory);
     setTheme(savedTheme);
@@ -230,7 +232,7 @@ export function ProfitPilotPage() {
         try {
             localStorage.setItem('profitPlannerTheme', theme);
         } catch (error) {
-            console.error("Could not access localStorage. Running on server?");
+            console.error("Could not access localStorage:", error);
         }
     }
   }, [theme, isClient]);
@@ -240,6 +242,7 @@ export function ProfitPilotPage() {
   };
 
   useEffect(() => {
+    if (!isClient) return;
     const handler = setTimeout(() => {
       if (inputs.productName) {
         generateUiTitles({
@@ -251,7 +254,7 @@ export function ProfitPilotPage() {
       }
     }, 500);
     return () => clearTimeout(handler);
-  }, [inputs.productName, inputs.businessType, inputs.profitGoal, inputs.fixedCosts]);
+  }, [inputs.productName, inputs.businessType, inputs.profitGoal, inputs.fixedCosts, isClient]);
 
   const autoDetectBusinessType = useCallback(() => {
     const combinedText = `${inputs.productName} ${inputs.productKeywords}`.toLowerCase();
@@ -266,11 +269,12 @@ export function ProfitPilotPage() {
   }, [inputs.productName, inputs.productKeywords, handleInputChange]);
 
   useEffect(() => {
+    if (!isClient) return;
     const timer = setTimeout(() => {
         autoDetectBusinessType();
     }, 300);
     return () => clearTimeout(timer);
-  }, [inputs.productName, inputs.productKeywords, autoDetectBusinessType]);
+  }, [inputs.productName, inputs.productKeywords, autoDetectBusinessType, isClient]);
 
   const handlePlatformChange = (value) => {
     const fees = platformFees[value];
@@ -285,6 +289,7 @@ export function ProfitPilotPage() {
   };
 
   const saveHistory = () => {
+    if (typeof window === 'undefined') return;
     const planName = inputs.productName || 'แผนที่ไม่ได้ตั้งชื่อ';
     const newHistory = [{
       id: Date.now(),
@@ -308,6 +313,7 @@ export function ProfitPilotPage() {
   };
 
   const deleteHistoryItem = (id) => {
+    if (typeof window === 'undefined') return;
     const newHistory = history.filter(item => item.id !== id);
     setHistory(newHistory);
     localStorage.setItem('profitPlannerHistory', JSON.stringify(newHistory));
@@ -319,6 +325,7 @@ export function ProfitPilotPage() {
       isOpen: true,
       message: 'คุณแน่ใจหรือไม่ว่าต้องการล้างประวัติทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้',
       onConfirm: () => {
+        if (typeof window === 'undefined') return;
         setHistory([]);
         localStorage.removeItem('profitPlannerHistory');
         toast({ title: 'Success', description: 'ล้างประวัติทั้งหมดแล้ว' });
@@ -417,7 +424,6 @@ export function ProfitPilotPage() {
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
     
-    // Sort data to ensure it's always in the correct order for display
     const sortedData = [...data].sort((a, b) => {
       const order = { 'TOFU': 1, 'MOFU': 2, 'BOFU': 3 };
       return order[a.name] - order[b.name];
@@ -425,14 +431,15 @@ export function ProfitPilotPage() {
   
     return (
       <div className="w-full flex justify-center items-center my-4 py-4 min-h-[300px]">
-        <div className="flex flex-col items-center justify-center w-full max-w-sm space-y-4">
+        <div className="flex flex-col items-center justify-start w-full max-w-sm space-y-2">
           {sortedData.map((item, index) => {
             const widthPercentage = 100 - (index * 20); // TOFU=100, MOFU=80, BOFU=60
             const layerStyle: React.CSSProperties = {
                 width: `${widthPercentage}%`,
+                clipPath: 'polygon(0 0, 100% 0, 95% 100%, 5% 100%)',
                 minHeight: '60px',
                 backgroundColor: item.color,
-                boxShadow: `0 0 15px ${item.color}, 0 0 25px ${item.color}66, inset 0 0 10px ${item.color}33`,
+                boxShadow: `0 0 15px ${item.color}, 0 0 25px ${item.color}66`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -440,8 +447,6 @@ export function ProfitPilotPage() {
                 fontWeight: 'bold',
                 fontSize: '1.1rem',
                 textShadow: '0 0 5px #000, 0 0 10px #000',
-                borderRadius: '8px',
-                border: `1px solid ${item.color}`
             };
             return (
               <div key={item.name} style={layerStyle}>
@@ -468,31 +473,35 @@ export function ProfitPilotPage() {
     );
   };
 
-  const newFunnelCampaigns = [
-    { audience: "ENGAGE 60 วัน", lookalike: "Lookalike 1-10%" },
-    { audience: "INBOX 60 วัน", lookalike: "Lookalike 1-10%" },
-    { audience: "VDO 95% (60 วัน)", lookalike: "Lookalike 1-10%" },
-    { audience: "PURCHASE LTV 60 วัน", lookalike: "Lookalike 1-10%" },
-    { audience: "Tel 1,000 + LTV", lookalike: "Lookalike 1-10%" },
-  ];
+  const StructureBox = ({ children, className = '', header, subHeader }) => (
+    <div className={cn("flex flex-col items-center", className)}>
+      {header && <div className="text-xs font-semibold text-center text-white/80 mb-1">{header}</div>}
+      <div className="bg-blue-900/50 border border-blue-400 rounded-lg p-3 w-40 text-center">
+        {subHeader && <div className="font-bold text-white mb-1">{subHeader}</div>}
+        {children}
+      </div>
+    </div>
+  );
 
-  const NewStructureBox = ({ children, className = '' }) => (
-    <div className={cn("rounded-md p-4 flex items-center justify-center text-center", className)}>
+  const StructureLine = ({ children, isDashed = false }) => (
+    <div className="flex-1 flex items-center justify-center relative">
+      <div className={cn("w-full h-px", isDashed ? "bg-none" : "bg-blue-400")}
+           style={isDashed ? { backgroundImage: "linear-gradient(to right, #4A90E2 50%, transparent 50%)", backgroundSize: "8px 1px", backgroundRepeat: "repeat-x"} : {}}
+      />
       {children}
     </div>
   );
   
-  const NewStructureLine = ({ className = "" }) => (
-    <div className={cn("flex items-center justify-center h-full w-16", className)}>
-      <div className="w-full h-0.5 bg-gray-400 relative">
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 border-solid border-y-4 border-y-transparent border-l-8 border-l-gray-400"></div>
-      </div>
+  const StructureBranch = () => (
+    <div className="w-10 h-full flex items-center">
+        <div className="w-5 h-px bg-blue-400"></div>
+        <div className="w-px h-full bg-blue-400 relative">
+            <div className="absolute top-0 right-0 w-5 h-px bg-blue-400"></div>
+            <div className="absolute bottom-0 right-0 w-5 h-px bg-blue-400"></div>
+        </div>
     </div>
   );
-  
-  const NewContentLine = ({ className = "" }) => (
-    <div className={cn("absolute h-px w-8 bg-gray-400", className)}></div>
-  );
+
   
   if (!isClient) {
       return (
@@ -787,7 +796,7 @@ export function ProfitPilotPage() {
 
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white flex items-center gap-2">
-                <Megaphone className="w-8 h-8 text-primary" />
+                <Megaphone className="w-6 h-6 text-primary" />
                 การกระจายงบประมาณ
               </h3>
               <div className="neumorphic-card p-6">
@@ -866,68 +875,113 @@ export function ProfitPilotPage() {
             
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white">Funnel Structure</h3>
-              <div className="neumorphic-card p-6 space-y-6">
-                
-                <div className="flex items-center justify-around text-center">
-                    <div className="w-1/3">
-                        <p className="font-bold" style={{ color: funnelData.find(d => d.name === 'TOFU')?.color }}>TOFU</p>
-                        <p className="text-sm font-semibold">{F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}<span className="text-xs opacity-70">/วัน/บัญชี</span></p>
-                    </div>
-                    <div className="w-1/3">
-                        <p className="font-bold" style={{ color: funnelData.find(d => d.name === 'MOFU')?.color }}>MOFU</p>
-                        <p className="text-sm font-semibold">{F.formatCurrency(calculated.mofuBudgetPerAccountDaily)}<span className="text-xs opacity-70">/วัน/บัญชี</span></p>
-                    </div>
-                     <div className="w-1/3">
-                        <p className="font-bold" style={{ color: funnelData.find(d => d.name === 'BOFU')?.color }}>BOFU</p>
-                        <p className="text-sm font-semibold">{F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}<span className="text-xs opacity-70">/วัน/บัญชี</span></p>
-                    </div>
-                </div>
-                <hr className="border-primary/20"/>
-                <div className="text-center mb-4">
-                  <h4 className="text-2xl font-bold text-white bg-blue-600 inline-block px-6 py-2 rounded">หาลูกค้าใหม่</h4>
-                </div>
-                {newFunnelCampaigns.map((campaign, index) => (
-                  <div key={index} className="flex items-center justify-between text-sm">
-                    {/* Campaign CBO */}
-                    <NewStructureBox className="bg-white/10 text-white w-48 h-20">
-                      CAMPAIGN CBO
-                    </NewStructureBox>
-
-                    <NewStructureLine />
-
-                    {/* Audience */}
-                    <NewStructureBox className="bg-blue-600 text-white w-64 h-20 flex-col">
-                      <p className="font-bold">{campaign.audience}</p>
-                      <p>{campaign.lookalike}</p>
-                    </NewStructureBox>
-
-                    {/* Content Lines */}
-                    <div className="relative w-16 h-20 flex items-center justify-center">
-                      <div className="w-0.5 h-full bg-transparent"></div>
-                      <NewContentLine className="left-0 top-1/2 -translate-y-2.5" />
-                      <NewContentLine className="left-0 bottom-1/2 translate-y-2.5" />
-                      <div className="absolute left-8 h-10 w-0.5 bg-gray-400"></div>
-                       <div className="absolute right-0 top-[calc(50%-10px)] -translate-y-1/2 border-solid border-y-4 border-y-transparent border-l-8 border-l-gray-400"></div>
-                       <div className="absolute right-0 bottom-[calc(50%-10px)] translate-y-1/2 border-solid border-y-4 border-y-transparent border-l-8 border-l-gray-400"></div>
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="flex flex-col gap-4">
-                       <NewStructureBox className="bg-gray-400/30 text-white w-48 h-12 text-xs">
-                        <div>
-                          <p>CONTENT 1</p>
-                          <p>(VDO,PIC)</p>
-                        </div>
-                      </NewStructureBox>
-                      <NewStructureBox className="bg-gray-400/30 text-white w-48 h-12 text-xs">
-                        <div>
-                          <p>CONTENT 2</p>
-                          <p>(VDO,PIC)</p>
-                        </div>
-                      </NewStructureBox>
-                    </div>
+              <div className="neumorphic-card p-6 space-y-8 overflow-x-auto">
+                {/* New Customer Structure */}
+                <div className="flex items-start gap-4">
+                  <div className="w-48 flex-shrink-0 pt-12">
+                      <div className="bg-blue-600 rounded-lg p-3 text-center text-white">
+                        <h4 className="font-bold text-lg">ลูกค้าใหม่</h4>
+                      </div>
+                      <div className="mt-2 text-sm text-white/90 pl-3">
+                        <p className="font-semibold">ใช้กลุ่มเป้าหมาย</p>
+                        <ul className="list-disc list-inside">
+                          <li>Interest</li>
+                          <li>Lookalike</li>
+                        </ul>
+                      </div>
                   </div>
-                ))}
+
+                  <div className="flex items-center h-48"> <StructureLine /> </div>
+
+                  <div className="w-48 flex-shrink-0 pt-12">
+                    <StructureBox header="Campaign">
+                      <p className="font-bold text-lg">Conversion CBO</p>
+                      <p className="text-xs text-white/70 mt-1">งบ 500 - 5,000</p>
+                    </StructureBox>
+                  </div>
+                  
+                  <div className="flex items-center h-48"> <StructureBranch /> </div>
+
+                  <div className="flex flex-col justify-around h-48 flex-shrink-0">
+                    <StructureBox header="Ad Group">
+                      <p>กลุ่มเป้าหมาย 1</p>
+                    </StructureBox>
+                     <StructureBox>
+                      <p>กลุ่มเป้าหมาย 2</p>
+                    </StructureBox>
+                     <StructureBox>
+                      <p>กลุ่มเป้าหมาย 3</p>
+                    </StructureBox>
+                  </div>
+                  
+                   <div className="flex items-center h-48">
+                      <div className="flex flex-col h-full w-16">
+                          <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
+                          <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
+                          <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
+                      </div>
+                  </div>
+                  
+                  <div className="flex flex-col justify-around h-48 flex-shrink-0">
+                    <StructureBox header="Ads" className="h-full justify-around">
+                      <p className="bg-white/10 rounded px-2 py-0.5">VDO 1</p>
+                      <p className="bg-white/10 rounded px-2 py-0.5">VDO 2</p>
+                      <p className="bg-white/10 rounded px-2 py-0.5">VDO 3</p>
+                    </StructureBox>
+                    <p className="text-center text-xl font-bold">,,</p>
+                     <p className="text-center text-xl font-bold">,,</p>
+                  </div>
+                </div>
+
+                <hr className="border-primary/20"/>
+
+                {/* Retarget Structure */}
+                 <div className="flex items-start gap-4">
+                  <div className="w-48 flex-shrink-0 pt-20">
+                      <div className="bg-blue-800 rounded-lg p-3 text-center text-white">
+                        <h4 className="font-bold text-lg">Retarget</h4>
+                      </div>
+                  </div>
+
+                  <div className="flex items-center h-60"> <StructureLine /> </div>
+                  
+                  <div className="w-48 flex-shrink-0 pt-20">
+                    <StructureBox header="Campaign">
+                      <p className="font-bold text-lg">Conversion CBO</p>
+                      <p className="text-xs text-white/70 mt-1">งบ 500 - 5,000</p>
+                    </StructureBox>
+                  </div>
+                  
+                  <div className="flex items-center h-60"> <StructureBranch /> </div>
+
+                  <div className="flex flex-col justify-around h-60 flex-shrink-0">
+                    <StructureBox header="Ad Group"><p>VDO 25% 7 วัน</p></StructureBox>
+                    <StructureBox><p>View Content 7 วัน</p></StructureBox>
+                    <StructureBox><p>VDO 25% 14 วัน</p></StructureBox>
+                    <StructureBox><p>VDO 25% 30 วัน</p></StructureBox>
+                  </div>
+
+                   <div className="flex items-center h-60">
+                      <div className="flex flex-col h-full w-16">
+                          <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
+                           <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
+                           <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
+                           <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
+                      </div>
+                  </div>
+                  
+                  <div className="flex flex-col justify-around h-60 flex-shrink-0">
+                    <StructureBox header="Ads" className="h-full justify-around">
+                      <p className="bg-white/10 rounded px-2 py-0.5">VDO ปิด</p>
+                      <p className="bg-white/10 rounded px-2 py-0.5">โปรโมชั่น</p>
+                      <p className="bg-white/10 rounded px-2 py-0.5">รีวิว/ผลลัพธ์</p>
+                    </StructureBox>
+                    <p className="text-center text-xl font-bold">,,</p>
+                    <p className="text-center text-xl font-bold">,,</p>
+                    <p className="text-center text-xl font-bold">,,</p>
+                  </div>
+                </div>
+
               </div>
             </div>
 
@@ -1066,3 +1120,5 @@ export function ProfitPilotPage() {
     </>
   );
 }
+
+    
