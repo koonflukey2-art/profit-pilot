@@ -26,7 +26,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, ArrowRight, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv } from 'lucide-react';
+import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, ArrowRight, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users } from 'lucide-react';
 import { generateUiTitles, generateAutomationWorkflow, getMetricsAdvice } from './actions';
 import { Progress } from '../ui/progress';
 
@@ -211,21 +211,27 @@ export function ProfitPilotPage() {
 
   useEffect(() => {
     setIsClient(true);
+    let savedHistory = [];
+    let savedTheme = 'dark';
     try {
-      const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
-      const savedTheme = localStorage.getItem('profitPlannerTheme') || 'dark';
-      setHistory(savedHistory);
-      setTheme(savedTheme);
+        savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
+        savedTheme = localStorage.getItem('profitPlannerTheme') || 'dark';
     } catch (error) {
         console.error("Could not access localStorage. Running on server?");
     }
+    setHistory(savedHistory);
+    setTheme(savedTheme);
   }, []);
-
+  
   useEffect(() => {
     if (isClient) {
         document.documentElement.classList.remove('light', 'dark');
         document.documentElement.classList.add(theme);
-        localStorage.setItem('profitPlannerTheme', theme);
+        try {
+            localStorage.setItem('profitPlannerTheme', theme);
+        } catch (error) {
+            console.error("Could not access localStorage. Running on server?");
+        }
     }
   }, [theme, isClient]);
   
@@ -407,19 +413,16 @@ export function ProfitPilotPage() {
 
   const FunnelChart = ({ data }) => {
     if (!data.length) return null;
-
+  
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
     
     // Sort data to ensure it's always in the correct order for display
     const sortedData = [...data].sort((a, b) => {
-      if (a.name === 'TOFU') return -1;
-      if (b.name === 'TOFU') return 1;
-      if (a.name === 'MOFU') return -1;
-      if (b.name === 'MOFU') return 1;
-      return 0; // BOFU last
+      const order = { 'TOFU': 1, 'MOFU': 2, 'BOFU': 3 };
+      return order[a.name] - order[b.name];
     });
-
+  
     return (
       <div className="w-full flex justify-center items-center my-4 py-4 min-h-[300px]">
         <div className="flex flex-col items-center justify-center w-full max-w-sm space-y-4">
@@ -784,14 +787,7 @@ export function ProfitPilotPage() {
 
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white flex items-center gap-2">
-                <Image
-                    src="https://placehold.co/80x80.png"
-                    width={40}
-                    height={40}
-                    alt="Banana Marketing"
-                    className="rounded-full"
-                    data-ai-hint="banana marketing"
-                />
+                <Megaphone className="w-8 h-8 text-primary" />
                 การกระจายงบประมาณ
               </h3>
               <div className="neumorphic-card p-6">
@@ -813,28 +809,12 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8 px-4">
-                  <div className="relative w-full max-w-2xl min-h-[400px] flex items-center justify-center">
+                   <div className="relative w-full max-w-2xl min-h-[400px] flex items-center justify-center">
                     {/* Floating Icons */}
                     <FloatingIcon icon={Tv} className="top-10 left-0 md:left-10 animate-bounce" size="lg" />
-                    <Image 
-                      src="https://placehold.co/120x80.png"
-                      width={120}
-                      height={80}
-                      alt="Target Icon"
-                      data-ai-hint="target dart"
-                      className="absolute top-5 right-5 opacity-80"
-                    />
-                    <div className="absolute top-1/2 -right-4 md:right-0 -translate-y-1/2">
-                       <Image src="https://placehold.co/80x80.png" width={60} height={60} alt="Ads Icon" data-ai-hint="megaphone social" />
-                    </div>
-                     <Image 
-                      src="https://placehold.co/100x100.png"
-                      width={80}
-                      height={80}
-                      alt="Chart Icon"
-                      data-ai-hint="chart growth"
-                      className="absolute bottom-10 left-0 md:left-10"
-                    />
+                    <FloatingIcon icon={Target} className="top-5 right-5 opacity-80" size="lg"/>
+                    <FloatingIcon icon={Users} className="absolute top-1/2 -right-4 md:right-0 -translate-y-1/2" size="lg" />
+                    <FloatingIcon icon={LineChart} className="bottom-10 left-0 md:left-10" size="lg"/>
                     <FloatingIcon icon={Percent} className="bottom-5 right-5 md:right-16 animate-pulse" size="md" />
                     <FloatingIcon icon={DollarSign} className="bottom-20 right-2 md:right-8 animate-bounce" size="lg" />
                     
