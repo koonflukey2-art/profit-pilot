@@ -218,21 +218,24 @@ export function ProfitPilotPage() {
     try {
       if (typeof window !== 'undefined') {
         savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
+        setHistory(savedHistory);
+        
         savedTheme = localStorage.getItem('profitPlannerTheme') || 'dark';
+        setTheme(savedTheme);
+        document.documentElement.classList.remove('light', 'dark');
+        document.documentElement.classList.add(savedTheme);
       }
     } catch (error) {
         console.error("Could not access localStorage:", error);
     }
-    setHistory(savedHistory);
-    setTheme(savedTheme);
   }, []);
   
   useEffect(() => {
     if (isClient) {
-        document.documentElement.classList.remove('light', 'dark');
-        document.documentElement.classList.add(theme);
         try {
             localStorage.setItem('profitPlannerTheme', theme);
+            document.documentElement.classList.remove('light', 'dark');
+            document.documentElement.classList.add(theme);
         } catch (error) {
             console.error("Could not access localStorage:", error);
         }
@@ -417,7 +420,7 @@ export function ProfitPilotPage() {
       { name: 'TOFU', value: currentFunnelPlan.tofu, color: '#2196F3' },
       { name: 'MOFU', value: currentFunnelPlan.mofu, color: '#29B6F6' },
       { name: 'BOFU', value: currentFunnelPlan.bofu, color: '#4DD0E1' },
-    ];
+    ].sort((a,b) => b.value - a.value);
   }, [currentFunnelPlan]);
 
   const FunnelChart = ({ data }) => {
@@ -430,7 +433,6 @@ export function ProfitPilotPage() {
       <div className="w-full flex justify-center items-end my-4 py-4 min-h-[300px]">
         <div className="flex flex-col items-center justify-end w-full max-w-sm space-y-2">
           {data.map((item) => {
-            const widthPercentage = 100 - (item.value / 2);
             const layerStyle: React.CSSProperties = {
                 width: `${item.value}%`,
                 clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)',
@@ -875,7 +877,7 @@ export function ProfitPilotPage() {
               <div className="neumorphic-card p-6 space-y-8 overflow-x-auto">
                 {/* New Customer Structure */}
                 <div className="flex items-start gap-4">
-                  <div className="w-48 flex-shrink-0 pt-12">
+                  <div className="w-48 flex-shrink-0 pt-20">
                       <div className="bg-blue-600 rounded-lg p-3 text-center text-white">
                         <h4 className="font-bold text-lg">ลูกค้าใหม่</h4>
                       </div>
@@ -888,45 +890,42 @@ export function ProfitPilotPage() {
                       </div>
                   </div>
 
-                  <div className="flex items-center h-48"> <StructureLine /> </div>
+                  <div className="flex items-center h-60"> <StructureLine /> </div>
 
-                  <div className="w-48 flex-shrink-0 pt-12">
+                  <div className="w-48 flex-shrink-0 pt-20">
                     <StructureBox header="Campaign">
                       <p className="font-bold text-lg">CBO</p>
                       <p className="text-xs text-white/70 mt-1">งบ {F.formatInt(calculated.tofuBudgetPerAccountDaily)} - {F.formatInt(calculated.tofuBudgetPerAccountDaily * 2)}</p>
                     </StructureBox>
                   </div>
                   
-                  <div className="flex items-center h-48"> <StructureBranch /> </div>
+                  <div className="flex items-center h-60"> <StructureBranch /> </div>
 
-                  <div className="flex flex-col justify-around h-48 flex-shrink-0">
-                    <StructureBox header="Ad Group">
-                      <p>กลุ่มเป้าหมาย 1</p>
-                    </StructureBox>
-                     <StructureBox>
-                      <p>กลุ่มเป้าหมาย 2</p>
-                    </StructureBox>
-                     <StructureBox>
-                      <p>กลุ่มเป้าหมาย 3</p>
-                    </StructureBox>
+                  <div className="flex flex-col justify-around h-60 flex-shrink-0">
+                    <StructureBox header="Ad Group"><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
+                     <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
+                     <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
+                     <StructureBox><p>Lookalike</p></StructureBox>
                   </div>
                   
-                   <div className="flex items-center h-48">
+                   <div className="flex items-center h-60">
                       <div className="flex flex-col h-full w-16">
                           <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
                           <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
                           <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
+                           <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
                       </div>
                   </div>
                   
-                  <div className="flex flex-col justify-around h-48 flex-shrink-0">
+                  <div className="flex flex-col justify-around h-60 flex-shrink-0">
                     <StructureBox header="Ads" className="h-full justify-around">
                       <p className="bg-white/10 rounded px-2 py-0.5">VDO 1</p>
                       <p className="bg-white/10 rounded px-2 py-0.5">VDO 2</p>
-                      <p className="bg-white/10 rounded px-2 py-0.5">VDO 3</p>
+                      <p className="bg-white/10 rounded px-2 py-0.5">รูปภาพ</p>
                     </StructureBox>
                     <p className="text-center text-xl font-bold">,,</p>
-                     <p className="text-center text-xl font-bold">,,</p>
+                    <p className="text-center text-xl font-bold">,,</p>
+                    <p className="text-center text-xl font-bold">,,</p>
                   </div>
                 </div>
 
