@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -491,15 +492,22 @@ export function ProfitPilotPage() {
     </div>
   );
   
-  const StructureBranch = () => (
-    <div className="w-10 h-full flex items-center">
-        <div className="w-5 h-px bg-blue-400"></div>
-        <div className="w-px h-full bg-blue-400 relative">
-            <div className="absolute top-0 right-0 w-5 h-px bg-blue-400"></div>
-            <div className="absolute bottom-0 right-0 w-5 h-px bg-blue-400"></div>
-        </div>
-    </div>
-  );
+  const StructureBranch = ({ count = 1, height = 240 }) => {
+    const viewBox = `0 0 40 ${height}`;
+    const startY = height / 2;
+    const endYPositions = Array.from({ length: count }, (_, i) => (i + 0.5) * (height / count));
+  
+    return (
+      <div className="flex items-center" style={{ height: `${height}px` }}>
+        <svg width="40" height={height} viewBox={viewBox} className="stroke-blue-400" fill="none" strokeWidth="1">
+          <path d={`M0,${startY} H20`} />
+          {endYPositions.map((endY, i) => (
+            <path key={i} d={`M20,${startY} C 30,${startY} 30,${endY} 40,${endY}`} />
+          ))}
+        </svg>
+      </div>
+    );
+  };
 
   
   if (!isClient) {
@@ -899,7 +907,7 @@ export function ProfitPilotPage() {
                     </StructureBox>
                   </div>
                   
-                  <div className="flex items-center h-60"> <StructureBranch /> </div>
+                  <StructureBranch count={4} />
 
                   <div className="flex flex-col justify-around h-60 flex-shrink-0">
                      <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
@@ -948,7 +956,7 @@ export function ProfitPilotPage() {
                     </StructureBox>
                   </div>
                   
-                  <div className="flex items-center h-60"> <StructureBranch /> </div>
+                  <StructureBranch count={3} />
 
                   <div className="flex flex-col justify-around h-60 flex-shrink-0">
                     <StructureBox><p>INBOX 7,15,30 วัน</p></StructureBox>
