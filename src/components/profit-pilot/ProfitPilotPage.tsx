@@ -26,7 +26,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, ArrowRight, Target } from 'lucide-react';
+import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, ArrowRight, Target, Heart, ThumbsUp, Hash, DollarSign } from 'lucide-react';
 import { generateUiTitles, generateAutomationWorkflow, getMetricsAdvice } from './actions';
 import { Progress } from '../ui/progress';
 
@@ -402,24 +402,21 @@ export function ProfitPilotPage() {
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
 
-    // Invert the funnel logic
-    const sortedData = [...data].sort((a, b) => b.value - a.value);
-
     return (
       <div className="w-full flex justify-center items-center my-4 py-4 min-h-[300px]">
         <div className="flex flex-col items-center justify-center space-y-2 w-full max-w-lg">
-          {sortedData.map((item, index) => {
-            const widthPercentage = Math.max(15, (100 * item.value) / 100); 
+          {data.map((item, index) => {
+            const widthPercentage = Math.max(25, (100 * item.value) / 100) * 0.9;
             const layerStyle: React.CSSProperties = {
               width: `${widthPercentage}%`,
               height: '80px',
               backgroundColor: item.color,
-              filter: `drop-shadow(0 0 10px ${item.color}) drop-shadow(0 0 20px ${item.color}33)`,
+              boxShadow: `0 0 15px ${item.color}, 0 0 25px ${item.color}66`,
               position: 'relative',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: '8px',
+              borderRadius: '4px',
               color: 'white',
               fontWeight: 'bold',
               fontSize: '1.1rem',
@@ -429,6 +426,15 @@ export function ProfitPilotPage() {
             return <div key={item.name} style={layerStyle}>{item.name} {item.value}%</div>;
           })}
         </div>
+      </div>
+    );
+  };
+  
+  const FloatingIcon = ({ icon, className }) => {
+    const IconComponent = icon;
+    return (
+      <div className={cn("absolute bg-card/80 backdrop-blur-sm p-3 rounded-full shadow-lg border border-primary/20", className)}>
+        <IconComponent className="w-6 h-6 text-primary" />
       </div>
     );
   };
@@ -745,7 +751,7 @@ export function ProfitPilotPage() {
 
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white flex items-center gap-2">
-                <Image src="https://placehold.co/24x24.png" width={24} height={24} alt="Marketing Icon" data-ai-hint="marketing illustration" />
+                <Image src="https://placehold.co/24x24.png" width={24} height={24} alt="Marketing Icon" data-ai-hint="banana marketing" />
                 การแบ่งงบประมาณ
               </h3>
               <div className="neumorphic-card p-6">
@@ -767,7 +773,21 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8 px-4">
-                   <FunnelChart data={funnelData} />
+                  <div className="relative w-full max-w-xl h-[400px] flex items-center justify-center">
+                    <FloatingIcon icon={DollarSign} className="top-10 left-10 animate-bounce" />
+                    <FloatingIcon icon={Heart} className="top-10 right-10 animate-pulse" />
+                    <Image 
+                      src="https://placehold.co/120x80.png"
+                      width={120}
+                      height={80}
+                      alt="Target Icon"
+                      data-ai-hint="target dart"
+                      className="absolute top-1/2 right-0 -translate-y-1/2"
+                    />
+                    <FunnelChart data={funnelData} />
+                    <FloatingIcon icon={ThumbsUp} className="bottom-10 left-10 animate-spin" />
+                    <FloatingIcon icon={Hash} className="bottom-10 right-10 animate-bounce" />
+                  </div>
                 </div>
                 
                 <div className="space-y-4">
