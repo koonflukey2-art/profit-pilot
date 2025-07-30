@@ -416,7 +416,7 @@ export function ProfitPilotPage() {
       { name: 'TOFU', value: currentFunnelPlan.tofu, color: '#2196F3' },
       { name: 'MOFU', value: currentFunnelPlan.mofu, color: '#29B6F6' },
       { name: 'BOFU', value: currentFunnelPlan.bofu, color: '#4DD0E1' },
-    ].sort((a,b) => b.value - a.value);
+    ];
   }, [currentFunnelPlan]);
 
   const FunnelChart = ({ data }) => {
@@ -425,12 +425,10 @@ export function ProfitPilotPage() {
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
   
-    const sortedData = [...data].sort((a, b) => b.value - a.value);
-
     return (
       <div className="w-full flex justify-center items-end my-4 py-4 min-h-[300px]">
         <div className="flex flex-col items-center justify-end w-full max-w-sm space-y-2">
-          {sortedData.map((item, index) => {
+          {data.map((item, index) => {
             const layerStyle: React.CSSProperties = {
                 width: `${item.value}%`,
                 clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)',
