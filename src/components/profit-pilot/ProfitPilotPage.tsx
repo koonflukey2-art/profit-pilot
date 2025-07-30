@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
@@ -212,16 +213,16 @@ export function ProfitPilotPage() {
 
   useEffect(() => {
     setIsClient(true);
-    try {
-      if (typeof window !== 'undefined') {
-        const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
-        setHistory(savedHistory);
-        
-        const savedTheme = localStorage.getItem('profitPlannerTheme') || 'dark';
-        setTheme(savedTheme);
-      }
-    } catch (error) {
-        console.error("Could not access localStorage:", error);
+    if (typeof window !== 'undefined') {
+        try {
+            const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
+            setHistory(savedHistory);
+            
+            const savedTheme = localStorage.getItem('profitPlannerTheme') || 'dark';
+            setTheme(savedTheme);
+        } catch (error) {
+            console.error("Could not access localStorage:", error);
+        }
     }
   }, []);
   
@@ -893,6 +894,7 @@ export function ProfitPilotPage() {
                     <StructureBox header="Campaign">
                       <p className="font-bold text-lg">CBO / ABO</p>
                       <p className="text-xs text-white/70 mt-1">งบ {F.formatInt(calculated.tofuBudgetPerAccountDaily)} - {F.formatInt(calculated.tofuBudgetPerAccountDaily * 2)}</p>
+                      <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
                     </StructureBox>
                   </div>
                   
@@ -942,6 +944,7 @@ export function ProfitPilotPage() {
                     <StructureBox header="Campaign">
                       <p className="font-bold text-lg">CBO / ABO</p>
                        <p className="text-xs text-white/70 mt-1">งบ {F.formatInt(calculated.bofuBudgetPerAccountDaily)} - {F.formatInt(calculated.bofuBudgetPerAccountDaily * 2)}</p>
+                       <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
                     </StructureBox>
                   </div>
                   
