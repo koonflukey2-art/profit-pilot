@@ -64,6 +64,7 @@ const initialInputs = {
 };
 
 export function ProfitPilotPage() {
+  const [isClient, setIsClient] = useState(false);
   const [inputs, setInputs] = useState(initialInputs);
   const [calculated, setCalculated] = useState({
     grossProfitUnit: 0,
@@ -206,9 +207,10 @@ export function ProfitPilotPage() {
 
   useEffect(() => {
     calculateAll();
-  }, [inputs.sellingPrice, inputs.vatProduct, inputs.cogs, inputs.platformFee, inputs.paymentFee, inputs.kolFee, inputs.packagingCost, inputs.shippingCost, inputs.profitGoal, inputs.profitGoalTimeframe, inputs.fixedCosts, inputs.targetRoas, inputs.targetCpa, inputs.adCostPercent, inputs.calcDriver, inputs.funnelPlan, inputs.numberOfAccounts]);
+  }, [inputs.sellingPrice, inputs.vatProduct, inputs.cogs, inputs.platformFee, inputs.paymentFee, inputs.kolFee, inputs.packagingCost, inputs.shippingCost, inputs.profitGoal, inputs.profitGoalTimeframe, inputs.fixedCosts, inputs.targetRoas, inputs.targetCpa, inputs.adCostPercent, inputs.calcDriver, inputs.funnelPlan, inputs.numberOfAccounts, calculateAll]);
 
   useEffect(() => {
+    setIsClient(true);
     const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
     setHistory(savedHistory);
     const savedTheme = localStorage.getItem('profitPlannerTheme') || 'dark';
@@ -216,10 +218,12 @@ export function ProfitPilotPage() {
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(theme);
-    localStorage.setItem('profitPlannerTheme', theme);
-  }, [theme]);
+    if (isClient) {
+        document.documentElement.classList.remove('light', 'dark');
+        document.documentElement.classList.add(theme);
+        localStorage.setItem('profitPlannerTheme', theme);
+    }
+  }, [theme, isClient]);
   
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -349,7 +353,8 @@ export function ProfitPilotPage() {
   const handleGenerateN8nWorkflow = async () => {
     setN8nWorkflow({ json: null, loading: true });
     
-    const [n8nWorkflowName, n8nPrimaryGoal] = [document.getElementById('n8nWorkflowName')?.value, document.getElementById('n8nPrimaryGoal')?.value];
+    const n8nWorkflowName = (document.getElementById('n8nWorkflowName') as HTMLInputElement)?.value;
+    const n8nPrimaryGoal = (document.getElementById('n8nPrimaryGoal') as HTMLInputElement)?.value;
     
     try {
       const result = await generateAutomationWorkflow({
@@ -403,25 +408,41 @@ export function ProfitPilotPage() {
     if (totalValue === 0) return null;
 
     return (
-      <div className="w-full flex justify-center items-center my-4 py-4 min-h-[300px]">
-        <div className="flex flex-col items-center justify-center w-full max-w-xs space-y-4">
+      <div className="w-full flex justify-center items-end my-4 py-4 min-h-[300px]">
+        <div className="flex flex-col items-center justify-end w-full max-w-sm space-y-2">
           {data.map((item, index) => {
-             const widthPercentage = Math.max(30, 100 - (index * 25));
-             const layerStyle: React.CSSProperties = {
+            const widthPercentage = 30 + (index * 35);
+            const layerStyle: React.CSSProperties = {
                 width: `${widthPercentage}%`,
                 height: '80px',
+                backgroundColor: 'transparent',
+                clipPath: 'polygon(20% 0, 80% 0, 100% 100%, 0% 100%)',
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+            };
+            const innerStyle: React.CSSProperties = {
+                position: 'absolute',
+                inset: '2px',
                 backgroundColor: item.color,
+                clipPath: 'polygon(20% 0, 80% 0, 100% 100%, 0% 100%)',
                 boxShadow: `0 0 15px ${item.color}, 0 0 25px ${item.color}66`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                borderRadius: '4px',
                 color: 'white',
                 fontWeight: 'bold',
                 fontSize: '1.1rem',
                 textShadow: '0 0 5px #000, 0 0 10px #000',
-            };
-            return <div key={item.name} style={layerStyle}>{item.name} {item.value}%</div>;
+            }
+            return (
+              <div key={item.name} style={layerStyle}>
+                <div style={innerStyle}>
+                  {item.name} {item.value}%
+                </div>
+              </div>
+            );
           })}
         </div>
       </div>
@@ -468,6 +489,9 @@ export function ProfitPilotPage() {
     <div className={cn("absolute h-px w-8 bg-gray-400", className)}></div>
   );
   
+  if (!isClient) {
+      return null;
+  }
   
   return (
     <>
@@ -754,7 +778,13 @@ export function ProfitPilotPage() {
 
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white flex items-center gap-2">
-                <Image src="https://placehold.co/80x80.png" width={24} height={24} alt="Marketing Icon" data-ai-hint="banana marketing" />
+                 <Image 
+                  src="https://placehold.co/80x80.png"
+                  width={24}
+                  height={24}
+                  alt="Marketing Icon"
+                  data-ai-hint="banana marketing"
+                />
                 การกระจายงบประมาณ
               </h3>
               <div className="neumorphic-card p-6">
@@ -779,16 +809,15 @@ export function ProfitPilotPage() {
                   <div className="relative w-full max-w-2xl min-h-[400px] flex items-center justify-center">
                     {/* Floating Icons */}
                     <FloatingIcon icon={Tv} className="top-10 left-0 md:left-10 animate-bounce" size="lg" />
-                    <FloatingIcon icon={Target} className="hidden md:flex top-5 right-5 animate-pulse" size="lg" />
                     <Image 
                       src="https://placehold.co/120x80.png"
                       width={120}
                       height={80}
                       alt="Target Icon"
                       data-ai-hint="target dart"
-                      className="absolute top-1/2 -right-4 md:right-0 -translate-y-1/2 opacity-80"
+                      className="absolute top-5 right-5 opacity-80"
                     />
-                    <div className="absolute top-20 right-0 md:right-10 transform -translate-y-1/2">
+                    <div className="absolute top-1/2 -right-4 md:right-0 -translate-y-1/2">
                        <Image src="https://placehold.co/80x80.png" width={60} height={60} alt="Ads Icon" data-ai-hint="megaphone social" />
                     </div>
                      <Image 
@@ -1003,7 +1032,7 @@ export function ProfitPilotPage() {
                 <div key={item.id} className="neumorphic-card flex justify-between items-center p-3">
                   <div>
                     <p className="font-bold">{item.name}</p>
-                    <p className="text-xs opacity-60">{item.date}</p>
+                    <p className="text-xs opacity-60">{new Date(item.id).toLocaleString()}</p>
                   </div>
                   <div className="flex gap-2">
                     <Button onClick={() => loadHistory(item.id)}>โหลด</Button>
@@ -1040,7 +1069,7 @@ export function ProfitPilotPage() {
           <div className="space-y-3 max-h-[60vh] overflow-y-auto p-1">
             {history.length > 0 ? history.map(item => (
               <div key={item.id} className="neumorphic-card flex justify-between items-center p-3">
-                <div><p className="font-bold">{item.name}</p><p className="text-xs opacity-60">{item.date}</p></div>
+                <div><p className="font-bold">{item.name}</p><p className="text-xs opacity-60">{new Date(item.id).toLocaleString()}</p></div>
                 <div className="flex gap-2"><Button onClick={() => loadHistory(item.id)}>Load</Button><Button variant="destructive" onClick={() => deleteHistoryItem(item.id)}><Trash2 className="w-4 h-4"/></Button></div>
               </div>
             )) : <p className="text-center opacity-60">ยังไม่มีประวัติการวางแผน</p>}
