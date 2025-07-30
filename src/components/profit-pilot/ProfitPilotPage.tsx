@@ -460,8 +460,8 @@ export function ProfitPilotPage() {
     const IconComponent = icon;
     const sizeClasses = {
       sm: 'w-5 h-5',
-      md: 'w-6 h-6',
-      lg: 'w-8 h-8',
+      md: 'w-8 h-8',
+      lg: 'w-10 h-10',
     };
     return (
       <div className={cn("absolute bg-card/50 backdrop-blur-sm p-2 md:p-3 rounded-full shadow-lg border border-primary/20", className)}>
