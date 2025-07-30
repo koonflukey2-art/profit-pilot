@@ -28,9 +28,7 @@ import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, ArrowRight, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users } from 'lucide-react';
-import { generateUiTitles } from './actions';
-import { generateAutomationWorkflow } from './actions';
-import { getMetricsAdvice } from './actions';
+import { generateUiTitles, generateAutomationWorkflow, getMetricsAdvice } from './actions';
 import { Progress } from '../ui/progress';
 
 const F = {
@@ -214,14 +212,12 @@ export function ProfitPilotPage() {
 
   useEffect(() => {
     setIsClient(true);
-    let savedHistory = [];
-    let savedTheme = 'dark';
     try {
       if (typeof window !== 'undefined') {
-        savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
+        const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
         setHistory(savedHistory);
         
-        savedTheme = localStorage.getItem('profitPlannerTheme') || 'dark';
+        const savedTheme = localStorage.getItem('profitPlannerTheme') || 'dark';
         setTheme(savedTheme);
       }
     } catch (error) {
@@ -502,7 +498,7 @@ export function ProfitPilotPage() {
         <svg width="40" height={height} viewBox={viewBox} className="stroke-blue-400" fill="none" strokeWidth="1">
           <path d={`M0,${startY} H20`} />
           {endYPositions.map((endY, i) => (
-            <path key={i} d={`M20,${startY} C 30,${startY} 30,${endY} 40,${endY}`} />
+             <path key={i} d={`M20,${startY} L 40,${endY}`} />
           ))}
         </svg>
       </div>
@@ -828,7 +824,7 @@ export function ProfitPilotPage() {
                    <div className="relative w-full max-w-2xl min-h-[400px] flex items-center justify-center">
                     {/* Floating Icons */}
                     <FloatingIcon icon={Tv} className="top-10 left-0 md:left-10 animate-bounce" size="lg" />
-                    <Image src="https://placehold.co/100x100.png" alt="Marketing Icon" width={100} height={100} className="absolute top-5 right-5 opacity-80" data-ai-hint="business target" />
+                    <FloatingIcon icon={Target} className="top-5 right-5 opacity-80" size="lg" />
                     <FloatingIcon icon={Users} className="absolute top-1/2 -right-4 md:right-0 -translate-y-1/2" size="lg" />
                     <FloatingIcon icon={LineChart} className="bottom-10 left-0 md:left-10" size="lg"/>
                     <FloatingIcon icon={Percent} className="bottom-5 right-5 md:right-16 animate-pulse" size="md" />
@@ -889,20 +885,13 @@ export function ProfitPilotPage() {
                       <div className="bg-blue-600 rounded-lg p-3 text-center text-white">
                         <h4 className="font-bold text-lg">ลูกค้าใหม่</h4>
                       </div>
-                      <div className="mt-2 text-sm text-white/90 pl-3">
-                        <p className="font-semibold">ใช้กลุ่มเป้าหมาย</p>
-                        <ul className="list-disc list-inside">
-                          <li>Interest</li>
-                          <li>Lookalike</li>
-                        </ul>
-                      </div>
                   </div>
 
                   <div className="flex items-center h-60"> <StructureLine /> </div>
 
                   <div className="w-48 flex-shrink-0 pt-20">
                     <StructureBox header="Campaign">
-                      <p className="font-bold text-lg">CBO</p>
+                      <p className="font-bold text-lg">CBO / ABO</p>
                       <p className="text-xs text-white/70 mt-1">งบ {F.formatInt(calculated.tofuBudgetPerAccountDaily)} - {F.formatInt(calculated.tofuBudgetPerAccountDaily * 2)}</p>
                     </StructureBox>
                   </div>
@@ -951,7 +940,7 @@ export function ProfitPilotPage() {
                   
                   <div className="w-48 flex-shrink-0 pt-20">
                     <StructureBox header="Campaign">
-                      <p className="font-bold text-lg">CBO</p>
+                      <p className="font-bold text-lg">CBO / ABO</p>
                        <p className="text-xs text-white/70 mt-1">งบ {F.formatInt(calculated.bofuBudgetPerAccountDaily)} - {F.formatInt(calculated.bofuBudgetPerAccountDaily * 2)}</p>
                     </StructureBox>
                   </div>
@@ -1121,3 +1110,5 @@ export function ProfitPilotPage() {
     </>
   );
 }
+
+    
