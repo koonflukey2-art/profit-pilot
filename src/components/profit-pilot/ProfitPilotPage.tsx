@@ -211,10 +211,14 @@ export function ProfitPilotPage() {
 
   useEffect(() => {
     setIsClient(true);
-    const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
-    setHistory(savedHistory);
-    const savedTheme = localStorage.getItem('profitPlannerTheme') || 'dark';
-    setTheme(savedTheme);
+    try {
+      const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
+      const savedTheme = localStorage.getItem('profitPlannerTheme') || 'dark';
+      setHistory(savedHistory);
+      setTheme(savedTheme);
+    } catch (error) {
+        console.error("Could not access localStorage. Running on server?");
+    }
   }, []);
 
   useEffect(() => {
@@ -406,28 +410,26 @@ export function ProfitPilotPage() {
 
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
+    
+    // Sort data to ensure it's always in the correct order for display
+    const sortedData = [...data].sort((a, b) => {
+      if (a.name === 'TOFU') return -1;
+      if (b.name === 'TOFU') return 1;
+      if (a.name === 'MOFU') return -1;
+      if (b.name === 'MOFU') return 1;
+      return 0; // BOFU last
+    });
 
     return (
-      <div className="w-full flex justify-center items-end my-4 py-4 min-h-[300px]">
-        <div className="flex flex-col items-center justify-end w-full max-w-sm space-y-2">
-          {data.map((item, index) => {
-            const widthPercentage = 30 + (index * 35);
+      <div className="w-full flex justify-center items-center my-4 py-4 min-h-[300px]">
+        <div className="flex flex-col items-center justify-center w-full max-w-sm space-y-4">
+          {sortedData.map((item, index) => {
+            const widthPercentage = 100 - (index * 20); // TOFU=100, MOFU=80, BOFU=60
             const layerStyle: React.CSSProperties = {
                 width: `${widthPercentage}%`,
-                height: '80px',
-                backgroundColor: 'transparent',
-                clipPath: 'polygon(20% 0, 80% 0, 100% 100%, 0% 100%)',
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-            };
-            const innerStyle: React.CSSProperties = {
-                position: 'absolute',
-                inset: '2px',
+                minHeight: '60px',
                 backgroundColor: item.color,
-                clipPath: 'polygon(20% 0, 80% 0, 100% 100%, 0% 100%)',
-                boxShadow: `0 0 15px ${item.color}, 0 0 25px ${item.color}66`,
+                boxShadow: `0 0 15px ${item.color}, 0 0 25px ${item.color}66, inset 0 0 10px ${item.color}33`,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -435,12 +437,12 @@ export function ProfitPilotPage() {
                 fontWeight: 'bold',
                 fontSize: '1.1rem',
                 textShadow: '0 0 5px #000, 0 0 10px #000',
-            }
+                borderRadius: '8px',
+                border: `1px solid ${item.color}`
+            };
             return (
               <div key={item.name} style={layerStyle}>
-                <div style={innerStyle}>
-                  {item.name} {item.value}%
-                </div>
+                {item.name} {item.value}%
               </div>
             );
           })}
@@ -490,7 +492,11 @@ export function ProfitPilotPage() {
   );
   
   if (!isClient) {
-      return null;
+      return (
+        <div className="w-full h-screen flex items-center justify-center bg-background">
+          <p className="text-foreground">Loading...</p>
+        </div>
+      );
   }
   
   return (
@@ -778,12 +784,13 @@ export function ProfitPilotPage() {
 
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white flex items-center gap-2">
-                 <Image 
-                  src="https://placehold.co/80x80.png"
-                  width={24}
-                  height={24}
-                  alt="Marketing Icon"
-                  data-ai-hint="banana marketing"
+                <Image
+                    src="https://placehold.co/80x80.png"
+                    width={40}
+                    height={40}
+                    alt="Banana Marketing"
+                    className="rounded-full"
+                    data-ai-hint="banana marketing"
                 />
                 การกระจายงบประมาณ
               </h3>
