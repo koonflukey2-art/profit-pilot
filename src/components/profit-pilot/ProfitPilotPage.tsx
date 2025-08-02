@@ -426,6 +426,7 @@ export function ProfitPilotPage() {
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
   
+    // DO NOT SORT, to preserve TOFU -> MOFU -> BOFU order
     const chartData = data;
 
     return (
@@ -433,9 +434,10 @@ export function ProfitPilotPage() {
         <div className="flex flex-col items-center justify-end w-full max-w-sm space-y-2">
           {chartData.map((item, index) => {
             const layerStyle: React.CSSProperties = {
-                width: `${item.value}%`,
+                width: `${100 - (index * 20)}%`, // Visually represent funnel shape
+                height: `${item.value}%`,
+                minHeight: '40px',
                 clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)',
-                minHeight: '80px',
                 backgroundColor: item.color,
                 boxShadow: `0 0 15px ${item.color}, 0 0 25px ${item.color}66`,
                 display: 'flex',
@@ -900,7 +902,7 @@ export function ProfitPilotPage() {
                   <div className="w-48 flex-shrink-0 pt-20">
                     <StructureBox header="Campaign">
                       <p className="font-bold text-lg">CBO / ABO</p>
-                      <p className="text-xs text-white/70 mt-1">งบ {F.formatInt(calculated.tofuBudgetPerAccountDaily / F.num(inputs.numberOfAccounts))} - {F.formatInt((calculated.tofuBudgetPerAccountDaily * 2) / F.num(inputs.numberOfAccounts))}</p>
+                      <p className="text-xs text-white/70 mt-1">งบประมาณ/วัน: {F.formatInt(calculated.tofuBudgetPerAccountDaily)} ฿</p>
                       <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
                     </StructureBox>
                   </div>
@@ -950,7 +952,7 @@ export function ProfitPilotPage() {
                   <div className="w-48 flex-shrink-0 pt-20">
                     <StructureBox header="Campaign">
                       <p className="font-bold text-lg">CBO / ABO</p>
-                       <p className="text-xs text-white/70 mt-1">งบ {F.formatInt(calculated.bofuBudgetPerAccountDaily / F.num(inputs.numberOfAccounts))} - {F.formatInt((calculated.bofuBudgetPerAccountDaily * 2) / F.num(inputs.numberOfAccounts))}</p>
+                       <p className="text-xs text-white/70 mt-1">งบประมาณ/วัน: {F.formatInt(calculated.bofuBudgetPerAccountDaily)} ฿</p>
                        <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
                     </StructureBox>
                   </div>
