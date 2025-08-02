@@ -721,12 +721,12 @@ export function ProfitPilotPage() {
       <div className="neumorphic-card p-6 mt-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="tab-nav mb-6 grid w-full grid-cols-2 md:grid-cols-6 bg-background shadow-inner">
-            <TabsTrigger value="summary" className="tab-button"><FileText className="w-4 h-4"/>สรุปแผน</TabsTrigger>
+            <TabsTrigger value="history" className="tab-button"><History className="w-4 h-4"/>ประวัติ</TabsTrigger>
             <TabsTrigger value="metrics" className="tab-button"><CalendarCheck className="w-4 h-4"/>Metrics แนะนำ</TabsTrigger>
             <TabsTrigger value="planning" className="tab-button"><GanttChartSquare className="w-4 h-4"/>การวางแผน</TabsTrigger>
             <TabsTrigger value="funnel" className="tab-button"><Filter className="w-4 h-4"/>กลยุทธ์ Funnel</TabsTrigger>
             <TabsTrigger value="automation" className="tab-button"><Bot className="w-4 h-4"/>ระบบอัตโนมัติ</TabsTrigger>
-            <TabsTrigger value="history" className="tab-button"><History className="w-4 h-4"/>ประวัติ</TabsTrigger>
+            <TabsTrigger value="summary" className="tab-button"><FileText className="w-4 h-4"/>สรุปแผน</TabsTrigger>
           </TabsList>
           
           <TabsContent value="summary">
@@ -1048,7 +1048,7 @@ export function ProfitPilotPage() {
                   <div className="w-48 flex-shrink-0 pt-20">
                     <StructureBox header="Campaign">
                       <p className="font-bold text-lg">CBO / ABO</p>
-                      <p className="text-xs text-white/70 mt-1">งบประมาณ/วัน: {F.formatInt(calculated.tofuBudgetPerAccountDaily)} ฿</p>
+                      <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}</p>
                       <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
                     </StructureBox>
                   </div>
@@ -1098,7 +1098,7 @@ export function ProfitPilotPage() {
                   <div className="w-48 flex-shrink-0 pt-20">
                     <StructureBox header="Campaign">
                       <p className="font-bold text-lg">CBO / ABO</p>
-                       <p className="text-xs text-white/70 mt-1">งบประมาณ/วัน: {F.formatInt(calculated.bofuBudgetPerAccountDaily)} ฿</p>
+                       <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p>
                        <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
                     </StructureBox>
                   </div>
