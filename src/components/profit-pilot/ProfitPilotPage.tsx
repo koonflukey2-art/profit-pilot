@@ -721,12 +721,12 @@ export function ProfitPilotPage() {
       <div className="neumorphic-card p-6 mt-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="tab-nav mb-6 grid w-full grid-cols-2 md:grid-cols-6 bg-background shadow-inner">
-            <TabsTrigger value="history" className="tab-button"><History className="w-4 h-4"/>ประวัติ</TabsTrigger>
+            <TabsTrigger value="summary" className="tab-button"><FileText className="w-4 h-4"/>สรุปแผน</TabsTrigger>
             <TabsTrigger value="metrics" className="tab-button"><CalendarCheck className="w-4 h-4"/>Metrics แนะนำ</TabsTrigger>
             <TabsTrigger value="planning" className="tab-button"><GanttChartSquare className="w-4 h-4"/>การวางแผน</TabsTrigger>
             <TabsTrigger value="funnel" className="tab-button"><Filter className="w-4 h-4"/>กลยุทธ์ Funnel</TabsTrigger>
             <TabsTrigger value="automation" className="tab-button"><Bot className="w-4 h-4"/>ระบบอัตโนมัติ</TabsTrigger>
-            <TabsTrigger value="summary" className="tab-button"><FileText className="w-4 h-4"/>สรุปแผน</TabsTrigger>
+            <TabsTrigger value="history" className="tab-button"><History className="w-4 h-4"/>ประวัติ</TabsTrigger>
           </TabsList>
           
           <TabsContent value="summary">
