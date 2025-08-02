@@ -827,16 +827,14 @@ export function ProfitPilotPage() {
                     {/* Floating Icons */}
                     <FloatingIcon icon={LineChart} className="top-0 left-1/4 animate-bounce" size="lg" />
                     <FloatingIcon icon={BarChart} className="top-0 right-1/4 animate-bounce" size="lg" />
-                    <FloatingIcon icon={Users} className="top-1/3 left-4" size="lg"/>
-                    <FloatingIcon icon={Target} className="top-1/3 right-4" size="lg" />
+                    <FloatingIcon icon={Users} className="top-1/3 left-8" size="lg"/>
+                    <FloatingIcon icon={Target} className="top-1/3 right-8" size="lg" />
                     <FloatingIcon icon={Megaphone} className="top-2/3 left-10" size="lg" />
                     <FloatingIcon icon={Heart} className="top-2/3 right-10" size="lg" />
                     <FloatingIcon icon={Tv} className="bottom-0 left-1/4" size="lg" />
                     <FloatingIcon icon={DollarSign} className="bottom-0 right-1/4" size="lg" />
                     <FloatingIcon icon={Percent} className="bottom-1/2 left-12 animate-pulse" size="md" />
                     <FloatingIcon icon={Hash} className="bottom-1/2 right-12 animate-pulse" size="md" />
-                    <FloatingIcon icon={ArrowRight} className="top-1/2 -left-4" size="sm" />
-                    <FloatingIcon icon={ArrowRight} className="top-1/2 -right-4" size="sm" />
 
                     {/* Funnel Chart */}
                     <div className="w-full max-w-sm">
