@@ -497,7 +497,7 @@ export function ProfitPilotPage() {
   const StructureBox = ({ children, className = '', header, subHeader }) => (
     <div className={cn("flex flex-col items-center", className)}>
       {header && <div className="text-xs font-semibold text-center text-white/80 mb-1">{header}</div>}
-      <div className="bg-blue-950 border border-blue-500 rounded-lg p-3 w-40 text-center">
+      <div className="border rounded-lg p-3 w-40 text-center" style={{backgroundColor: '#0D1B2A', borderColor: '#000814'}}>
         {subHeader && <div className="font-bold text-white mb-1">{subHeader}</div>}
         {children}
       </div>
@@ -507,7 +507,9 @@ export function ProfitPilotPage() {
   const StructureLine = ({ children, isDashed = false }) => (
     <div className="flex-1 flex items-center justify-center relative">
       <div className={cn("w-full h-px", isDashed ? "bg-none" : "bg-blue-500")}
-           style={isDashed ? { backgroundImage: "linear-gradient(to right, #3B82F6 50%, transparent 50%)", backgroundSize: "8px 1px", backgroundRepeat: "repeat-x"} : {}}
+           style={{
+             ...(isDashed ? { backgroundImage: "linear-gradient(to right, #00f5ff 50%, transparent 50%)", backgroundSize: "8px 1px", backgroundRepeat: "repeat-x"} : { backgroundColor: '#00f5ff'})
+           }}
       />
       {children}
     </div>
@@ -520,7 +522,7 @@ export function ProfitPilotPage() {
   
     return (
       <div className="flex items-center" style={{ height: `${height}px` }}>
-        <svg width="40" height={height} viewBox={viewBox} className="stroke-blue-500" fill="none" strokeWidth="1">
+        <svg width="40" height={height} viewBox={viewBox} stroke="#00f5ff" fill="none" strokeWidth="1">
           <path d={`M0,${startY} H20`} />
           {endYPositions.map((endY, i) => (
              <path key={i} d={`M20,${startY} L 40,${endY}`} />
@@ -1038,7 +1040,7 @@ export function ProfitPilotPage() {
                 {/* New Customer Structure */}
                 <div className="flex items-start gap-4">
                   <div className="w-48 flex-shrink-0 pt-20">
-                      <div className="bg-blue-950 border border-blue-500 rounded-lg p-3 text-center text-white">
+                      <div className="border rounded-lg p-3 text-center text-white" style={{backgroundColor: '#0D1B2A', borderColor: '#000814'}}>
                         <h4 className="font-bold text-lg">ลูกค้าใหม่</h4>
                       </div>
                   </div>
@@ -1088,7 +1090,7 @@ export function ProfitPilotPage() {
                 {/* Retarget Structure */}
                  <div className="flex items-start gap-4">
                   <div className="w-48 flex-shrink-0 pt-20">
-                      <div className="bg-blue-950 border border-blue-500 rounded-lg p-3 text-center text-white">
+                      <div className="border rounded-lg p-3 text-center text-white" style={{backgroundColor: '#0D1B2A', borderColor: '#000814'}}>
                         <h4 className="font-bold text-lg">Retarget</h4>
                       </div>
                   </div>
