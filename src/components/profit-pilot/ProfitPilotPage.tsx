@@ -497,89 +497,109 @@ export function ProfitPilotPage() {
     );
   };
   
-  const FunnelStructure = ({ data }) => {
-    return (
-      <div className="flex flex-col items-center gap-12 py-4">
-        {data.map((funnel, funnelIndex) => (
-          <div key={funnelIndex} className="grid grid-cols-[150px_1fr_1fr] items-center gap-x-8 w-full">
-            {/* Col 1: Stage */}
-            <div className="flex justify-center items-center">
-              <div
-                className="flex items-center justify-center border rounded-lg h-20 w-36 text-center"
-                style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}
-              >
-                <span className="font-bold text-lg">{funnel.stage}</span>
-              </div>
+const FunnelStructure = ({ data }) => {
+  return (
+    <div className="flex flex-col items-center gap-12 py-4">
+      {data.map((funnel, funnelIndex) => (
+        <div key={funnelIndex} className="grid grid-cols-[150px_1fr_1fr] items-start gap-x-8 w-full">
+          {/* Col 1: Stage */}
+          <div className="flex justify-center items-start pt-8">
+            <div
+              className="flex items-center justify-center border rounded-lg h-20 w-36 text-center"
+              style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}
+            >
+              <span className="font-bold text-lg">{funnel.stage}</span>
             </div>
-  
-            {/* Col 2: Campaign & Ad Groups */}
-            <div className="flex items-center gap-x-4">
-              {/* Campaign Box */}
-              <div className="relative flex-shrink-0">
-                  <div
-                    className="flex flex-col items-center justify-center border rounded-lg p-2 h-20 w-48 text-center text-sm"
-                    style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}
-                  >
-                    <p className="font-bold">{funnel.campaign.title}</p>
-                    <p>งบ/วัน: {funnel.campaign.budget}</p>
-                    <p>จำนวน {funnel.campaign.accounts}</p>
-                  </div>
-              </div>
+          </div>
 
-              {/* Connector and Ad Groups */}
-              <div className="flex items-center">
-                  {/* Connector from Campaign */}
-                   <div className="relative h-full w-8">
-                       <div className="absolute top-1/2 left-0 w-4 h-px bg-[#00f5ff] -translate-y-1/2"></div>
-                       <div className="absolute top-0 left-4 w-px h-full bg-[#00f5ff]"></div>
-                   </div>
-
-                  {/* Ad Groups Column */}
-                  <div className="flex flex-col gap-y-4">
-                      {funnel.adGroups.map((group, groupIndex) => (
-                          <div key={groupIndex} className="flex items-center">
-                              {/* Horizontal line to the box */}
-                              <div className="w-4 h-px bg-[#00f5ff]"></div>
-                              <div
-                                  className="flex flex-col items-center justify-center border rounded-lg p-2 h-14 text-center w-48 text-xs"
-                                  style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}
-                              >
-                                  <p className="font-bold">{group.title}</p>
-                                  {group.subtitle && <p>{group.subtitle}</p>}
-                              </div>
-                          </div>
-                      ))}
-                  </div>
-              </div>
-            </div>
-
-             {/* Col 3: Ads */}
-             <div className="flex items-center">
-                {/* Connector from Ad Groups */}
-                <div className="relative h-full w-8">
-                    <div className="absolute top-1/2 left-0 w-4 h-px bg-[#00f5ff] -translate-y-1/2"></div>
-                    <div className="absolute top-0 left-4 w-px h-full bg-[#00f5ff]"></div>
+          {/* Col 2: Campaign & Ad Groups */}
+          <div className="flex items-start gap-x-4">
+            {/* Campaign Box */}
+            <div className="relative flex-shrink-0 pt-8">
+                <div
+                  className="flex flex-col items-center justify-center border rounded-lg p-2 h-20 w-48 text-center text-sm"
+                  style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}
+                >
+                  <p className="font-bold">{funnel.campaign.title}</p>
+                  <p>งบ/วัน: {funnel.campaign.budget}</p>
+                  <p>จำนวน {funnel.campaign.accounts}</p>
                 </div>
+            </div>
 
-                <div className="flex flex-col gap-y-2">
-                    {funnel.ads.map((ad, adIndex) => (
-                        <div key={adIndex} className="flex items-center">
-                             <div className="w-4 h-px bg-[#00f5ff]"></div>
-                             <div
-                                className="flex items-center justify-center border rounded-lg p-1 h-8 text-center w-40 text-xs"
-                                style={{ backgroundColor: '#0D1B2A', borderColor: '#00f5ff' }}
-                             >
-                                 {ad}
-                             </div>
+            {/* Connector and Ad Groups */}
+            <div className="flex items-start pt-8 relative">
+                {/* Main connector from Campaign */}
+                <div className="absolute top-1/2 left-0 w-4 h-px bg-primary -translate-y-7" />
+
+                {/* Vertical line connecting Ad Groups */}
+                {funnel.adGroups.length > 1 && (
+                  <div 
+                    className="absolute w-px bg-primary"
+                    style={{
+                      left: '1rem', // Position it after the horizontal line from campaign
+                      top: ' calc(2rem + 1.75rem)', // Start from the middle of the first ad group box (py-8 + h-14/2)
+                      height: `calc(${(funnel.adGroups.length - 1)} * (3.5rem + 1rem))`, // (box height + gap) * (n-1)
+                    }}
+                  />
+                )}
+
+                {/* Ad Groups Column */}
+                <div className="flex flex-col gap-y-4">
+                    {funnel.adGroups.map((group, groupIndex) => (
+                        <div key={groupIndex} className="flex items-center">
+                            {/* Horizontal line to the box from vertical connector */}
+                            <div className="w-4 h-px bg-primary"></div>
+                            <div
+                                className="flex flex-col items-center justify-center border rounded-lg p-2 h-14 text-center w-48 text-xs"
+                                style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}
+                            >
+                                <p className="font-bold">{group.title}</p>
+                                {group.subtitle && <p>{group.subtitle}</p>}
+                            </div>
                         </div>
                     ))}
                 </div>
             </div>
           </div>
-        ))}
-      </div>
-    );
-  };
+
+           {/* Col 3: Ads */}
+           <div className="flex items-center pt-8">
+              {/* Main connector from Ad Groups column */}
+              <div className="relative h-full w-8">
+                  <div className="absolute top-1/2 left-0 w-4 h-px bg-primary -translate-y-1/2" />
+                  {/* Vertical Branching Line */}
+                  {funnel.ads.length > 1 && (
+                    <div 
+                      className="absolute w-px bg-primary"
+                      style={{
+                        left: '1rem',
+                        top: `calc(50% - ${((funnel.ads.length-1)/2)} * 2.5rem)`, // Center the line
+                        height: `calc(${(funnel.ads.length -1)} * 2.5rem)`, // Height based on number of ads
+                      }}
+                    />
+                  )}
+              </div>
+
+              <div className="flex flex-col gap-y-2">
+                  {funnel.ads.map((ad, adIndex) => (
+                      <div key={adIndex} className="flex items-center">
+                           {/* Horizontal line to each ad box */}
+                           <div className="w-4 h-px bg-primary"></div>
+                           <div
+                              className="flex items-center justify-center border rounded-lg p-1 h-8 text-center w-40 text-xs"
+                              style={{ backgroundColor: '#0D1B2A', borderColor: '#00f5ff' }}
+                           >
+                               {ad}
+                           </div>
+                      </div>
+                  ))}
+              </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
   
   const summaryFunnelData = useMemo(() => ([
     {
