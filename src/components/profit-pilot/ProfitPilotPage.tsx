@@ -505,30 +505,38 @@ export function ProfitPilotPage() {
   );
 
   const StructureBranchingLine = ({ children, count }) => {
-    const nodeHeight = 84; // Approximation of node height with gap
-    const verticalLineHeight = (count - 1) * nodeHeight;
+    const childrenArray = React.Children.toArray(children);
+    const itemHeight = 112; // Approx height of a node + margin
+    const containerHeight = count * itemHeight - 24; // Adjusted to better fit
 
     return (
-      <div className="flex items-center pl-8">
-        <div className="relative h-full">
-           {/* Horizontal line from parent */}
-           <div className="absolute top-1/2 -left-8 w-8 h-px" style={{backgroundColor: '#00f5ff'}}/>
-           
-           {/* Vertical line */}
-           <div className="absolute top-1/2 w-px" style={{backgroundColor: '#00f5ff', height: `${verticalLineHeight}px`, transform: `translateY(-${verticalLineHeight / 2}px)`}}/>
-        
-          <div className="flex flex-col justify-between" style={{height: `${verticalLineHeight}px`}}>
-            {children}
-          </div>
+        <div className="flex items-center pl-8">
+            <div className="relative" style={{ height: `${containerHeight}px` }}>
+                {/* Horizontal line from parent */}
+                <div className="absolute top-1/2 -left-8 w-8 h-px" style={{ backgroundColor: '#00f5ff' }} />
+
+                {/* Vertical line connecting all branches */}
+                <div className="absolute left-0 top-0 w-px h-full" style={{ backgroundColor: '#00f5ff' }} />
+                
+                <div className="absolute left-0 top-0 h-full w-full">
+                    {childrenArray.map((child, index) => {
+                        const topPosition = (index / (childrenArray.length -1)) * 100;
+                        return (
+                            <div key={index} className="absolute w-full" style={{ top: `${topPosition}%`, transform: 'translateY(-50%)' }}>
+                                {child}
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
         </div>
-      </div>
     );
-  };
+};
 
   const StructureNode = ({ children }) => {
     return (
-      <div className="flex items-center">
-         {/* Horizontal line to child */}
+      <div className="flex items-center relative">
+        {/* Horizontal line to child box */}
         <div className="w-8 h-px" style={{backgroundColor: '#00f5ff'}} />
         {children}
       </div>
@@ -1040,76 +1048,72 @@ export function ProfitPilotPage() {
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white">Funnel Structure</h3>
               <div className="neumorphic-card p-6 space-y-8 overflow-x-auto min-w-[800px]">
-                {/* New Customer Structure */}
                 <div className="flex items-center">
-                  <StructureBox><h4 className="font-bold text-lg">ลูกค้าใหม่</h4></StructureBox>
-                  <div className="flex items-center">
-                    <StructureNode>
-                      <StructureBox>
-                        <p className="font-bold text-lg">CBO / ABO</p>
-                        <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}</p>
-                        <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
-                      </StructureBox>
-                    </StructureNode>
-                    <StructureBranchingLine count={4}>
+                    <StructureBox><p className="font-bold text-lg">Campaign</p></StructureBox>
+                    <div className="flex items-center">
                         <StructureNode>
-                            <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
+                            <StructureBox>
+                                <p className="font-bold text-lg">Adset</p>
+                                <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}</p>
+                            </StructureBox>
                         </StructureNode>
-                        <StructureNode>
-                            <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
-                        </StructureNode>
-                        <StructureNode>
-                            <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
-                        </StructureNode>
-                        <StructureNode>
-                            <StructureBox><p>Lookalike</p></StructureBox>
-                        </StructureNode>
-                    </StructureBranchingLine>
-                     <StructureBranchingLine count={3}>
-                        <StructureNode>
-                          <StructureBox>
-                            <p className="bg-white/10 rounded px-2 py-0.5">VDO 1</p>
-                            <p className="bg-white/10 rounded px-2 py-0.5 mt-1">VDO 2</p>
-                            <p className="bg-white/10 rounded px-2 py-0.5 mt-1">รูปภาพ</p>
-                          </StructureBox>
-                        </StructureNode>
-                      </StructureBranchingLine>
-                  </div>
+                        <StructureBranchingLine count={4}>
+                            <StructureNode>
+                                <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
+                            </StructureNode>
+                            <StructureNode>
+                                <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
+                            </StructureNode>
+                            <StructureNode>
+                                <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
+                            </StructureNode>
+                            <StructureNode>
+                                <StructureBox><p>Lookalike</p></StructureBox>
+                            </StructureNode>
+                        </StructureBranchingLine>
+                        <StructureBranchingLine count={3}>
+                           <StructureNode>
+                                <StructureBox>
+                                    <p className="bg-white/10 rounded px-2 py-0.5">VDO 1</p>
+                                    <p className="bg-white/10 rounded px-2 py-0.5 mt-1">VDO 2</p>
+                                    <p className="bg-white/10 rounded px-2 py-0.5 mt-1">รูปภาพ</p>
+                                </StructureBox>
+                           </StructureNode>
+                        </StructureBranchingLine>
+                    </div>
                 </div>
 
                 <hr className="border-primary/20"/>
 
-                {/* Retarget Structure */}
                 <div className="flex items-center">
-                  <StructureBox><h4 className="font-bold text-lg">Retarget</h4></StructureBox>
-                   <div className="flex items-center">
-                      <StructureNode>
-                        <StructureBox>
-                          <p className="font-bold text-lg">CBO / ABO</p>
-                          <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p>
-                          <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
-                        </StructureBox>
-                      </StructureNode>
-                      <StructureBranchingLine count={3}>
-                          <StructureNode>
-                             <StructureBox><p>INBOX 7,15,30 วัน</p></StructureBox>
-                          </StructureNode>
-                          <StructureNode>
-                              <StructureBox><p>VDO75% 3,7,15,30 วัน</p></StructureBox>
-                          </StructureNode>
-                          <StructureNode>
-                             <StructureBox><p>ENGAGE 3,7,15,30 วัน</p></StructureBox>
-                          </StructureNode>
-                      </StructureBranchingLine>
-                       <StructureBranchingLine count={3}>
+                    <StructureBox><p className="font-bold text-lg">Campaign</p></StructureBox>
+                    <div className="flex items-center">
                         <StructureNode>
-                          <StructureBox>
-                            <p className="bg-white/10 rounded px-2 py-0.5">VDO ปิด</p>
-                            <p className="bg-white/10 rounded px-2 py-0.5 mt-1">โปรโมชั่น</p>
-                            <p className="bg-white/10 rounded px-2 py-0.5 mt-1">รีวิว/ผลลัพธ์</p>
-                          </StructureBox>
+                           <StructureBox>
+                               <p className="font-bold text-lg">Retarget Adset</p>
+                               <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p>
+                           </StructureBox>
                         </StructureNode>
-                      </StructureBranchingLine>
+                        <StructureBranchingLine count={3}>
+                            <StructureNode>
+                                <StructureBox><p>INBOX 7,15,30 วัน</p></StructureBox>
+                            </StructureNode>
+                            <StructureNode>
+                                <StructureBox><p>VDO75% 3,7,15,30 วัน</p></StructureBox>
+                            </StructureNode>
+                            <StructureNode>
+                                <StructureBox><p>ENGAGE 3,7,15,30 วัน</p></StructureBox>
+                            </StructureNode>
+                        </StructureBranchingLine>
+                        <StructureBranchingLine count={3}>
+                            <StructureNode>
+                                <StructureBox>
+                                    <p className="bg-white/10 rounded px-2 py-0.5">VDO ปิด</p>
+                                    <p className="bg-white/10 rounded px-2 py-0.5 mt-1">โปรโมชั่น</p>
+                                    <p className="bg-white/10 rounded px-2 py-0.5 mt-1">รีวิว/ผลลัพธ์</p>
+                                </StructureBox>
+                            </StructureNode>
+                        </StructureBranchingLine>
                     </div>
                 </div>
               </div>
