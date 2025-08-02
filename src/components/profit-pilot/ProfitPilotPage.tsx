@@ -501,7 +501,7 @@ const FunnelStructure = ({ data }) => {
   return (
     <div className="flex flex-col items-center gap-12 py-4">
       {data.map((funnel, funnelIndex) => (
-        <div key={funnelIndex} className="grid grid-cols-[150px_1fr_1fr] items-start gap-x-8 w-full">
+        <div key={funnelIndex} className="grid grid-cols-[150px_1fr] items-start gap-x-8 w-full">
           {/* Col 1: Stage */}
           <div className="flex justify-center items-start pt-8">
             <div
@@ -512,7 +512,7 @@ const FunnelStructure = ({ data }) => {
             </div>
           </div>
 
-          {/* Col 2: Campaign & Ad Groups */}
+          {/* Col 2: Campaign, Ad Groups & Ads */}
           <div className="flex items-start gap-x-4">
             {/* Campaign Box */}
             <div className="relative flex-shrink-0 pt-8">
@@ -526,29 +526,27 @@ const FunnelStructure = ({ data }) => {
                 </div>
             </div>
 
-            {/* Connector and Ad Groups */}
-            <div className="flex items-start pt-8 relative">
-                {/* Main connector from Campaign */}
-                <div className="absolute top-1/2 left-0 w-4 h-px bg-primary -translate-y-7" />
+            {/* Connectors & Right-side Columns */}
+            <div className="flex items-center pt-8 relative h-full">
+                 {/* Main horizontal line from Campaign */}
+                 <div className="absolute top-1/2 left-0 w-8 h-px bg-primary -translate-y-7" />
 
-                {/* Vertical line connecting Ad Groups */}
-                {funnel.adGroups.length > 1 && (
-                  <div 
+                {/* Vertical line */}
+                 <div 
                     className="absolute w-px bg-primary"
                     style={{
-                      left: '1rem', // Position it after the horizontal line from campaign
-                      top: ' calc(2rem + 1.75rem)', // Start from the middle of the first ad group box (py-8 + h-14/2)
-                      height: `calc(${(funnel.adGroups.length - 1)} * (3.5rem + 1rem))`, // (box height + gap) * (n-1)
+                      left: '2rem',
+                      top: `calc(50% - ${((funnel.adGroups.length -1) / 2) * (3.5 + 1)}rem + 1.75rem - 7px)`, // Adjust vertical centering
+                      height: `calc(${(funnel.adGroups.length -1)} * (3.5rem + 1rem))`,
                     }}
-                  />
-                )}
+                 />
 
                 {/* Ad Groups Column */}
-                <div className="flex flex-col gap-y-4">
+                <div className="flex flex-col gap-y-4 ml-8">
                     {funnel.adGroups.map((group, groupIndex) => (
-                        <div key={groupIndex} className="flex items-center">
+                        <div key={groupIndex} className="flex items-center relative">
                             {/* Horizontal line to the box from vertical connector */}
-                            <div className="w-4 h-px bg-primary"></div>
+                            <div className="absolute left-0 top-1/2 w-4 h-px bg-primary -translate-x-4"></div>
                             <div
                                 className="flex flex-col items-center justify-center border rounded-lg p-2 h-14 text-center w-48 text-xs"
                                 style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}
@@ -559,41 +557,9 @@ const FunnelStructure = ({ data }) => {
                         </div>
                     ))}
                 </div>
+
+                {/* Ads Column (further to the right) - This part is removed as per the image logic */}
             </div>
-          </div>
-
-           {/* Col 3: Ads */}
-           <div className="flex items-center pt-8">
-              {/* Main connector from Ad Groups column */}
-              <div className="relative h-full w-8">
-                  <div className="absolute top-1/2 left-0 w-4 h-px bg-primary -translate-y-1/2" />
-                  {/* Vertical Branching Line */}
-                  {funnel.ads.length > 1 && (
-                    <div 
-                      className="absolute w-px bg-primary"
-                      style={{
-                        left: '1rem',
-                        top: `calc(50% - ${((funnel.ads.length-1)/2)} * 2.5rem)`, // Center the line
-                        height: `calc(${(funnel.ads.length -1)} * 2.5rem)`, // Height based on number of ads
-                      }}
-                    />
-                  )}
-              </div>
-
-              <div className="flex flex-col gap-y-2">
-                  {funnel.ads.map((ad, adIndex) => (
-                      <div key={adIndex} className="flex items-center">
-                           {/* Horizontal line to each ad box */}
-                           <div className="w-4 h-px bg-primary"></div>
-                           <div
-                              className="flex items-center justify-center border rounded-lg p-1 h-8 text-center w-40 text-xs"
-                              style={{ backgroundColor: '#0D1B2A', borderColor: '#00f5ff' }}
-                           >
-                               {ad}
-                           </div>
-                      </div>
-                  ))}
-              </div>
           </div>
         </div>
       ))}
