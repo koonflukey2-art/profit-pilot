@@ -497,9 +497,11 @@ export function ProfitPilotPage() {
   const StructureBox = ({ children, className = '', header, subHeader }) => (
     <div className={cn("flex flex-col items-center", className)}>
       {header && <div className="text-xs font-semibold text-center text-white/80 mb-1">{header}</div>}
-      <div className="border rounded-lg p-3 w-40 text-center" style={{backgroundColor: '#0D1B2A', borderColor: '#00f5ff'}}>
-        {subHeader && <div className="font-bold text-white mb-1">{subHeader}</div>}
-        {children}
+      <div className="border rounded-lg p-1 w-40 text-center" style={{backgroundColor: '#0D1B2A', borderColor: '#00f5ff'}}>
+        <div className="rounded p-2" style={{backgroundColor: '#000814'}}>
+            {subHeader && <div className="font-bold text-white mb-1">{subHeader}</div>}
+            {children}
+        </div>
       </div>
     </div>
   );
@@ -1040,8 +1042,10 @@ export function ProfitPilotPage() {
                 {/* New Customer Structure */}
                 <div className="flex items-start gap-4">
                   <div className="w-48 flex-shrink-0 pt-20">
-                      <div className="border rounded-lg p-3 text-center text-white" style={{backgroundColor: '#0D1B2A', borderColor: '#00f5ff'}}>
-                        <h4 className="font-bold text-lg">ลูกค้าใหม่</h4>
+                      <div className="border rounded-lg p-1 text-center text-white" style={{backgroundColor: '#0D1B2A', borderColor: '#00f5ff'}}>
+                        <div className="rounded p-2" style={{backgroundColor: '#000814'}}>
+                           <h4 className="font-bold text-lg">ลูกค้าใหม่</h4>
+                        </div>
                       </div>
                   </div>
 
@@ -1090,8 +1094,10 @@ export function ProfitPilotPage() {
                 {/* Retarget Structure */}
                  <div className="flex items-start gap-4">
                   <div className="w-48 flex-shrink-0 pt-20">
-                      <div className="border rounded-lg p-3 text-center text-white" style={{backgroundColor: '#0D1B2A', borderColor: '#00f5ff'}}>
-                        <h4 className="font-bold text-lg">Retarget</h4>
+                       <div className="border rounded-lg p-1 text-center text-white" style={{backgroundColor: '#0D1B2A', borderColor: '#00f5ff'}}>
+                        <div className="rounded p-2" style={{backgroundColor: '#000814'}}>
+                           <h4 className="font-bold text-lg">Retarget</h4>
+                        </div>
                       </div>
                   </div>
 
