@@ -21,14 +21,14 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, ArrowRight, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users } from 'lucide-react';
+import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText } from 'lucide-react';
 import { generateUiTitles, generateAutomationWorkflow, getMetricsAdvice } from './actions';
 import { Progress } from '../ui/progress';
 
@@ -94,13 +94,14 @@ export function ProfitPilotPage() {
   });
   const [automationRules, setAutomationRules] = useState([]);
   const [uiTitles, setUiTitles] = useState({ productInfoTitle: 'ข้อมูลสินค้า', costCalculationTitle: 'คำนวณต้นทุน', goalsAndResultsTitle: 'เป้าหมายและผลลัพธ์', advancedPlanningTitle: 'Advanced Planning' });
-  const [activeTab, setActiveTab] = useState('planning');
+  const [activeTab, setActiveTab] = useState('summary');
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [history, setHistory] = useState([]);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: () => {} });
   const [n8nWorkflow, setN8nWorkflow] = useState({ json: null, loading: false });
   const [theme, setTheme] = useState('dark');
   const [funnelStageFilter, setFunnelStageFilter] = useState('all');
+  const [aiAdvice, setAiAdvice] = useState({ recommendations: '', insights: '', loading: false });
   
   const { toast } = useToast();
 
@@ -390,6 +391,27 @@ export function ProfitPilotPage() {
     }
   };
 
+  const fetchAiAdvice = useCallback(async () => {
+    setAiAdvice(prev => ({...prev, loading: true}));
+    try {
+      const advice = await getMetricsAdvice({
+        businessType: funnelObjectivesData[inputs.businessType]?.name || inputs.businessType,
+        profitGoal: F.num(inputs.profitGoal),
+        fixedCosts: F.num(inputs.fixedCosts),
+        sellingPrice: F.num(inputs.sellingPrice),
+        cogs: F.num(inputs.cogs),
+        targetRoas: calculated.targetRoas,
+        targetCpa: calculated.targetCpa,
+        funnelPlan: funnelPlans[inputs.funnelPlan]?.name || inputs.funnelPlan,
+        metricsPlan: metricsPlans[inputs.metricsPlan]?.name || inputs.metricsPlan,
+      });
+      setAiAdvice({ ...advice, loading: false });
+    } catch (error) {
+      toast({ variant: "destructive", title: "AI Advisor Error", description: "Failed to get AI-powered advice." });
+      setAiAdvice({ recommendations: '', insights: '', loading: false });
+    }
+  }, [inputs, calculated, toast]);
+
   const selectedMetricsPlan = metricsPlans[inputs.metricsPlan] || metricsPlans.fb_s1_plan;
   const filteredKpis = useMemo(() => {
     if (funnelStageFilter === 'all') {
@@ -426,7 +448,6 @@ export function ProfitPilotPage() {
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
   
-    // DO NOT SORT, to preserve TOFU -> MOFU -> BOFU order
     const chartData = data;
 
     return (
@@ -509,7 +530,19 @@ export function ProfitPilotPage() {
     );
   };
 
-  
+  const SummaryInfoCard = ({ title, value, subValue, icon: Icon }) => (
+    <Card className="neumorphic-card">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{title}</CardTitle>
+            <Icon className="h-5 w-5 text-primary" />
+        </CardHeader>
+        <CardContent>
+            <div className="text-2xl font-bold">{value}</div>
+            {subValue && <p className="text-xs text-muted-foreground">{subValue}</p>}
+        </CardContent>
+    </Card>
+);
+
   if (!isClient) {
       return (
         <div className="w-full h-screen flex items-center justify-center bg-background">
@@ -687,7 +720,8 @@ export function ProfitPilotPage() {
       
       <div className="neumorphic-card p-6 mt-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="tab-nav mb-6 grid w-full grid-cols-2 md:grid-cols-5 bg-background shadow-inner">
+          <TabsList className="tab-nav mb-6 grid w-full grid-cols-2 md:grid-cols-6 bg-background shadow-inner">
+            <TabsTrigger value="summary" className="tab-button"><FileText className="w-4 h-4"/>สรุปแผน</TabsTrigger>
             <TabsTrigger value="metrics" className="tab-button"><CalendarCheck className="w-4 h-4"/>Metrics แนะนำ</TabsTrigger>
             <TabsTrigger value="planning" className="tab-button"><GanttChartSquare className="w-4 h-4"/>การวางแผน</TabsTrigger>
             <TabsTrigger value="funnel" className="tab-button"><Filter className="w-4 h-4"/>กลยุทธ์ Funnel</TabsTrigger>
@@ -695,6 +729,118 @@ export function ProfitPilotPage() {
             <TabsTrigger value="history" className="tab-button"><History className="w-4 h-4"/>ประวัติ</TabsTrigger>
           </TabsList>
           
+          <TabsContent value="summary">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Overview Card */}
+              <Card className="neumorphic-card lg:col-span-3">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Info className="w-6 h-6 text-primary"/> ภาพรวมแผน</CardTitle>
+                  <CardDescription>สรุปข้อมูลหลักและเป้าหมายของแผนที่คุณวางไว้</CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                   <div className="flex items-center gap-4 p-4 bg-background/50 rounded-lg">
+                      <Briefcase className="w-8 h-8 text-primary"/>
+                      <div>
+                        <p className="text-sm text-muted-foreground">สินค้า/ธุรกิจ</p>
+                        <p className="font-bold">{inputs.productName || 'N/A'}</p>
+                        <p className="text-xs text-muted-foreground">{funnelObjectivesData[inputs.businessType]?.name || 'N/A'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 p-4 bg-background/50 rounded-lg">
+                      <Target className="w-8 h-8 text-primary"/>
+                      <div>
+                        <p className="text-sm text-muted-foreground">เป้าหมายกำไร</p>
+                        <p className="font-bold">{F.formatCurrency(inputs.profitGoal)}</p>
+                        <p className="text-xs text-muted-foreground">{inputs.profitGoalTimeframe === 'monthly' ? 'ต่อเดือน' : 'ต่อวัน'}</p>
+                      </div>
+                    </div>
+                     <div className="flex items-center gap-4 p-4 bg-background/50 rounded-lg">
+                      <Scaling className="w-8 h-8 text-primary"/>
+                      <div>
+                        <p className="text-sm text-muted-foreground">ค่าใช้จ่ายคงที่</p>
+                        <p className="font-bold">{F.formatCurrency(inputs.fixedCosts)}</p>
+                         <p className="text-xs text-muted-foreground">ต่อเดือน</p>
+                      </div>
+                    </div>
+                </CardContent>
+              </Card>
+
+              {/* Calculation Summary */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:col-span-3">
+                <SummaryInfoCard title="ราคาขาย (ต่อหน่วย)" value={F.formatCurrency(calculated.priceBeforeVat)} subValue={`รวม VAT: ${F.formatCurrency(inputs.sellingPrice)}`} icon={DollarSign} />
+                <SummaryInfoCard title="กำไรขั้นต้น (ต่อหน่วย)" value={F.formatCurrency(calculated.grossProfitUnit)} subValue="ราคาขาย(ไม่รวม VAT) - ต้นทุนแปรผันทั้งหมด" icon={BarChart} />
+                <SummaryInfoCard title="กำไรสุทธิ (ต่อหน่วย)" value={F.formatCurrency(calculated.netProfitUnit)} subValue="กำไรขั้นต้น - ค่าโฆษณาต่อหน่วย (CPA)" icon={LineChart} />
+                <SummaryInfoCard title="งบโฆษณา (ต่อหน่วย)" value={F.formatCurrency(calculated.targetCpa)} subValue="Target CPA ที่คำนวณได้" icon={Megaphone} />
+              </div>
+
+              {/* Goals & Budget */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:col-span-3">
+                <SummaryInfoCard title="ยอดขายเป้าหมาย (ต่อเดือน)" value={F.formatCurrency(calculated.targetRevenue)} icon={Users} />
+                <SummaryInfoCard title="จำนวนออเดอร์ (ต่อเดือน)" value={F.formatInt(calculated.targetOrders)} subValue={`เฉลี่ย ${F.formatNumber(calculated.targetOrdersDaily, 1)} ออเดอร์/วัน`} icon={ThumbsUp} />
+                <SummaryInfoCard title="งบโฆษณารวม (ต่อเดือน)" value={F.formatCurrency(calculated.adBudget)} icon={Percent} />
+                 <SummaryInfoCard title="งบโฆษณา + VAT (ต่อเดือน)" value={F.formatCurrency(calculated.adBudgetWithVat)} subValue={`VAT ${inputs.vatProduct}%`} icon={Hash} />
+              </div>
+              
+              {/* KPIs */}
+              <div className="lg:col-span-3">
+                 <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Target className="w-5 h-5 text-primary"/>ตัวชี้วัด (KPIs)</h3>
+                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="neumorphic-card p-4 text-center bg-red-900/20 border-red-500/50">
+                        <p className="font-bold text-red-400">BE ROAS</p>
+                        <p className="text-2xl font-bold text-red-400">{F.formatNumber(calculated.breakevenRoas)}</p>
+                        <p className="text-xs text-red-200/70">ROAS คุ้มทุน</p>
+                    </div>
+                    <div className="neumorphic-card p-4 text-center bg-red-900/20 border-red-500/50">
+                        <p className="font-bold text-red-400">BE CPA</p>
+                        <p className="text-2xl font-bold text-red-400">{F.formatCurrency(calculated.breakevenCpa)}</p>
+                        <p className="text-xs text-red-200/70">CPA คุ้มทุน</p>
+                    </div>
+                    <div className="neumorphic-card p-4 text-center bg-green-900/20 border-green-500/50">
+                        <p className="font-bold text-green-400">Target ROAS</p>
+                        <p className="text-2xl font-bold text-green-400">{F.formatNumber(calculated.targetRoas)}</p>
+                         <p className="text-xs text-green-200/70">ROAS เป้าหมาย</p>
+                    </div>
+                    <div className="neumorphic-card p-4 text-center bg-green-900/20 border-green-500/50">
+                        <p className="font-bold text-green-400">Target CPA</p>
+                        <p className="text-2xl font-bold text-green-400">{F.formatCurrency(calculated.targetCpa)}</p>
+                         <p className="text-xs text-green-200/70">CPA เป้าหมาย</p>
+                    </div>
+                 </div>
+              </div>
+
+               {/* AI Advisor */}
+              <div className="lg:col-span-3">
+                  <Card className="neumorphic-card">
+                      <CardHeader>
+                          <CardTitle className="flex items-center gap-2"><BrainCircuit className="w-6 h-6 text-primary"/> AI Advisor</CardTitle>
+                          <CardDescription>รับคำแนะนำและข้อมูลเชิงลึกจาก AI เพื่อปรับปรุงแผนของคุณ</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                          <Button onClick={fetchAiAdvice} disabled={aiAdvice.loading} className="w-full neon-button">
+                              {aiAdvice.loading ? 'กำลังวิเคราะห์...' : 'ขอคำแนะนำจาก AI'}
+                          </Button>
+                          {aiAdvice.loading && <Progress value={50} className="w-full mt-4" />}
+                          {!aiAdvice.loading && (aiAdvice.recommendations || aiAdvice.insights) && (
+                            <div className="mt-4 space-y-4 text-sm">
+                                {aiAdvice.recommendations && (
+                                  <div>
+                                      <h4 className="font-bold mb-2">คำแนะนำ (Recommendations):</h4>
+                                      <p className="p-4 bg-background/50 rounded-lg whitespace-pre-wrap">{aiAdvice.recommendations}</p>
+                                  </div>
+                                )}
+                                {aiAdvice.insights && (
+                                  <div>
+                                      <h4 className="font-bold mb-2">ข้อมูลเชิงลึก (Insights):</h4>
+                                      <p className="p-4 bg-background/50 rounded-lg whitespace-pre-wrap">{aiAdvice.insights}</p>
+                                  </div>
+                                )}
+                            </div>
+                          )}
+                      </CardContent>
+                  </Card>
+              </div>
+            </div>
+          </TabsContent>
           <TabsContent value="metrics">
              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div className="md:col-span-1">
