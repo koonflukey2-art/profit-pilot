@@ -516,9 +516,7 @@ export function ProfitPilotPage() {
                 <div 
                     className="absolute left-0 top-0 w-px h-full" 
                     style={{ 
-                        backgroundColor: dashed ? 'transparent' : '#00f5ff',
-                        backgroundImage: dashed ? `linear-gradient(to bottom, #00f5ff 50%, transparent 50%)` : 'none',
-                        backgroundSize: '1px 10px'
+                        backgroundColor: '#00f5ff'
                     }} 
                 />
                 
@@ -543,9 +541,7 @@ export function ProfitPilotPage() {
         <div 
           className="w-8 h-px" 
           style={{ 
-            backgroundColor: dashed ? 'transparent' : '#00f5ff',
-            backgroundImage: dashed ? `linear-gradient(to right, #00f5ff 50%, transparent 50%)` : 'none',
-            backgroundSize: '10px 1px'
+            backgroundColor: '#00f5ff'
            }} 
         />
         {children}
@@ -1064,25 +1060,18 @@ export function ProfitPilotPage() {
                         <p className="font-bold text-lg">Adset</p>
                         <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}</p>
                     </StructureBox>
-                    <StructureBranchingLine count={4} dashed>
-                        <StructureNode dashed>
+                    <StructureBranchingLine count={4}>
+                        <StructureNode>
                             <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
                         </StructureNode>
-                        <StructureNode dashed>
+                        <StructureNode>
                             <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
                         </StructureNode>
-                        <StructureNode dashed>
+                        <StructureNode>
                             <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
                         </StructureNode>
-                        <StructureNode dashed>
-                            <StructureBox><p>Lookalike</p></StructureBox>
-                        </StructureNode>
-                    </StructureBranchingLine>
-                    <StructureBranchingLine count={1}>
                         <StructureNode>
-                            <StructureBox>
-                                <p className="bg-white/10 rounded px-2 py-0.5">Ads</p>
-                            </StructureBox>
+                            <StructureBox><p>Lookalike</p></StructureBox>
                         </StructureNode>
                     </StructureBranchingLine>
                 </div>
@@ -1096,22 +1085,15 @@ export function ProfitPilotPage() {
                         <p className="font-bold text-lg">Retarget Adset</p>
                         <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p>
                     </StructureBox>
-                    <StructureBranchingLine count={3} dashed>
-                        <StructureNode dashed>
+                    <StructureBranchingLine count={3}>
+                        <StructureNode>
                             <StructureBox><p>INBOX 7,15,30 วัน</p></StructureBox>
                         </StructureNode>
-                        <StructureNode dashed>
+                        <StructureNode>
                             <StructureBox><p>VDO75% 3,7,15,30 วัน</p></StructureBox>
                         </StructureNode>
-                        <StructureNode dashed>
-                            <StructureBox><p>ENGAGE 3,7,15,30 วัน</p></StructureBox>
-                        </StructureNode>
-                    </StructureBranchingLine>
-                     <StructureBranchingLine count={1}>
                         <StructureNode>
-                            <StructureBox>
-                                <p className="bg-white/10 rounded px-2 py-0.5">Ads</p>
-                            </StructureBox>
+                            <StructureBox><p>ENGAGE 3,7,15,30 วัน</p></StructureBox>
                         </StructureNode>
                     </StructureBranchingLine>
                 </div>
