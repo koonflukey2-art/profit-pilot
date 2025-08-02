@@ -412,11 +412,12 @@ export function ProfitPilotPage() {
   const numAccounts = F.num(inputs.numberOfAccounts) || 1;
   
   const funnelData = useMemo(() => {
-    return [
+    const data = [
       { name: 'TOFU', value: currentFunnelPlan.tofu, color: '#2196F3' },
       { name: 'MOFU', value: currentFunnelPlan.mofu, color: '#29B6F6' },
       { name: 'BOFU', value: currentFunnelPlan.bofu, color: '#4DD0E1' },
     ];
+    return data;
   }, [currentFunnelPlan]);
 
   const FunnelChart = ({ data }) => {
@@ -425,7 +426,7 @@ export function ProfitPilotPage() {
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
   
-    const chartData = [...data];
+    const chartData = data;
 
     return (
       <div className="w-full flex justify-center items-end my-4 py-4 min-h-[300px]">
@@ -456,15 +457,15 @@ export function ProfitPilotPage() {
     );
   };
   
-  const FloatingIcon = ({ icon, className, size = 'md' }) => {
+  const FloatingIcon = ({ icon, className = '', size = 'md', style = {} }) => {
     const IconComponent = icon;
     const sizeClasses = {
-      sm: 'w-5 h-5',
-      md: 'w-10 h-10',
+      sm: 'w-6 h-6',
+      md: 'w-8 h-8',
       lg: 'w-12 h-12',
     };
     return (
-      <div className={cn("absolute bg-card/50 backdrop-blur-sm p-2 md:p-3 rounded-full shadow-lg border border-primary/20", className)}>
+      <div className={cn("absolute bg-card/50 backdrop-blur-sm p-2 md:p-3 rounded-full shadow-lg border border-primary/20", className)} style={style}>
         <IconComponent className={cn(sizeClasses[size], "text-primary opacity-90")} />
       </div>
     );
@@ -822,17 +823,25 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8 px-4">
-                   <div className="relative w-full max-w-2xl min-h-[400px] flex items-center justify-center">
+                   <div className="relative w-full max-w-4xl min-h-[400px] flex items-center justify-center">
                     {/* Floating Icons */}
-                    <FloatingIcon icon={Tv} className="top-10 left-0 md:left-10 animate-bounce" size="lg" />
-                    <FloatingIcon icon={DollarSign} className="bottom-10 left-0 md:left-10 animate-bounce" size="lg" />
-                    <FloatingIcon icon={Target} className="top-5 right-5 opacity-80" size="lg" />
-                    <FloatingIcon icon={Users} className="absolute top-1/2 -right-4 md:right-0 -translate-y-1/2" size="lg" />
-                    <FloatingIcon icon={LineChart} className="bottom-20 right-2 md:right-8" size="lg"/>
-                    <FloatingIcon icon={Percent} className="bottom-5 right-5 md:right-16 animate-pulse" size="md" />
+                    <FloatingIcon icon={LineChart} className="top-0 left-1/4 animate-bounce" size="lg" />
+                    <FloatingIcon icon={BarChart} className="top-0 right-1/4 animate-bounce" size="lg" />
+                    <FloatingIcon icon={Users} className="top-1/3 left-4" size="lg"/>
+                    <FloatingIcon icon={Target} className="top-1/3 right-4" size="lg" />
+                    <FloatingIcon icon={Megaphone} className="top-2/3 left-10" size="lg" />
+                    <FloatingIcon icon={Heart} className="top-2/3 right-10" size="lg" />
+                    <FloatingIcon icon={Tv} className="bottom-0 left-1/4" size="lg" />
+                    <FloatingIcon icon={DollarSign} className="bottom-0 right-1/4" size="lg" />
+                    <FloatingIcon icon={Percent} className="bottom-1/2 left-12 animate-pulse" size="md" />
+                    <FloatingIcon icon={Hash} className="bottom-1/2 right-12 animate-pulse" size="md" />
+                    <FloatingIcon icon={ArrowRight} className="top-1/2 -left-4" size="sm" />
+                    <FloatingIcon icon={ArrowRight} className="top-1/2 -right-4" size="sm" />
 
                     {/* Funnel Chart */}
-                    <FunnelChart data={funnelData} />
+                    <div className="w-full max-w-sm">
+                      <FunnelChart data={funnelData} />
+                    </div>
                   </div>
                 </div>
                 
@@ -894,7 +903,7 @@ export function ProfitPilotPage() {
                     <StructureBox header="Campaign">
                       <p className="font-bold text-lg">CBO / ABO</p>
                       <p className="text-xs text-white/70 mt-1">งบ {F.formatInt(calculated.tofuBudgetPerAccountDaily)} - {F.formatInt(calculated.tofuBudgetPerAccountDaily * 2)}</p>
-                      <p className="text-xs text-white/70 mt-1">จำนวน 1 บัญชี</p>
+                      <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
                     </StructureBox>
                   </div>
                   
@@ -944,7 +953,7 @@ export function ProfitPilotPage() {
                     <StructureBox header="Campaign">
                       <p className="font-bold text-lg">CBO / ABO</p>
                        <p className="text-xs text-white/70 mt-1">งบ {F.formatInt(calculated.bofuBudgetPerAccountDaily)} - {F.formatInt(calculated.bofuBudgetPerAccountDaily * 2)}</p>
-                       <p className="text-xs text-white/70 mt-1">จำนวน 1 บัญชี</p>
+                       <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
                     </StructureBox>
                   </div>
                   
@@ -1113,5 +1122,3 @@ export function ProfitPilotPage() {
     </>
   );
 }
-
-    
