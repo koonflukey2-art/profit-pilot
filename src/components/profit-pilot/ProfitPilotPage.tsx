@@ -500,9 +500,9 @@ const FunnelStructure = ({ data }) => {
   return (
     <div className="flex flex-col items-center gap-12">
       {data.map((funnel, funnelIndex) => (
-        <div key={funnelIndex} className="grid grid-cols-[1fr,auto,1fr,auto,1fr] items-center justify-center gap-4 md:gap-8 w-full">
+        <div key={funnelIndex} className="grid grid-cols-[auto,auto,1fr,auto,1fr] items-center justify-center gap-4 md:gap-8 w-full">
           {/* Column 1: Stage */}
-          <div className="w-40 flex-shrink-0 justify-self-end">
+          <div className="w-40 flex-shrink-0 justify-self-end self-start mt-2">
             <div className="flex items-center justify-center border rounded-lg p-2 h-20 text-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
               <span className="font-bold text-lg">{funnel.stage}</span>
             </div>
@@ -515,7 +515,14 @@ const FunnelStructure = ({ data }) => {
               <p>งบ/วัน: {funnel.campaign.budget}</p>
               <p>จำนวน {funnel.campaign.accounts}</p>
             </div>
-            {funnelIndex < data.length -1 && <div className="absolute bottom-[-2rem] left-1/2 -translate-x-1/2 w-full h-px bg-[#00f5ff] " />}
+             {/* Dashed lines to Ads */}
+            <div className="absolute top-1/2 -right-4 h-full w-[calc(100%_+_17rem)]">
+                <svg width="100%" height="100%" className="absolute" style={{ overflow: 'visible' }}>
+                    <line x1="0" y1="0" x2="100%" y2="-55" stroke="#00f5ff" strokeWidth="1" strokeDasharray="5,5" />
+                    <line x1="0" y1="0" x2="100%" y2="0" stroke="#00f5ff" strokeWidth="1" strokeDasharray="5,5" />
+                    <line x1="0" y1="0" x2="100%" y2="55" stroke="#00f5ff" strokeWidth="1" strokeDasharray="5,5" />
+                </svg>
+            </div>
           </div>
 
           {/* Lines to Column 3 */}
