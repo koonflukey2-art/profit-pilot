@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import {
   platformFees,
@@ -496,13 +496,13 @@ export function ProfitPilotPage() {
 
   const StructureBox = ({ children, className = '' }) => (
     <div className={cn("flex flex-col items-center", className)}>
-      <div className="border rounded-lg p-1 w-40 text-center" style={{backgroundColor: '#0D1B2A', borderColor: '#00f5ff'}}>
-        <div className="rounded p-2" style={{backgroundColor: '#000814'}}>
-            {children}
+        <div className="border rounded-lg p-1 w-40 text-center" style={{backgroundColor: '#0D1B2A', borderColor: '#00f5ff'}}>
+            <div className="rounded p-2" style={{backgroundColor: '#000814'}}>
+                {children}
+            </div>
         </div>
-      </div>
     </div>
-  );
+);
 
   const StructureBranchingLine = ({ children, count }) => {
     const childrenArray = React.Children.toArray(children);
@@ -511,7 +511,7 @@ export function ProfitPilotPage() {
 
     return (
         <div className="flex items-center pl-8">
-            <div className="relative" style={{ height: `${containerHeight}px` }}>
+            <div className="relative" style={{ height: `${containerHeight}px`, minHeight: '1px' }}>
                 {/* Horizontal line from parent */}
                 <div className="absolute top-1/2 -left-8 w-8 h-px" style={{ backgroundColor: '#00f5ff' }} />
 
@@ -520,7 +520,7 @@ export function ProfitPilotPage() {
                 
                 <div className="absolute left-0 top-0 h-full w-full">
                     {childrenArray.map((child, index) => {
-                        const topPosition = (index / (childrenArray.length -1)) * 100;
+                        const topPosition = childrenArray.length > 1 ? (index / (childrenArray.length - 1)) * 100 : 50;
                         return (
                             <div key={index} className="absolute w-full" style={{ top: `${topPosition}%`, transform: 'translateY(-50%)' }}>
                                 {child}
@@ -570,7 +570,6 @@ export function ProfitPilotPage() {
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Profit Pilot</h1>
         <p className="text-base opacity-80">Profit & Metrics Planner v5.3</p>
       </header>
-
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-4">
           <div className="neumorphic-card p-6 h-full">
@@ -1071,12 +1070,10 @@ export function ProfitPilotPage() {
                                 <StructureBox><p>Lookalike</p></StructureBox>
                             </StructureNode>
                         </StructureBranchingLine>
-                        <StructureBranchingLine count={3}>
+                        <StructureBranchingLine count={1}>
                            <StructureNode>
                                 <StructureBox>
-                                    <p className="bg-white/10 rounded px-2 py-0.5">VDO 1</p>
-                                    <p className="bg-white/10 rounded px-2 py-0.5 mt-1">VDO 2</p>
-                                    <p className="bg-white/10 rounded px-2 py-0.5 mt-1">รูปภาพ</p>
+                                    <p className="bg-white/10 rounded px-2 py-0.5">Ads</p>
                                 </StructureBox>
                            </StructureNode>
                         </StructureBranchingLine>
@@ -1105,12 +1102,10 @@ export function ProfitPilotPage() {
                                 <StructureBox><p>ENGAGE 3,7,15,30 วัน</p></StructureBox>
                             </StructureNode>
                         </StructureBranchingLine>
-                        <StructureBranchingLine count={3}>
+                        <StructureBranchingLine count={1}>
                             <StructureNode>
                                 <StructureBox>
-                                    <p className="bg-white/10 rounded px-2 py-0.5">VDO ปิด</p>
-                                    <p className="bg-white/10 rounded px-2 py-0.5 mt-1">โปรโมชั่น</p>
-                                    <p className="bg-white/10 rounded px-2 py-0.5 mt-1">รีวิว/ผลลัพธ์</p>
+                                    <p className="bg-white/10 rounded px-2 py-0.5">Ads</p>
                                 </StructureBox>
                             </StructureNode>
                         </StructureBranchingLine>
