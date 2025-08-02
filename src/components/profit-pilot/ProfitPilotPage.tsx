@@ -494,60 +494,84 @@ export function ProfitPilotPage() {
       </div>
     );
   };
-
-  const StructureBox = ({ children, className = '' }) => (
-    <div className={cn("flex flex-col items-center", className)}>
-        <div className="border rounded-lg p-1 w-44 text-center" style={{backgroundColor: '#0D1B2A', borderColor: '#00f5ff'}}>
-            <div className="rounded p-2" style={{backgroundColor: '#000814'}}>
-                {children}
-            </div>
-        </div>
-    </div>
-);
-
-const StructureBranchingLine = ({ children }) => {
-  const childrenArray = React.Children.toArray(children);
-  const count = childrenArray.length;
   
-  return (
-    <div className="relative flex justify-center">
-      {/* Central vertical line from the center node */}
-      <div className="absolute top-full left-1/2 w-px h-8 bg-[#00f5ff]" />
-
-      <div className="absolute top-full mt-8 left-0 right-0 h-px bg-[#00f5ff]" />
-      
-      <div className="flex justify-around w-full absolute top-full mt-8">
-        {childrenArray.map((child, index) => {
-          const isFirst = index === 0;
-          const isLast = index === count - 1;
-          
-          return (
-            <div key={index} className="relative flex flex-col items-center pt-8">
-              {/* Vertical line going up to the horizontal line */}
-              <div className="absolute bottom-full left-1/2 w-px h-8 bg-[#00f5ff]" />
-              {child}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-
-  const StructureNode = ({ children, dashed = false }) => {
+  const StructureColumn = ({ title, items, isDashed = false, className = '' }) => {
     return (
-      <div className="flex items-center relative">
-        <div 
-          className="w-8 h-px" 
-          style={{ 
-            backgroundColor: '#00f5ff'
-           }} 
-        />
-        {children}
+      <div className={cn("flex flex-col items-center", className)}>
+        {title && <div className="px-4 py-1.5 rounded-md text-sm font-bold mb-4" style={{ backgroundColor: '#0D1B2A', color: 'white' }}>{title}</div>}
+        <div className="flex flex-col gap-4 relative">
+          {items.map((item, index) => (
+            <div key={index} className="relative flex items-center">
+              <div className="flex-grow flex items-center justify-center border rounded-lg p-2 min-w-44 h-16 text-center text-xs" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
+                <div>{item.content}</div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   };
+  
+  const StructureAdsColumn = ({ items, className = '' }) => {
+    return (
+      <div className={cn("flex flex-col items-center", className)}>
+        <div className="px-4 py-1.5 rounded-md text-sm font-bold mb-4" style={{ backgroundColor: '#0D1B2A', color: 'white' }}>Ads</div>
+        <div className="flex flex-col gap-[3.25rem] relative">
+          {items.map((item, index) => (
+            <div key={index} className="relative flex items-center h-16">
+              <div className="flex flex-col gap-1">
+                {item.ads.map((ad, adIndex) => (
+                  <div key={adIndex} className="flex-grow flex items-center justify-center border rounded-lg p-1 w-32 h-8 text-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
+                    <div className="text-xs">{ad}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+  
+  const FunnelStructure = ({ title, target, campaign, adGroups, ads }) => {
+    return (
+      <div className="flex gap-4 items-start justify-center">
+        {/* Left-side Title */}
+        <div className="flex-shrink-0 w-48 pt-12">
+          <div className="p-4 rounded-lg" style={{ backgroundColor: '#0D1B2A' }}>
+            <h4 className="font-bold text-lg text-white">{title}</h4>
+            <div className="text-sm mt-2">
+              {target}
+            </div>
+          </div>
+        </div>
+  
+        {/* Main Structure with Connections */}
+        <div className="flex items-start gap-8 relative">
+          <StructureColumn items={[campaign]} title="Campaign" />
+          <div className="absolute top-1/2 left-full w-8 h-px bg-[#00f5ff]" style={{ transform: 'translateY(-50%)' }} />
+  
+          {/* Vertical line from Campaign to branching point */}
+          <div className="absolute top-1/2 left-full w-px bg-[#00f5ff]" style={{ height: `${(adGroups.length -1) * 4.5}rem`, transform: `translate(1.5rem, -${((adGroups.length -1) * 4.5)/2}rem)` }} />
+  
+          <div className="flex flex-col justify-center relative" style={{ marginLeft: '3rem' }}>
+              <StructureColumn items={adGroups} title="Ad Group" />
+              {adGroups.map((_, index) => (
+                   <div key={index} className="absolute left-[-2rem] w-8 h-px bg-[#00f5ff]" style={{ top: `calc(4.5rem * ${index} + 2rem)`}} />
+              ))}
+          </div>
+  
+           <div className="flex flex-col justify-center relative" style={{ marginLeft: '1rem' }}>
+              <StructureAdsColumn items={ads} />
+               {ads.map((ad, index) => (
+                 !ad.isQuote && <div key={index} className="absolute left-[-2rem] w-8 h-px border-t-2 border-dashed border-[#00f5ff]" style={{ top: `calc(4.5rem * ${index} + 2rem)`}} />
+              ))}
+           </div>
+        </div>
+      </div>
+    );
+  };
+  
 
   const SummaryInfoCard = ({ title, value, subValue, icon: Icon }) => (
     <Card className="neumorphic-card">
@@ -1052,33 +1076,70 @@ const StructureBranchingLine = ({ children }) => {
             
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white">Funnel Structure</h3>
-              <div className="neumorphic-card p-6 space-y-12 overflow-x-auto min-w-[800px] flex flex-col items-center">
-                  <div className="relative flex flex-col items-center" style={{paddingBottom: '240px'}}>
-                      <StructureBox>
-                          <p className="font-bold text-lg">Campaign</p>
-                          <p className="text-xs text-cyan-400 mt-1">CBO: {F.formatCurrency(calculated.tofuBudget)}</p>
-                      </StructureBox>
-                      <StructureBranchingLine>
-                          <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
-                          <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
-                          <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
-                          <StructureBox><p>Lookalike</p></StructureBox>
-                      </StructureBranchingLine>
-                  </div>
+              <div className="neumorphic-card p-6 space-y-12 overflow-x-auto">
+                 <FunnelStructure
+                  title="ลูกค้าใหม่"
+                  target={
+                    <>
+                      <p>ใช้กลุ่มเป้าหมาย</p>
+                      <ul className="list-disc list-inside mt-1">
+                        <li>Interest</li>
+                        <li>Lookalike</li>
+                      </ul>
+                    </>
+                  }
+                  campaign={{
+                    content: (
+                      <div className="flex flex-col items-center">
+                        <p className="font-bold">Conversion</p>
+                        <p className="font-bold text-xl">CBO</p>
+                        <p>งบ {F.formatCurrency(calculated.tofuBudget)}</p>
+                      </div>
+                    )
+                  }}
+                  adGroups={[
+                    { content: 'กลุ่มเป้าหมาย 1' },
+                    { content: 'กลุ่มเป้าหมาย 2' },
+                    { content: 'กลุ่มเป้าหมาย 3' },
+                    { content: 'กลุ่มเป้าหมาย 4' },
+                    { content: 'กลุ่มเป้าหมาย 5' },
+                  ]}
+                  ads={[
+                    { ads: ['VDO 1', 'VDO 2', 'VDO 3'] },
+                    { ads: ['”'], isQuote: true },
+                    { ads: ['”'], isQuote: true },
+                    { ads: ['”'], isQuote: true },
+                    { ads: ['”'], isQuote: true },
+                  ]}
+                />
 
-                  <hr className="border-primary/20 w-full"/>
+                <hr className="border-primary/20 w-full" />
 
-                  <div className="relative flex flex-col items-center" style={{paddingBottom: '160px'}}>
-                       <StructureBox>
-                          <p className="font-bold text-lg">Campaign</p>
-                          <p className="text-xs text-cyan-400 mt-1">CBO: {F.formatCurrency(calculated.bofuBudget)}</p>
-                      </StructureBox>
-                      <StructureBranchingLine>
-                          <StructureBox><p>INBOX 7,15,30 วัน</p></StructureBox>
-                          <StructureBox><p>VDO75% 3,7,15,30 วัน</p></StructureBox>
-                          <StructureBox><p>ENGAGE 3,7,15,30 วัน</p></StructureBox>
-                      </StructureBranchingLine>
-                  </div>
+                <FunnelStructure
+                  title="Retarget"
+                  target=""
+                  campaign={{
+                    content: (
+                      <div className="flex flex-col items-center">
+                        <p className="font-bold">Conversion</p>
+                        <p className="font-bold text-xl">CBO</p>
+                        <p>งบ {F.formatCurrency(calculated.bofuBudget)}</p>
+                      </div>
+                    )
+                  }}
+                  adGroups={[
+                    { content: 'VDO 25% 7 วัน' },
+                    { content: 'View Content 7 วัน' },
+                    { content: 'VDO 25% 14 วัน' },
+                    { content: 'VDO 25% 30 วัน' },
+                  ]}
+                  ads={[
+                    { ads: ['VDO ปัง', 'โปรโมชั่น', 'รีวิว/ผลลัพธ์'] },
+                    { ads: ['”'], isQuote: true },
+                    { ads: ['”'], isQuote: true },
+                    { ads: ['”'], isQuote: true },
+                  ]}
+                />
               </div>
             </div>
 
