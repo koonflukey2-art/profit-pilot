@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -496,7 +497,7 @@ export function ProfitPilotPage() {
 
   const StructureBox = ({ children, className = '' }) => (
     <div className={cn("flex flex-col items-center", className)}>
-        <div className="border rounded-lg p-1 w-40 text-center" style={{backgroundColor: '#0D1B2A', borderColor: '#00f5ff'}}>
+        <div className="border rounded-lg p-1 w-44 text-center" style={{backgroundColor: '#0D1B2A', borderColor: '#00f5ff'}}>
             <div className="rounded p-2" style={{backgroundColor: '#000814'}}>
                 {children}
             </div>
@@ -506,7 +507,7 @@ export function ProfitPilotPage() {
 
   const StructureBranchingLine = ({ children, count, dashed = false }) => {
     const childrenArray = React.Children.toArray(children);
-    const itemHeight = 112; 
+    const itemHeight = 90; 
     const containerHeight = count * itemHeight - (count > 1 ? 24 : 0);
 
     return (
@@ -1053,12 +1054,10 @@ export function ProfitPilotPage() {
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white">Funnel Structure</h3>
               <div className="neumorphic-card p-6 space-y-8 overflow-x-auto min-w-[800px]">
-                <div className="flex items-center">
-                    <StructureBox><p className="font-bold text-lg">Campaign</p></StructureBox>
-                    <StructureNode />
+                <div className="flex items-start">
                     <StructureBox>
-                        <p className="font-bold text-lg">Adset</p>
-                        <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}</p>
+                        <p className="font-bold text-lg">Campaign</p>
+                        <p className="text-xs text-cyan-400 mt-1">CBO: {F.formatCurrency(calculated.tofuBudget)}</p>
                     </StructureBox>
                     <StructureBranchingLine count={4}>
                         <StructureNode>
@@ -1078,12 +1077,10 @@ export function ProfitPilotPage() {
 
                 <hr className="border-primary/20"/>
 
-                <div className="flex items-center">
-                    <StructureBox><p className="font-bold text-lg">Campaign</p></StructureBox>
-                    <StructureNode />
+                <div className="flex items-start">
                     <StructureBox>
-                        <p className="font-bold text-lg">Retarget Adset</p>
-                        <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p>
+                        <p className="font-bold text-lg">Campaign</p>
+                        <p className="text-xs text-cyan-400 mt-1">CBO: {F.formatCurrency(calculated.bofuBudget)}</p>
                     </StructureBox>
                     <StructureBranchingLine count={3}>
                         <StructureNode>
