@@ -499,58 +499,74 @@ export function ProfitPilotPage() {
   
 const FunnelStructure = ({ data }) => {
   return (
-    <div className="flex flex-col items-center gap-12">
+    <div className="flex flex-col items-center gap-12 py-4">
       {data.map((funnel, funnelIndex) => (
-        <div key={funnelIndex} className="relative w-full">
-          <div className="grid grid-cols-[auto,1fr,auto] items-start justify-center gap-x-4 md:gap-x-8 w-full">
-            {/* Column 1: Stage */}
-            <div className="w-40 flex-shrink-0 justify-self-end mt-1">
-              <div className="flex items-center justify-center border rounded-lg p-2 h-20 text-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
-                <span className="font-bold text-lg">{funnel.stage}</span>
+        <div key={funnelIndex} className="flex items-center justify-center gap-8 w-full">
+          {/* Stage */}
+          <div className="flex-shrink-0">
+            <div className="flex items-center justify-center border rounded-lg p-2 h-20 w-40 text-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
+              <span className="font-bold text-lg">{funnel.stage}</span>
+            </div>
+          </div>
+
+          {/* Connector */}
+          <div className="w-8 h-px bg-[#00f5ff]"></div>
+
+          {/* Campaign */}
+          <div className="flex-shrink-0">
+            <div className="flex flex-col items-center justify-center border rounded-lg p-2 h-20 w-48 text-center text-sm" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
+              <p className="font-bold">{funnel.campaign.title}</p>
+              <p>งบ/วัน: {funnel.campaign.budget}</p>
+              <p>จำนวน {funnel.campaign.accounts}</p>
+            </div>
+          </div>
+
+          {/* Branching Connector */}
+          <div className="flex items-center">
+            <div className="w-8 h-px bg-[#00f5ff]"></div>
+            <div className="w-px h-32 bg-[#00f5ff] relative">
+              {funnel.adGroups.map((_, groupIndex) => (
+                 <div key={groupIndex} className="absolute left-0 w-4 h-px bg-[#00f5ff]" style={{ top: `${(groupIndex + 0.5) * (100 / funnel.adGroups.length)}%` }}></div>
+              ))}
+            </div>
+          </div>
+
+          {/* Ad Groups */}
+          <div className="flex flex-col gap-4">
+            {funnel.adGroups.map((group, groupIndex) => (
+              <div key={groupIndex} className="flex items-center gap-4">
+                 <div className="flex flex-col items-center justify-center border rounded-lg p-2 h-14 text-center w-48 text-xs" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
+                    <p className="font-bold">{group.title}</p>
+                    {group.subtitle && <p>{group.subtitle}</p>}
+                  </div>
               </div>
-            </div>
+            ))}
+          </div>
 
-            {/* Column 2: Campaign & Ad Groups */}
-            <div className="flex-grow justify-self-stretch">
-                {/* Campaign */}
-                <div className="relative flex flex-col items-center justify-center border rounded-lg p-2 h-20 text-center text-sm mb-4" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
-                    <p className="font-bold">{funnel.campaign.title}</p>
-                    <p>งบ/วัน: {funnel.campaign.budget}</p>
-                    <p>จำนวน {funnel.campaign.accounts}</p>
-                    <div className="absolute bottom-[-1px] left-0 right-0 h-px bg-[#00f5ff]"></div> {/* Underline */}
-                </div>
+          {/* Branching Connector to Ads */}
+          <div className="flex items-center">
+            <div className="w-8 h-px bg-[#00f5ff]"></div>
+             <div className="w-px h-24 bg-[#00f5ff] relative">
+               {funnel.ads.map((_, adIndex) => (
+                 <div key={adIndex} className="absolute left-0 w-4 h-px bg-[#00f5ff]" style={{ top: `${(adIndex + 0.5) * (100 / funnel.ads.length)}%` }}></div>
+                ))}
+             </div>
+          </div>
 
-                {/* Ad Groups */}
-                <div className="flex flex-col gap-4">
-                  {funnel.adGroups.map((group, groupIndex) => (
-                    <div key={groupIndex} className="relative flex items-center">
-                      <div className="flex flex-col items-center justify-center border rounded-lg p-2 h-14 text-center w-full text-xs" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
-                        <p className="font-bold">{group.title}</p>
-                        {group.subtitle && <p>{group.subtitle}</p>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-            </div>
-            
-            {/* Column 3: Ads */}
-            <div className="w-40 flex-shrink-0 justify-self-start self-center">
-                <div className="border rounded-lg p-2 flex flex-col gap-2 items-center justify-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
-                    {funnel.ads.map((ad, adIndex) => (
-                        <div key={adIndex} className="relative flex items-center w-full">
-                            <div className="flex items-center justify-center border rounded-lg p-1 h-8 text-center w-full text-xs" style={{ backgroundColor: '#0D1B2A', borderColor: '#00f5ff' }}>
-                                {ad}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
+          {/* Ads */}
+           <div className="flex flex-col gap-2">
+              {funnel.ads.map((ad, adIndex) => (
+                  <div key={adIndex} className="flex items-center justify-center border rounded-lg p-1 h-8 text-center w-40 text-xs" style={{ backgroundColor: '#0D1B2A', borderColor: '#00f5ff' }}>
+                      {ad}
+                  </div>
+              ))}
           </div>
         </div>
       ))}
     </div>
   );
 };
+
 
 
   const summaryFunnelData = useMemo(() => ([
