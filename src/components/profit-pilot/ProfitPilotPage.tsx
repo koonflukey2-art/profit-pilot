@@ -500,38 +500,36 @@ const FunnelStructure = ({ data }) => {
   return (
     <div className="flex flex-col items-center gap-12">
       {data.map((funnel, funnelIndex) => (
-        <div key={funnelIndex} className="flex items-center justify-center gap-4 md:gap-8">
+        <div key={funnelIndex} className="grid grid-cols-[1fr,auto,1fr,auto,1fr] items-center justify-center gap-4 md:gap-8 w-full">
           {/* Column 1: Stage */}
-          <div className="w-40 flex-shrink-0">
+          <div className="w-40 flex-shrink-0 justify-self-end">
             <div className="flex items-center justify-center border rounded-lg p-2 h-20 text-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
               <span className="font-bold text-lg">{funnel.stage}</span>
             </div>
           </div>
 
-          {/* Line to Column 2 */}
-          <div className="w-8 h-px bg-[#00f5ff]" />
-
           {/* Column 2: Campaign */}
-          <div className="w-48 flex-shrink-0">
+          <div className="w-48 flex-shrink-0 relative justify-self-center">
             <div className="flex flex-col items-center justify-center border rounded-lg p-2 h-20 text-center text-sm" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
               <p className="font-bold">{funnel.campaign.title}</p>
               <p>งบ/วัน: {funnel.campaign.budget}</p>
               <p>จำนวน {funnel.campaign.accounts}</p>
             </div>
+            {funnelIndex < data.length -1 && <div className="absolute bottom-[-2rem] left-1/2 -translate-x-1/2 w-full h-px bg-[#00f5ff] " />}
           </div>
 
           {/* Lines to Column 3 */}
-          <div className="relative flex items-center">
-            <div className="w-8 h-px bg-[#00f5ff]" />
-            <div className="absolute left-8 w-px bg-[#00f5ff]" style={{ height: `${(funnel.adGroups.length - 1) * 4}rem`, top: `calc(50% - ${((funnel.adGroups.length - 1) * 4) / 2}rem)` }} />
+          <div className="relative flex items-center justify-self-stretch">
+            <div className="w-full h-px bg-[#00f5ff]" />
+            <div className="absolute right-0 w-px bg-[#00f5ff]" style={{ height: `${(funnel.adGroups.length) * 4}rem`, top: `calc(50% - ${((funnel.adGroups.length) * 4) / 2}rem)` }} />
           </div>
 
           {/* Column 3: Ad Groups */}
-          <div className="w-48 flex-shrink-0">
+          <div className="w-48 flex-shrink-0 justify-self-center">
             <div className="flex flex-col gap-4">
               {funnel.adGroups.map((group, groupIndex) => (
                 <div key={groupIndex} className="relative flex items-center">
-                  <div className="absolute left-[-2rem] w-8 h-px bg-[#00f5ff]" />
+                  <div className="absolute right-full w-8 h-px bg-[#00f5ff]" />
                   <div className="flex flex-col items-center justify-center border rounded-lg p-2 h-14 text-center w-full text-xs" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
                     <p className="font-bold">{group.title}</p>
                     {group.subtitle && <p>{group.subtitle}</p>}
@@ -540,19 +538,12 @@ const FunnelStructure = ({ data }) => {
               ))}
             </div>
           </div>
-          
-          {/* Lines to Column 4 */}
-           <div className="relative flex items-center">
-            <div className="w-8 h-px bg-[#00f5ff]" />
-            <div className="absolute left-8 w-px bg-[#00f5ff]" style={{ height: `${(funnel.ads.length - 1) * 3}rem`, top: `calc(50% - ${((funnel.ads.length - 1) * 3) / 2}rem)` }} />
-          </div>
-          
+                    
           {/* Column 4: Ads */}
-          <div className="w-40 flex-shrink-0">
+          <div className="w-40 flex-shrink-0 justify-self-start">
              <div className="border rounded-lg p-2 flex flex-col gap-2 items-center justify-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
                  {funnel.ads.map((ad, adIndex) => (
                      <div key={adIndex} className="relative flex items-center w-full">
-                         {funnel.adGroups.length > 1 && <div className="absolute left-[-2.5rem] w-8 h-px bg-[#00f5ff]" style={{top: `calc(50% - ${((funnel.ads.length - 1) * 1.5)}rem + ${adIndex*3}rem)`}}/>}
                          <div className="flex items-center justify-center border rounded-lg p-1 h-8 text-center w-full text-xs" style={{ backgroundColor: '#0D1B2A', borderColor: '#00f5ff' }}>
                              {ad}
                          </div>
