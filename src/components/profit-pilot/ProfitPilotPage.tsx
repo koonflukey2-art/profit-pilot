@@ -500,9 +500,9 @@ const FunnelStructure = ({ data }) => {
   return (
     <div className="flex flex-col items-center gap-12">
       {data.map((funnel, funnelIndex) => (
-        <div key={funnelIndex} className="grid grid-cols-[auto,auto,1fr,auto,1fr] items-center justify-center gap-4 md:gap-8 w-full">
+        <div key={funnelIndex} className="grid grid-cols-[auto,auto,1fr,auto] items-start justify-center gap-x-4 md:gap-x-8 w-full">
           {/* Column 1: Stage */}
-          <div className="w-40 flex-shrink-0 justify-self-end self-start mt-2">
+          <div className="w-40 flex-shrink-0 justify-self-end mt-1">
             <div className="flex items-center justify-center border rounded-lg p-2 h-20 text-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
               <span className="font-bold text-lg">{funnel.stage}</span>
             </div>
@@ -516,19 +516,13 @@ const FunnelStructure = ({ data }) => {
               <p>จำนวน {funnel.campaign.accounts}</p>
             </div>
              {/* Dashed lines to Ads */}
-            <div className="absolute top-1/2 -right-4 h-full w-[calc(100%_+_17rem)]">
-                <svg width="100%" height="100%" className="absolute" style={{ overflow: 'visible' }}>
-                    <line x1="0" y1="0" x2="100%" y2="-55" stroke="#00f5ff" strokeWidth="1" strokeDasharray="5,5" />
-                    <line x1="0" y1="0" x2="100%" y2="0" stroke="#00f5ff" strokeWidth="1" strokeDasharray="5,5" />
-                    <line x1="0" y1="0" x2="100%" y2="55" stroke="#00f5ff" strokeWidth="1" strokeDasharray="5,5" />
+            <div className="absolute top-1/2 -right-4 h-[calc(100%+16px)] w-[calc(100%_+_17rem)]">
+                <svg width="100%" height="100%" className="absolute -top-2" style={{ overflow: 'visible' }}>
+                    <line x1="0" y1="50%" x2="calc(100% - 15rem)" y2="14%" stroke="#00f5ff" strokeWidth="1" strokeDasharray="5,5" />
+                    <line x1="0" y1="50%" x2="calc(100% - 15rem)" y2="50%" stroke="#00f5ff" strokeWidth="1" strokeDasharray="5,5" />
+                    <line x1="0" y1="50%" x2="calc(100% - 15rem)" y2="86%" stroke="#00f5ff" strokeWidth="1" strokeDasharray="5,5" />
                 </svg>
             </div>
-          </div>
-
-          {/* Lines to Column 3 */}
-          <div className="relative flex items-center justify-self-stretch">
-            <div className="w-full h-px bg-[#00f5ff]" />
-            <div className="absolute right-0 w-px bg-[#00f5ff]" style={{ height: `${(funnel.adGroups.length) * 4}rem`, top: `calc(50% - ${((funnel.adGroups.length) * 4) / 2}rem)` }} />
           </div>
 
           {/* Column 3: Ad Groups */}
@@ -536,7 +530,6 @@ const FunnelStructure = ({ data }) => {
             <div className="flex flex-col gap-4">
               {funnel.adGroups.map((group, groupIndex) => (
                 <div key={groupIndex} className="relative flex items-center">
-                  <div className="absolute right-full w-8 h-px bg-[#00f5ff]" />
                   <div className="flex flex-col items-center justify-center border rounded-lg p-2 h-14 text-center w-full text-xs" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
                     <p className="font-bold">{group.title}</p>
                     {group.subtitle && <p>{group.subtitle}</p>}
