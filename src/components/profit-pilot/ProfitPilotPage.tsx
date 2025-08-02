@@ -494,12 +494,10 @@ export function ProfitPilotPage() {
     );
   };
 
-  const StructureBox = ({ children, className = '', header, subHeader }) => (
+  const StructureBox = ({ children, className = '' }) => (
     <div className={cn("flex flex-col items-center", className)}>
-      {header && <div className="text-xs font-semibold text-center text-white/80 mb-1">{header}</div>}
       <div className="border rounded-lg p-1 w-40 text-center" style={{backgroundColor: '#0D1B2A', borderColor: '#00f5ff'}}>
         <div className="rounded p-2" style={{backgroundColor: '#000814'}}>
-            {subHeader && <div className="font-bold text-white mb-1">{subHeader}</div>}
             {children}
         </div>
       </div>
@@ -507,12 +505,19 @@ export function ProfitPilotPage() {
   );
 
   const StructureBranchingLine = ({ children, count }) => {
+    const nodeHeight = 84; // Approximation of node height with gap
+    const verticalLineHeight = (count - 1) * nodeHeight;
+
     return (
-      <div className="flex items-center">
-        <div className="w-8 h-px" style={{ backgroundColor: '#00f5ff' }} />
-        <div className="relative flex flex-col justify-center">
-          <div className="w-px h-full absolute left-0" style={{ backgroundColor: '#00f5ff', height: `${(count - 1) * 3.5}rem` }}/>
-          <div className="flex flex-col gap-4">
+      <div className="flex items-center pl-8">
+        <div className="relative h-full">
+           {/* Horizontal line from parent */}
+           <div className="absolute top-1/2 -left-8 w-8 h-px" style={{backgroundColor: '#00f5ff'}}/>
+           
+           {/* Vertical line */}
+           <div className="absolute top-1/2 w-px" style={{backgroundColor: '#00f5ff', height: `${verticalLineHeight}px`, transform: `translateY(-${verticalLineHeight / 2}px)`}}/>
+        
+          <div className="flex flex-col justify-between" style={{height: `${verticalLineHeight}px`}}>
             {children}
           </div>
         </div>
@@ -523,7 +528,8 @@ export function ProfitPilotPage() {
   const StructureNode = ({ children }) => {
     return (
       <div className="flex items-center">
-        <div className="w-8 h-px" style={{ backgroundColor: '#00f5ff' }} />
+         {/* Horizontal line to child */}
+        <div className="w-8 h-px" style={{backgroundColor: '#00f5ff'}} />
         {children}
       </div>
     );
@@ -1037,38 +1043,38 @@ export function ProfitPilotPage() {
                 {/* New Customer Structure */}
                 <div className="flex items-center">
                   <StructureBox><h4 className="font-bold text-lg">ลูกค้าใหม่</h4></StructureBox>
-                  <StructureBranchingLine count={1}>
+                  <div className="flex items-center">
                     <StructureNode>
-                      <StructureBox header="Campaign">
+                      <StructureBox>
                         <p className="font-bold text-lg">CBO / ABO</p>
                         <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}</p>
                         <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
                       </StructureBox>
-                      <StructureBranchingLine count={4}>
-                          <StructureNode>
-                             <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
-                          </StructureNode>
-                          <StructureNode>
-                             <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
-                          </StructureNode>
-                          <StructureNode>
-                              <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
-                          </StructureNode>
-                           <StructureNode>
-                              <StructureBox><p>Lookalike</p></StructureBox>
-                           </StructureNode>
-                      </StructureBranchingLine>
-                      <StructureBranchingLine count={3}>
+                    </StructureNode>
+                    <StructureBranchingLine count={4}>
                         <StructureNode>
-                          <StructureBox header="Ads">
+                            <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
+                        </StructureNode>
+                        <StructureNode>
+                            <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
+                        </StructureNode>
+                        <StructureNode>
+                            <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
+                        </StructureNode>
+                        <StructureNode>
+                            <StructureBox><p>Lookalike</p></StructureBox>
+                        </StructureNode>
+                    </StructureBranchingLine>
+                     <StructureBranchingLine count={3}>
+                        <StructureNode>
+                          <StructureBox>
                             <p className="bg-white/10 rounded px-2 py-0.5">VDO 1</p>
-                            <p className="bg-white/10 rounded px-2 py-0.5">VDO 2</p>
-                            <p className="bg-white/10 rounded px-2 py-0.5">รูปภาพ</p>
+                            <p className="bg-white/10 rounded px-2 py-0.5 mt-1">VDO 2</p>
+                            <p className="bg-white/10 rounded px-2 py-0.5 mt-1">รูปภาพ</p>
                           </StructureBox>
                         </StructureNode>
                       </StructureBranchingLine>
-                    </StructureNode>
-                  </StructureBranchingLine>
+                  </div>
                 </div>
 
                 <hr className="border-primary/20"/>
@@ -1076,13 +1082,14 @@ export function ProfitPilotPage() {
                 {/* Retarget Structure */}
                 <div className="flex items-center">
                   <StructureBox><h4 className="font-bold text-lg">Retarget</h4></StructureBox>
-                  <StructureBranchingLine count={1}>
-                    <StructureNode>
-                      <StructureBox header="Campaign">
-                        <p className="font-bold text-lg">CBO / ABO</p>
-                        <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p>
-                        <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
-                      </StructureBox>
+                   <div className="flex items-center">
+                      <StructureNode>
+                        <StructureBox>
+                          <p className="font-bold text-lg">CBO / ABO</p>
+                          <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p>
+                          <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
+                        </StructureBox>
+                      </StructureNode>
                       <StructureBranchingLine count={3}>
                           <StructureNode>
                              <StructureBox><p>INBOX 7,15,30 วัน</p></StructureBox>
@@ -1096,15 +1103,14 @@ export function ProfitPilotPage() {
                       </StructureBranchingLine>
                        <StructureBranchingLine count={3}>
                         <StructureNode>
-                          <StructureBox header="Ads">
+                          <StructureBox>
                             <p className="bg-white/10 rounded px-2 py-0.5">VDO ปิด</p>
-                            <p className="bg-white/10 rounded px-2 py-0.5">โปรโมชั่น</p>
-                            <p className="bg-white/10 rounded px-2 py-0.5">รีวิว/ผลลัพธ์</p>
+                            <p className="bg-white/10 rounded px-2 py-0.5 mt-1">โปรโมชั่น</p>
+                            <p className="bg-white/10 rounded px-2 py-0.5 mt-1">รีวิว/ผลลัพธ์</p>
                           </StructureBox>
                         </StructureNode>
                       </StructureBranchingLine>
-                    </StructureNode>
-                  </StructureBranchingLine>
+                    </div>
                 </div>
               </div>
             </div>
