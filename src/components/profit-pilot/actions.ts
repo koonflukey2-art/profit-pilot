@@ -21,7 +21,6 @@ export async function generateUiTitles(input: UiTitlesInput) {
 export async function generateAutomationWorkflow(input: AutomationWorkflowGeneratorInput) {
     try {
         const result = await genWorkflow(input);
-        // Ensure the output is a stringified JSON
         if (typeof result.workflowJson === 'object') {
              return { workflowJson: JSON.stringify(result.workflowJson, null, 2) };
         }
@@ -41,5 +40,3 @@ export async function getMetricsAdvice(input: MetricsAdviceInput) {
         throw new Error("Failed to get AI-powered advice.");
     }
 }
-
-    

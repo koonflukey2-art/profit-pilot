@@ -29,7 +29,7 @@ import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText } from 'lucide-react';
-import { generateUiTitles, generateAutomationWorkflow, getMetricsAdvice } from './actions';
+import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
 
 const F = {
@@ -377,10 +377,11 @@ export function ProfitPilotPage() {
     const n8nPrimaryGoal = (document.getElementById('n8nPrimaryGoal') as HTMLInputElement)?.value;
     
     try {
+      const { generateAutomationWorkflow } = await import('./actions');
       const result = await generateAutomationWorkflow({
         workflowName: n8nWorkflowName || "Profit Pilot Workflow",
         primaryGoal: n8nPrimaryGoal || "scale-revenue",
-        platforms: ["facebook", "sheets", "slack", "email"], // Simplified for example
+        platforms: ["facebook", "sheets", "slack", "email"],
         features: ["budget optimization", "creative refresh"],
         rules: automationRules
       });
@@ -395,6 +396,7 @@ export function ProfitPilotPage() {
   const fetchAiAdvice = useCallback(async () => {
     setAiAdvice(prev => ({...prev, loading: true}));
     try {
+      const { getMetricsAdvice } = await import('./actions');
       const advice = await getMetricsAdvice({
         businessType: funnelObjectivesData[inputs.businessType]?.name || inputs.businessType,
         profitGoal: F.num(inputs.profitGoal),
@@ -495,83 +497,80 @@ export function ProfitPilotPage() {
     );
   };
   
-  const StructureColumn = ({ title, items, isDashed = false, className = '' }) => {
-    return (
-      <div className={cn("flex flex-col items-center", className)}>
-        {title && <div className="px-4 py-1.5 rounded-md text-sm font-bold mb-4" style={{ backgroundColor: '#0D1B2A', color: 'white' }}>{title}</div>}
-        <div className="flex flex-col gap-4 relative">
-          {items.map((item, index) => (
-            <div key={index} className="relative flex items-center">
-              <div className="flex-grow flex items-center justify-center border rounded-lg p-2 min-w-44 h-16 text-center text-xs" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
-                <div>{item.content}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-  
-  const StructureAdsColumn = ({ items, className = '' }) => {
-    return (
-      <div className={cn("flex flex-col items-center", className)}>
-        <div className="px-4 py-1.5 rounded-md text-sm font-bold mb-4" style={{ backgroundColor: '#0D1B2A', color: 'white' }}>Ads</div>
-        <div className="flex flex-col gap-[3.25rem] relative">
-          {items.map((item, index) => (
-            <div key={index} className="relative flex items-center h-16">
-              <div className="flex flex-col gap-1">
-                {item.ads.map((ad, adIndex) => (
-                  <div key={adIndex} className="flex-grow flex items-center justify-center border rounded-lg p-1 w-32 h-8 text-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
-                    <div className="text-xs">{ad}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-  
-  const FunnelStructure = ({ title, target, campaign, adGroups, ads }) => {
-    return (
-      <div className="flex gap-4 items-start justify-center">
-        {/* Left-side Title */}
-        <div className="flex-shrink-0 w-48 pt-12">
-          <div className="p-4 rounded-lg" style={{ backgroundColor: '#0D1B2A' }}>
-            <h4 className="font-bold text-lg text-white">{title}</h4>
-            <div className="text-sm mt-2">
-              {target}
+const StructureColumn = ({ title, items, isDashed = false, className = '' }) => {
+  return (
+    <div className={cn("flex flex-col items-center", className)}>
+      {title && <div className="px-4 py-1.5 rounded-md text-sm font-bold mb-4" style={{ backgroundColor: '#0D1B2A', color: 'white' }}>{title}</div>}
+      <div className="flex flex-col gap-4 relative">
+        {items.map((item, index) => (
+          <div key={index} className="relative flex items-center">
+            <div className="flex-grow flex items-center justify-center border rounded-lg p-2 min-w-44 h-16 text-center text-xs" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
+              <div>{item.content}</div>
             </div>
           </div>
-        </div>
-  
-        {/* Main Structure with Connections */}
-        <div className="flex items-start gap-8 relative">
-          <StructureColumn items={[campaign]} title="Campaign" />
-          <div className="absolute top-1/2 left-full w-8 h-px bg-[#00f5ff]" style={{ transform: 'translateY(-50%)' }} />
-  
-          {/* Vertical line from Campaign to branching point */}
-          <div className="absolute top-1/2 left-full w-px bg-[#00f5ff]" style={{ height: `${(adGroups.length -1) * 4.5}rem`, transform: `translate(1.5rem, -${((adGroups.length -1) * 4.5)/2}rem)` }} />
-  
-          <div className="flex flex-col justify-center relative" style={{ marginLeft: '3rem' }}>
-              <StructureColumn items={adGroups} title="Ad Group" />
-              {adGroups.map((_, index) => (
-                   <div key={index} className="absolute left-[-2rem] w-8 h-px bg-[#00f5ff]" style={{ top: `calc(4.5rem * ${index} + 2rem)`}} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const StructureAdsColumn = ({ items, className = '' }) => {
+  return (
+    <div className={cn("flex flex-col items-center", className)}>
+      <div className="px-4 py-1.5 rounded-md text-sm font-bold mb-4" style={{ backgroundColor: '#0D1B2A', color: 'white' }}>Ads</div>
+      <div className="flex flex-col gap-[3.25rem] relative">
+        {items.map((item, index) => (
+          <div key={index} className="relative flex items-center h-16">
+            <div className="flex flex-col gap-1">
+              {item.ads.map((ad, adIndex) => (
+                <div key={adIndex} className="flex-grow flex items-center justify-center border rounded-lg p-1 w-32 h-8 text-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
+                  <div className="text-xs">{ad}</div>
+                </div>
               ))}
+            </div>
           </div>
-  
-           <div className="flex flex-col justify-center relative" style={{ marginLeft: '1rem' }}>
-              <StructureAdsColumn items={ads} />
-               {ads.map((ad, index) => (
-                 !ad.isQuote && <div key={index} className="absolute left-[-2rem] w-8 h-px border-t-2 border-dashed border-[#00f5ff]" style={{ top: `calc(4.5rem * ${index} + 2rem)`}} />
-              ))}
-           </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const FunnelStructure = ({ title, target, campaign, adGroups, ads }) => {
+  return (
+    <div className="flex gap-4 items-start justify-center">
+      <div className="flex-shrink-0 w-48 pt-12">
+        <div className="p-4 rounded-lg" style={{ backgroundColor: '#0D1B2A' }}>
+          <h4 className="font-bold text-lg text-white">{title}</h4>
+          <div className="text-sm mt-2">
+            {target}
+          </div>
         </div>
       </div>
-    );
-  };
-  
+
+      <div className="flex items-start gap-8 relative">
+        <StructureColumn items={[campaign]} title="Campaign" />
+        <div className="absolute top-1/2 left-full w-8 h-px bg-[#00f5ff]" style={{ transform: 'translateY(calc(-50% + 2rem))' }} />
+
+        <div className="absolute top-1/2 left-full w-px bg-[#00f5ff]" style={{ height: `${(adGroups.length - 1) * 4.5}rem`, transform: `translate(1.5rem, calc(-${((adGroups.length - 1) * 4.5) / 2}rem + 2rem))` }} />
+        
+        <div className="flex flex-col justify-center relative" style={{ marginLeft: '3rem' }}>
+            <StructureColumn items={adGroups} title="Ad Group" />
+            {adGroups.map((_, index) => (
+                 <div key={index} className="absolute left-[-2rem] w-8 h-px bg-[#00f5ff]" style={{ top: `calc(4.5rem * ${index} + 2rem)`}} />
+            ))}
+        </div>
+
+         <div className="flex flex-col justify-center relative" style={{ marginLeft: '1rem' }}>
+            <StructureAdsColumn items={ads} />
+             {ads.map((ad, index) => (
+               !ad.isQuote && <div key={index} className="absolute left-[-2rem] w-8 h-px border-t-2 border-dashed border-[#00f5ff]" style={{ top: `calc(4.s5rem * ${index} + 2rem)`}} />
+            ))}
+         </div>
+      </div>
+    </div>
+  );
+};
+
 
   const SummaryInfoCard = ({ title, value, subValue, icon: Icon }) => (
     <Card className="neumorphic-card">
