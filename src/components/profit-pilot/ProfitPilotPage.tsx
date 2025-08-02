@@ -519,6 +519,16 @@ export function ProfitPilotPage() {
   return (
     <>
       <header className="text-center mb-8 relative">
+        <div className="relative w-full max-w-4xl mx-auto mb-8">
+            <Image
+              src="https://placehold.co/1200x400.png"
+              alt="Digital Marketing Illustration"
+              width={1200}
+              height={400}
+              className="rounded-xl shadow-2xl object-cover"
+              data-ai-hint="digital marketing automation"
+            />
+          </div>
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Profit Pilot</h1>
         <p className="text-base opacity-80">Profit & Metrics Planner v5.3</p>
       </header>
