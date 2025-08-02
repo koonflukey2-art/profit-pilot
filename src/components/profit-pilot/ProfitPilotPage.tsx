@@ -94,7 +94,7 @@ export function ProfitPilotPage() {
   });
   const [automationRules, setAutomationRules] = useState([]);
   const [uiTitles, setUiTitles] = useState({ productInfoTitle: 'ข้อมูลสินค้า', costCalculationTitle: 'คำนวณต้นทุน', goalsAndResultsTitle: 'เป้าหมายและผลลัพธ์', advancedPlanningTitle: 'Advanced Planning' });
-  const [activeTab, setActiveTab] = useState('summary');
+  const [activeTab, setActiveTab] = useState('metrics');
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [history, setHistory] = useState([]);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: () => {} });
@@ -721,11 +721,11 @@ export function ProfitPilotPage() {
       <div className="neumorphic-card p-6 mt-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="tab-nav mb-6 grid w-full grid-cols-2 md:grid-cols-6 bg-background shadow-inner">
-            <TabsTrigger value="summary" className="tab-button"><FileText className="w-4 h-4"/>สรุปแผน</TabsTrigger>
             <TabsTrigger value="metrics" className="tab-button"><CalendarCheck className="w-4 h-4"/>Metrics แนะนำ</TabsTrigger>
             <TabsTrigger value="planning" className="tab-button"><GanttChartSquare className="w-4 h-4"/>การวางแผน</TabsTrigger>
             <TabsTrigger value="funnel" className="tab-button"><Filter className="w-4 h-4"/>กลยุทธ์ Funnel</TabsTrigger>
             <TabsTrigger value="automation" className="tab-button"><Bot className="w-4 h-4"/>ระบบอัตโนมัติ</TabsTrigger>
+            <TabsTrigger value="summary" className="tab-button"><FileText className="w-4 h-4"/>สรุปแผน</TabsTrigger>
             <TabsTrigger value="history" className="tab-button"><History className="w-4 h-4"/>ประวัติ</TabsTrigger>
           </TabsList>
           
