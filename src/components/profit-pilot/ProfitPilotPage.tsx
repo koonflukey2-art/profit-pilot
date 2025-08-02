@@ -502,7 +502,7 @@ const FunnelStructure = ({ data }) => {
     <div className="flex flex-col items-center gap-12">
       {data.map((funnel, funnelIndex) => (
         <div key={funnelIndex} className="relative w-full">
-          <div className="grid grid-cols-[auto,auto,1fr] items-start justify-center gap-x-4 md:gap-x-8 w-full">
+          <div className="grid grid-cols-[auto,1fr,auto] items-start justify-center gap-x-4 md:gap-x-8 w-full">
             {/* Column 1: Stage */}
             <div className="w-40 flex-shrink-0 justify-self-end mt-1">
               <div className="flex items-center justify-center border rounded-lg p-2 h-20 text-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
