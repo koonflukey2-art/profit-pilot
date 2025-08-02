@@ -505,36 +505,35 @@ export function ProfitPilotPage() {
     </div>
 );
 
-  const StructureBranchingLine = ({ children, count, dashed = false }) => {
-    const childrenArray = React.Children.toArray(children);
-    const itemHeight = 90; 
-    const containerHeight = count * itemHeight - (count > 1 ? 24 : 0);
+const StructureBranchingLine = ({ children }) => {
+  const childrenArray = React.Children.toArray(children);
+  const count = childrenArray.length;
+  
+  return (
+    <div className="relative flex justify-center">
+      {/* Central vertical line from the center node */}
+      <div className="absolute top-full left-1/2 w-px h-8 bg-[#00f5ff]" />
 
-    return (
-        <div className="flex items-center pl-8">
-            <div className="relative" style={{ height: `${containerHeight}px`, minHeight: '1px' }}>
-                <div className="absolute top-1/2 -left-8 w-8 h-px" style={{ backgroundColor: '#00f5ff' }} />
-                <div 
-                    className="absolute left-0 top-0 w-px h-full" 
-                    style={{ 
-                        backgroundColor: '#00f5ff'
-                    }} 
-                />
-                
-                <div className="absolute left-0 top-0 h-full w-full">
-                    {childrenArray.map((child, index) => {
-                        const topPosition = childrenArray.length > 1 ? (index / (childrenArray.length - 1)) * 100 : 50;
-                        return (
-                            <div key={index} className="absolute w-full" style={{ top: `${topPosition}%`, transform: 'translateY(-50%)' }}>
-                                {child}
-                            </div>
-                        )
-                    })}
-                </div>
+      <div className="absolute top-full mt-8 left-0 right-0 h-px bg-[#00f5ff]" />
+      
+      <div className="flex justify-around w-full absolute top-full mt-8">
+        {childrenArray.map((child, index) => {
+          const isFirst = index === 0;
+          const isLast = index === count - 1;
+          
+          return (
+            <div key={index} className="relative flex flex-col items-center pt-8">
+              {/* Vertical line going up to the horizontal line */}
+              <div className="absolute bottom-full left-1/2 w-px h-8 bg-[#00f5ff]" />
+              {child}
             </div>
-        </div>
-    );
+          );
+        })}
+      </div>
+    </div>
+  );
 };
+
 
   const StructureNode = ({ children, dashed = false }) => {
     return (
@@ -1053,47 +1052,33 @@ export function ProfitPilotPage() {
             
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white">Funnel Structure</h3>
-              <div className="neumorphic-card p-6 space-y-8 overflow-x-auto min-w-[800px]">
-                <div className="flex items-start">
-                    <StructureBox>
-                        <p className="font-bold text-lg">Campaign</p>
-                        <p className="text-xs text-cyan-400 mt-1">CBO: {F.formatCurrency(calculated.tofuBudget)}</p>
-                    </StructureBox>
-                    <StructureBranchingLine count={4}>
-                        <StructureNode>
-                            <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
-                        </StructureNode>
-                        <StructureNode>
-                            <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
-                        </StructureNode>
-                        <StructureNode>
-                            <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
-                        </StructureNode>
-                        <StructureNode>
-                            <StructureBox><p>Lookalike</p></StructureBox>
-                        </StructureNode>
-                    </StructureBranchingLine>
-                </div>
+              <div className="neumorphic-card p-6 space-y-12 overflow-x-auto min-w-[800px] flex flex-col items-center">
+                  <div className="relative flex flex-col items-center" style={{paddingBottom: '240px'}}>
+                      <StructureBox>
+                          <p className="font-bold text-lg">Campaign</p>
+                          <p className="text-xs text-cyan-400 mt-1">CBO: {F.formatCurrency(calculated.tofuBudget)}</p>
+                      </StructureBox>
+                      <StructureBranchingLine>
+                          <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
+                          <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
+                          <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
+                          <StructureBox><p>Lookalike</p></StructureBox>
+                      </StructureBranchingLine>
+                  </div>
 
-                <hr className="border-primary/20"/>
+                  <hr className="border-primary/20 w-full"/>
 
-                <div className="flex items-start">
-                    <StructureBox>
-                        <p className="font-bold text-lg">Campaign</p>
-                        <p className="text-xs text-cyan-400 mt-1">CBO: {F.formatCurrency(calculated.bofuBudget)}</p>
-                    </StructureBox>
-                    <StructureBranchingLine count={3}>
-                        <StructureNode>
-                            <StructureBox><p>INBOX 7,15,30 วัน</p></StructureBox>
-                        </StructureNode>
-                        <StructureNode>
-                            <StructureBox><p>VDO75% 3,7,15,30 วัน</p></StructureBox>
-                        </StructureNode>
-                        <StructureNode>
-                            <StructureBox><p>ENGAGE 3,7,15,30 วัน</p></StructureBox>
-                        </StructureNode>
-                    </StructureBranchingLine>
-                </div>
+                  <div className="relative flex flex-col items-center" style={{paddingBottom: '160px'}}>
+                       <StructureBox>
+                          <p className="font-bold text-lg">Campaign</p>
+                          <p className="text-xs text-cyan-400 mt-1">CBO: {F.formatCurrency(calculated.bofuBudget)}</p>
+                      </StructureBox>
+                      <StructureBranchingLine>
+                          <StructureBox><p>INBOX 7,15,30 วัน</p></StructureBox>
+                          <StructureBox><p>VDO75% 3,7,15,30 วัน</p></StructureBox>
+                          <StructureBox><p>ENGAGE 3,7,15,30 วัน</p></StructureBox>
+                      </StructureBranchingLine>
+                  </div>
               </div>
             </div>
 
