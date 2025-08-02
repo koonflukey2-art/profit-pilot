@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -500,63 +501,57 @@ const FunnelStructure = ({ data }) => {
   return (
     <div className="flex flex-col items-center gap-12">
       {data.map((funnel, funnelIndex) => (
-        <div key={funnelIndex} className="grid grid-cols-[auto,auto,1fr,auto] items-start justify-center gap-x-4 md:gap-x-8 w-full">
-          {/* Column 1: Stage */}
-          <div className="w-40 flex-shrink-0 justify-self-end mt-1">
-            <div className="flex items-center justify-center border rounded-lg p-2 h-20 text-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
-              <span className="font-bold text-lg">{funnel.stage}</span>
+        <div key={funnelIndex} className="relative w-full">
+          <div className="grid grid-cols-[auto,auto,1fr] items-start justify-center gap-x-4 md:gap-x-8 w-full">
+            {/* Column 1: Stage */}
+            <div className="w-40 flex-shrink-0 justify-self-end mt-1">
+              <div className="flex items-center justify-center border rounded-lg p-2 h-20 text-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
+                <span className="font-bold text-lg">{funnel.stage}</span>
+              </div>
             </div>
-          </div>
 
-          {/* Column 2: Campaign */}
-          <div className="w-48 flex-shrink-0 relative justify-self-center">
-            <div className="flex flex-col items-center justify-center border rounded-lg p-2 h-20 text-center text-sm" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
-              <p className="font-bold">{funnel.campaign.title}</p>
-              <p>งบ/วัน: {funnel.campaign.budget}</p>
-              <p>จำนวน {funnel.campaign.accounts}</p>
-            </div>
-             {/* Dashed lines to Ads */}
-            <div className="absolute top-1/2 -right-4 h-[calc(100%+16px)] w-[calc(100%_+_17rem)]">
-                <svg width="100%" height="100%" className="absolute -top-2" style={{ overflow: 'visible' }}>
-                    <line x1="0" y1="50%" x2="calc(100% - 15rem)" y2="14%" stroke="#00f5ff" strokeWidth="1" strokeDasharray="5,5" />
-                    <line x1="0" y1="50%" x2="calc(100% - 15rem)" y2="50%" stroke="#00f5ff" strokeWidth="1" strokeDasharray="5,5" />
-                    <line x1="0" y1="50%" x2="calc(100% - 15rem)" y2="86%" stroke="#00f5ff" strokeWidth="1" strokeDasharray="5,5" />
-                </svg>
-            </div>
-          </div>
-
-          {/* Column 3: Ad Groups */}
-          <div className="w-48 flex-shrink-0 justify-self-center">
-            <div className="flex flex-col gap-4">
-              {funnel.adGroups.map((group, groupIndex) => (
-                <div key={groupIndex} className="relative flex items-center">
-                  <div className="flex flex-col items-center justify-center border rounded-lg p-2 h-14 text-center w-full text-xs" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
-                    <p className="font-bold">{group.title}</p>
-                    {group.subtitle && <p>{group.subtitle}</p>}
-                  </div>
+            {/* Column 2: Campaign & Ad Groups */}
+            <div className="flex-grow justify-self-stretch">
+                {/* Campaign */}
+                <div className="relative flex flex-col items-center justify-center border rounded-lg p-2 h-20 text-center text-sm mb-4" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
+                    <p className="font-bold">{funnel.campaign.title}</p>
+                    <p>งบ/วัน: {funnel.campaign.budget}</p>
+                    <p>จำนวน {funnel.campaign.accounts}</p>
+                    <div className="absolute bottom-[-1px] left-0 right-0 h-px bg-[#00f5ff]"></div> {/* Underline */}
                 </div>
-              ))}
-            </div>
-          </div>
-                    
-          {/* Column 4: Ads */}
-          <div className="w-40 flex-shrink-0 justify-self-start">
-             <div className="border rounded-lg p-2 flex flex-col gap-2 items-center justify-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
-                 {funnel.ads.map((ad, adIndex) => (
-                     <div key={adIndex} className="relative flex items-center w-full">
-                         <div className="flex items-center justify-center border rounded-lg p-1 h-8 text-center w-full text-xs" style={{ backgroundColor: '#0D1B2A', borderColor: '#00f5ff' }}>
-                             {ad}
-                         </div>
-                     </div>
-                 ))}
-            </div>
-          </div>
 
+                {/* Ad Groups */}
+                <div className="flex flex-col gap-4">
+                  {funnel.adGroups.map((group, groupIndex) => (
+                    <div key={groupIndex} className="relative flex items-center">
+                      <div className="flex flex-col items-center justify-center border rounded-lg p-2 h-14 text-center w-full text-xs" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
+                        <p className="font-bold">{group.title}</p>
+                        {group.subtitle && <p>{group.subtitle}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+            </div>
+            
+            {/* Column 3: Ads */}
+            <div className="w-40 flex-shrink-0 justify-self-start self-center">
+                <div className="border rounded-lg p-2 flex flex-col gap-2 items-center justify-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
+                    {funnel.ads.map((ad, adIndex) => (
+                        <div key={adIndex} className="relative flex items-center w-full">
+                            <div className="flex items-center justify-center border rounded-lg p-1 h-8 text-center w-full text-xs" style={{ backgroundColor: '#0D1B2A', borderColor: '#00f5ff' }}>
+                                {ad}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+          </div>
         </div>
       ))}
     </div>
   );
 };
+
 
   const summaryFunnelData = useMemo(() => ([
     {
