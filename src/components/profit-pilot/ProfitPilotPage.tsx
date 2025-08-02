@@ -517,22 +517,12 @@ export function ProfitPilotPage() {
     </div>
   );
   
-  const StructureBranch = ({ count = 1, height = 240 }) => {
-    const viewBox = `0 0 40 ${height}`;
-    const startY = height / 2;
-    const endYPositions = Array.from({ length: count }, (_, i) => (i + 0.5) * (height / count));
-  
-    return (
-      <div className="flex items-center" style={{ height: `${height}px` }}>
-        <svg width="40" height={height} viewBox={viewBox} stroke="#00f5ff" fill="none" strokeWidth="1">
-          <path d={`M0,${startY} H20`} />
-          {endYPositions.map((endY, i) => (
-             <path key={i} d={`M20,${startY} L 40,${endY}`} />
-          ))}
-        </svg>
-      </div>
-    );
-  };
+  const StructureBranch = ({ children, className = '' }) => (
+    <div className={cn("flex justify-center relative", className)}>
+      <div className="w-px h-full" style={{backgroundColor: '#00f5ff'}}></div>
+      {children}
+    </div>
+  );
 
   const SummaryInfoCard = ({ title, value, subValue, icon: Icon }) => (
     <Card className="neumorphic-card">
@@ -1040,70 +1030,56 @@ export function ProfitPilotPage() {
               <h3 className="text-xl font-bold mb-4 text-white">Funnel Structure</h3>
               <div className="neumorphic-card p-6 space-y-8 overflow-x-auto">
                 {/* New Customer Structure */}
-                <div className="flex items-start gap-4">
-                  <div className="w-48 flex-shrink-0 pt-20">
-                      <div className="border rounded-lg p-1 text-center text-white" style={{backgroundColor: '#0D1B2A', borderColor: '#00f5ff'}}>
-                        <div className="rounded p-2" style={{backgroundColor: '#000814'}}>
-                           <h4 className="font-bold text-lg">ลูกค้าใหม่</h4>
-                        </div>
-                      </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-48 flex-shrink-0">
+                    <StructureBox>
+                      <h4 className="font-bold text-lg">ลูกค้าใหม่</h4>
+                    </StructureBox>
                   </div>
-
-                  <div className="flex items-center h-60"> <StructureLine /> </div>
-
-                  <div className="w-48 flex-shrink-0 pt-20">
+            
+                  <StructureLine />
+            
+                  <div className="w-48 flex-shrink-0">
                     <StructureBox header="Campaign">
                       <p className="font-bold text-lg">CBO / ABO</p>
                       <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}</p>
                       <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
                     </StructureBox>
                   </div>
-                  
-                  <StructureBranch count={4} />
-
-                  <div className="flex flex-col justify-around h-60 flex-shrink-0">
-                     <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
-                     <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
-                     <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
-                     <StructureBox><p>Lookalike</p></StructureBox>
+            
+                  <StructureLine />
+            
+                  <div className="flex flex-col gap-4">
+                    <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
+                    <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
+                    <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
+                    <StructureBox><p>Lookalike</p></StructureBox>
                   </div>
-                  
-                   <div className="flex items-center h-60">
-                      <div className="flex flex-col h-full w-16">
-                          <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
-                          <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
-                          <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
-                           <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
-                      </div>
-                  </div>
-                  
-                  <div className="flex flex-col justify-around h-60 flex-shrink-0">
-                    <StructureBox header="Ads" className="h-full justify-around">
+            
+                  <StructureLine />
+            
+                  <div className="flex flex-col gap-4">
+                    <StructureBox header="Ads">
                       <p className="bg-white/10 rounded px-2 py-0.5">VDO 1</p>
                       <p className="bg-white/10 rounded px-2 py-0.5">VDO 2</p>
                       <p className="bg-white/10 rounded px-2 py-0.5">รูปภาพ</p>
                     </StructureBox>
-                    <p className="text-center text-xl font-bold">,,</p>
-                    <p className="text-center text-xl font-bold">,,</p>
-                    <p className="text-center text-xl font-bold">,,</p>
                   </div>
                 </div>
 
                 <hr className="border-primary/20"/>
 
                 {/* Retarget Structure */}
-                 <div className="flex items-start gap-4">
-                  <div className="w-48 flex-shrink-0 pt-20">
-                       <div className="border rounded-lg p-1 text-center text-white" style={{backgroundColor: '#0D1B2A', borderColor: '#00f5ff'}}>
-                        <div className="rounded p-2" style={{backgroundColor: '#000814'}}>
-                           <h4 className="font-bold text-lg">Retarget</h4>
-                        </div>
-                      </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-48 flex-shrink-0">
+                    <StructureBox>
+                      <h4 className="font-bold text-lg">Retarget</h4>
+                    </StructureBox>
                   </div>
-
-                  <div className="flex items-center h-60"> <StructureLine /> </div>
+            
+                  <StructureLine />
                   
-                  <div className="w-48 flex-shrink-0 pt-20">
+                  <div className="w-48 flex-shrink-0">
                     <StructureBox header="Campaign">
                       <p className="font-bold text-lg">CBO / ABO</p>
                        <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p>
@@ -1111,30 +1087,22 @@ export function ProfitPilotPage() {
                     </StructureBox>
                   </div>
                   
-                  <StructureBranch count={3} />
+                  <StructureLine />
 
-                  <div className="flex flex-col justify-around h-60 flex-shrink-0">
+                  <div className="flex flex-col gap-4">
                     <StructureBox><p>INBOX 7,15,30 วัน</p></StructureBox>
                     <StructureBox><p>VDO75% 3,7,15,30 วัน</p></StructureBox>
                     <StructureBox><p>ENGAGE 3,7,15,30 วัน</p></StructureBox>
                   </div>
 
-                   <div className="flex items-center h-60">
-                      <div className="flex flex-col h-full w-16">
-                          <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
-                           <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
-                           <div className="flex-1 flex items-center"><StructureLine isDashed /></div>
-                      </div>
-                  </div>
+                  <StructureLine />
                   
-                  <div className="flex flex-col justify-around h-60 flex-shrink-0">
-                    <StructureBox header="Ads" className="h-full justify-around">
+                  <div className="flex flex-col gap-4">
+                    <StructureBox header="Ads">
                       <p className="bg-white/10 rounded px-2 py-0.5">VDO ปิด</p>
                       <p className="bg-white/10 rounded px-2 py-0.5">โปรโมชั่น</p>
                       <p className="bg-white/10 rounded px-2 py-0.5">รีวิว/ผลลัพธ์</p>
                     </StructureBox>
-                    <p className="text-center text-xl font-bold">,,</p>
-                    <p className="text-center text-xl font-bold">,,</p>
                   </div>
                 </div>
 
