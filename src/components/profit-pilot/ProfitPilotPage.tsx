@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -91,6 +90,7 @@ export function ProfitPilotPage() {
     targetRoas: 0,
     targetCpa: 0,
     adCostPercent: 0,
+    priceBeforeVat: 0,
   });
   const [automationRules, setAutomationRules] = useState([]);
   const [uiTitles, setUiTitles] = useState({ productInfoTitle: 'ข้อมูลสินค้า', costCalculationTitle: 'คำนวณต้นทุน', goalsAndResultsTitle: 'เป้าหมายและผลลัพธ์', advancedPlanningTitle: 'Advanced Planning' });
@@ -504,19 +504,23 @@ export function ProfitPilotPage() {
     </div>
 );
 
-  const StructureBranchingLine = ({ children, count }) => {
+  const StructureBranchingLine = ({ children, count, dashed = false }) => {
     const childrenArray = React.Children.toArray(children);
-    const itemHeight = 112; // Approx height of a node + margin
-    const containerHeight = count * itemHeight - 24; // Adjusted to better fit
+    const itemHeight = 112; 
+    const containerHeight = count * itemHeight - (count > 1 ? 24 : 0);
 
     return (
         <div className="flex items-center pl-8">
             <div className="relative" style={{ height: `${containerHeight}px`, minHeight: '1px' }}>
-                {/* Horizontal line from parent */}
                 <div className="absolute top-1/2 -left-8 w-8 h-px" style={{ backgroundColor: '#00f5ff' }} />
-
-                {/* Vertical line connecting all branches */}
-                <div className="absolute left-0 top-0 w-px h-full" style={{ backgroundColor: '#00f5ff' }} />
+                <div 
+                    className="absolute left-0 top-0 w-px h-full" 
+                    style={{ 
+                        backgroundColor: dashed ? 'transparent' : '#00f5ff',
+                        backgroundImage: dashed ? `linear-gradient(to bottom, #00f5ff 50%, transparent 50%)` : 'none',
+                        backgroundSize: '1px 10px'
+                    }} 
+                />
                 
                 <div className="absolute left-0 top-0 h-full w-full">
                     {childrenArray.map((child, index) => {
@@ -533,11 +537,17 @@ export function ProfitPilotPage() {
     );
 };
 
-  const StructureNode = ({ children }) => {
+  const StructureNode = ({ children, dashed = false }) => {
     return (
       <div className="flex items-center relative">
-        {/* Horizontal line to child box */}
-        <div className="w-8 h-px" style={{backgroundColor: '#00f5ff'}} />
+        <div 
+          className="w-8 h-px" 
+          style={{ 
+            backgroundColor: dashed ? 'transparent' : '#00f5ff',
+            backgroundImage: dashed ? `linear-gradient(to right, #00f5ff 50%, transparent 50%)` : 'none',
+            backgroundSize: '10px 1px'
+           }} 
+        />
         {children}
       </div>
     );
@@ -1049,67 +1059,61 @@ export function ProfitPilotPage() {
               <div className="neumorphic-card p-6 space-y-8 overflow-x-auto min-w-[800px]">
                 <div className="flex items-center">
                     <StructureBox><p className="font-bold text-lg">Campaign</p></StructureBox>
-                    <div className="flex items-center">
+                    <StructureNode />
+                    <StructureBox>
+                        <p className="font-bold text-lg">Adset</p>
+                        <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}</p>
+                    </StructureBox>
+                    <StructureBranchingLine count={4} dashed>
+                        <StructureNode dashed>
+                            <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
+                        </StructureNode>
+                        <StructureNode dashed>
+                            <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
+                        </StructureNode>
+                        <StructureNode dashed>
+                            <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
+                        </StructureNode>
+                        <StructureNode dashed>
+                            <StructureBox><p>Lookalike</p></StructureBox>
+                        </StructureNode>
+                    </StructureBranchingLine>
+                    <StructureBranchingLine count={1}>
                         <StructureNode>
                             <StructureBox>
-                                <p className="font-bold text-lg">Adset</p>
-                                <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}</p>
+                                <p className="bg-white/10 rounded px-2 py-0.5">Ads</p>
                             </StructureBox>
                         </StructureNode>
-                        <StructureBranchingLine count={4}>
-                            <StructureNode>
-                                <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
-                            </StructureNode>
-                            <StructureNode>
-                                <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
-                            </StructureNode>
-                            <StructureNode>
-                                <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
-                            </StructureNode>
-                            <StructureNode>
-                                <StructureBox><p>Lookalike</p></StructureBox>
-                            </StructureNode>
-                        </StructureBranchingLine>
-                        <StructureBranchingLine count={1}>
-                           <StructureNode>
-                                <StructureBox>
-                                    <p className="bg-white/10 rounded px-2 py-0.5">Ads</p>
-                                </StructureBox>
-                           </StructureNode>
-                        </StructureBranchingLine>
-                    </div>
+                    </StructureBranchingLine>
                 </div>
 
                 <hr className="border-primary/20"/>
 
                 <div className="flex items-center">
                     <StructureBox><p className="font-bold text-lg">Campaign</p></StructureBox>
-                    <div className="flex items-center">
-                        <StructureNode>
-                           <StructureBox>
-                               <p className="font-bold text-lg">Retarget Adset</p>
-                               <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p>
-                           </StructureBox>
+                    <StructureNode />
+                    <StructureBox>
+                        <p className="font-bold text-lg">Retarget Adset</p>
+                        <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p>
+                    </StructureBox>
+                    <StructureBranchingLine count={3} dashed>
+                        <StructureNode dashed>
+                            <StructureBox><p>INBOX 7,15,30 วัน</p></StructureBox>
                         </StructureNode>
-                        <StructureBranchingLine count={3}>
-                            <StructureNode>
-                                <StructureBox><p>INBOX 7,15,30 วัน</p></StructureBox>
-                            </StructureNode>
-                            <StructureNode>
-                                <StructureBox><p>VDO75% 3,7,15,30 วัน</p></StructureBox>
-                            </StructureNode>
-                            <StructureNode>
-                                <StructureBox><p>ENGAGE 3,7,15,30 วัน</p></StructureBox>
-                            </StructureNode>
-                        </StructureBranchingLine>
-                        <StructureBranchingLine count={1}>
-                            <StructureNode>
-                                <StructureBox>
-                                    <p className="bg-white/10 rounded px-2 py-0.5">Ads</p>
-                                </StructureBox>
-                            </StructureNode>
-                        </StructureBranchingLine>
-                    </div>
+                        <StructureNode dashed>
+                            <StructureBox><p>VDO75% 3,7,15,30 วัน</p></StructureBox>
+                        </StructureNode>
+                        <StructureNode dashed>
+                            <StructureBox><p>ENGAGE 3,7,15,30 วัน</p></StructureBox>
+                        </StructureNode>
+                    </StructureBranchingLine>
+                     <StructureBranchingLine count={1}>
+                        <StructureNode>
+                            <StructureBox>
+                                <p className="bg-white/10 rounded px-2 py-0.5">Ads</p>
+                            </StructureBox>
+                        </StructureNode>
+                    </StructureBranchingLine>
                 </div>
               </div>
             </div>
