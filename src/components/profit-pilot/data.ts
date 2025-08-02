@@ -4,6 +4,9 @@ export const platformFees = {
   tiktok_shop: { platform: 4.0, payment: 3.0 },
   shopee: { platform: 5.0, payment: 3.0 },
   lazada: { platform: 5.0, payment: 3.0 },
+  facebook_ads_message: { platform: 0, payment: 3.0 },
+  facebook_ads_website: { platform: 0, payment: 3.0 },
+  tiktok_ads: { platform: 0, payment: 3.0 },
   other: { platform: 0, payment: 0 },
 };
 
@@ -13,6 +16,9 @@ export const platformFeeLabels = {
   tiktok_shop: 'TikTok Shop',
   shopee: 'Shopee',
   lazada: 'Lazada',
+  facebook_ads_message: 'Facebook Ads - ข้อความ',
+  facebook_ads_website: 'Facebook Ads - เว็บไซต์',
+  tiktok_ads: 'Tiktok Ads',
   other: 'อื่นๆ',
 };
 

@@ -425,10 +425,12 @@ export function ProfitPilotPage() {
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
     if (totalValue === 0) return null;
   
+    const chartData = [...data];
+
     return (
       <div className="w-full flex justify-center items-end my-4 py-4 min-h-[300px]">
         <div className="flex flex-col items-center justify-end w-full max-w-sm space-y-2">
-          {data.map((item, index) => {
+          {chartData.map((item, index) => {
             const layerStyle: React.CSSProperties = {
                 width: `${item.value}%`,
                 clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)',
@@ -458,8 +460,8 @@ export function ProfitPilotPage() {
     const IconComponent = icon;
     const sizeClasses = {
       sm: 'w-5 h-5',
-      md: 'w-8 h-8',
-      lg: 'w-10 h-10',
+      md: 'w-10 h-10',
+      lg: 'w-12 h-12',
     };
     return (
       <div className={cn("absolute bg-card/50 backdrop-blur-sm p-2 md:p-3 rounded-full shadow-lg border border-primary/20", className)}>
@@ -823,12 +825,12 @@ export function ProfitPilotPage() {
                    <div className="relative w-full max-w-2xl min-h-[400px] flex items-center justify-center">
                     {/* Floating Icons */}
                     <FloatingIcon icon={Tv} className="top-10 left-0 md:left-10 animate-bounce" size="lg" />
+                    <FloatingIcon icon={DollarSign} className="bottom-10 left-0 md:left-10 animate-bounce" size="lg" />
                     <FloatingIcon icon={Target} className="top-5 right-5 opacity-80" size="lg" />
                     <FloatingIcon icon={Users} className="absolute top-1/2 -right-4 md:right-0 -translate-y-1/2" size="lg" />
-                    <FloatingIcon icon={LineChart} className="bottom-10 left-0 md:left-10" size="lg"/>
+                    <FloatingIcon icon={LineChart} className="bottom-20 right-2 md:right-8" size="lg"/>
                     <FloatingIcon icon={Percent} className="bottom-5 right-5 md:right-16 animate-pulse" size="md" />
-                    <FloatingIcon icon={DollarSign} className="bottom-20 right-2 md:right-8 animate-bounce" size="lg" />
-                    
+
                     {/* Funnel Chart */}
                     <FunnelChart data={funnelData} />
                   </div>
@@ -892,7 +894,7 @@ export function ProfitPilotPage() {
                     <StructureBox header="Campaign">
                       <p className="font-bold text-lg">CBO / ABO</p>
                       <p className="text-xs text-white/70 mt-1">งบ {F.formatInt(calculated.tofuBudgetPerAccountDaily)} - {F.formatInt(calculated.tofuBudgetPerAccountDaily * 2)}</p>
-                      <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
+                      <p className="text-xs text-white/70 mt-1">จำนวน 1 บัญชี</p>
                     </StructureBox>
                   </div>
                   
@@ -942,7 +944,7 @@ export function ProfitPilotPage() {
                     <StructureBox header="Campaign">
                       <p className="font-bold text-lg">CBO / ABO</p>
                        <p className="text-xs text-white/70 mt-1">งบ {F.formatInt(calculated.bofuBudgetPerAccountDaily)} - {F.formatInt(calculated.bofuBudgetPerAccountDaily * 2)}</p>
-                       <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
+                       <p className="text-xs text-white/70 mt-1">จำนวน 1 บัญชี</p>
                     </StructureBox>
                   </div>
                   
