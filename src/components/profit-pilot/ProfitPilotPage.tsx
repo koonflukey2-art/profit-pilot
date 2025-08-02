@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -497,79 +496,108 @@ export function ProfitPilotPage() {
     );
   };
   
-const StructureColumn = ({ title, items, isDashed = false, className = '' }) => {
+const FunnelStructure = ({ data }) => {
   return (
-    <div className={cn("flex flex-col items-center", className)}>
-      {title && <div className="px-4 py-1.5 rounded-md text-sm font-bold mb-4" style={{ backgroundColor: '#0D1B2A', color: 'white' }}>{title}</div>}
-      <div className="flex flex-col gap-4 relative">
-        {items.map((item, index) => (
-          <div key={index} className="relative flex items-center">
-            <div className="flex-grow flex items-center justify-center border rounded-lg p-2 min-w-44 h-16 text-center text-xs" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
-              <div>{item.content}</div>
+    <div className="flex flex-col items-center gap-12">
+      {data.map((funnel, funnelIndex) => (
+        <div key={funnelIndex} className="flex items-center justify-center gap-4 md:gap-8">
+          {/* Column 1: Stage */}
+          <div className="w-40 flex-shrink-0">
+            <div className="flex items-center justify-center border rounded-lg p-2 h-20 text-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
+              <span className="font-bold text-lg">{funnel.stage}</span>
             </div>
           </div>
-        ))}
-      </div>
-    </div>
-  );
-};
 
-const StructureAdsColumn = ({ items, className = '' }) => {
-  return (
-    <div className={cn("flex flex-col items-center", className)}>
-      <div className="px-4 py-1.5 rounded-md text-sm font-bold mb-4" style={{ backgroundColor: '#0D1B2A', color: 'white' }}>Ads</div>
-      <div className="flex flex-col gap-[3.25rem] relative">
-        {items.map((item, index) => (
-          <div key={index} className="relative flex items-center h-16">
-            <div className="flex flex-col gap-1">
-              {item.ads.map((ad, adIndex) => (
-                <div key={adIndex} className="flex-grow flex items-center justify-center border rounded-lg p-1 w-32 h-8 text-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
-                  <div className="text-xs">{ad}</div>
+          {/* Line to Column 2 */}
+          <div className="w-8 h-px bg-[#00f5ff]" />
+
+          {/* Column 2: Campaign */}
+          <div className="w-48 flex-shrink-0">
+            <div className="flex flex-col items-center justify-center border rounded-lg p-2 h-20 text-center text-sm" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
+              <p className="font-bold">{funnel.campaign.title}</p>
+              <p>งบ/วัน: {funnel.campaign.budget}</p>
+              <p>จำนวน {funnel.campaign.accounts}</p>
+            </div>
+          </div>
+
+          {/* Lines to Column 3 */}
+          <div className="relative flex items-center">
+            <div className="w-8 h-px bg-[#00f5ff]" />
+            <div className="absolute left-8 w-px bg-[#00f5ff]" style={{ height: `${(funnel.adGroups.length - 1) * 4}rem`, top: `calc(50% - ${((funnel.adGroups.length - 1) * 4) / 2}rem)` }} />
+          </div>
+
+          {/* Column 3: Ad Groups */}
+          <div className="w-48 flex-shrink-0">
+            <div className="flex flex-col gap-4">
+              {funnel.adGroups.map((group, groupIndex) => (
+                <div key={groupIndex} className="relative flex items-center">
+                  <div className="absolute left-[-2rem] w-8 h-px bg-[#00f5ff]" />
+                  <div className="flex flex-col items-center justify-center border rounded-lg p-2 h-14 text-center w-full text-xs" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
+                    <p className="font-bold">{group.title}</p>
+                    {group.subtitle && <p>{group.subtitle}</p>}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const FunnelStructure = ({ title, target, campaign, adGroups, ads }) => {
-  return (
-    <div className="flex gap-4 items-start justify-center">
-      <div className="flex-shrink-0 w-48 pt-12">
-        <div className="p-4 rounded-lg" style={{ backgroundColor: '#0D1B2A' }}>
-          <h4 className="font-bold text-lg text-white">{title}</h4>
-          <div className="text-sm mt-2">
-            {target}
+          
+          {/* Lines to Column 4 */}
+           <div className="relative flex items-center">
+            <div className="w-8 h-px bg-[#00f5ff]" />
+            <div className="absolute left-8 w-px bg-[#00f5ff]" style={{ height: `${(funnel.ads.length - 1) * 3}rem`, top: `calc(50% - ${((funnel.ads.length - 1) * 3) / 2}rem)` }} />
           </div>
+          
+          {/* Column 4: Ads */}
+          <div className="w-40 flex-shrink-0">
+             <div className="border rounded-lg p-2 flex flex-col gap-2 items-center justify-center" style={{ backgroundColor: '#000814', borderColor: '#00f5ff' }}>
+                 {funnel.ads.map((ad, adIndex) => (
+                     <div key={adIndex} className="relative flex items-center w-full">
+                         {funnel.adGroups.length > 1 && <div className="absolute left-[-2.5rem] w-8 h-px bg-[#00f5ff]" style={{top: `calc(50% - ${((funnel.ads.length - 1) * 1.5)}rem + ${adIndex*3}rem)`}}/>}
+                         <div className="flex items-center justify-center border rounded-lg p-1 h-8 text-center w-full text-xs" style={{ backgroundColor: '#0D1B2A', borderColor: '#00f5ff' }}>
+                             {ad}
+                         </div>
+                     </div>
+                 ))}
+            </div>
+          </div>
+
         </div>
-      </div>
-
-      <div className="flex items-start gap-8 relative">
-        <StructureColumn items={[campaign]} title="Campaign" />
-        <div className="absolute top-1/2 left-full w-8 h-px bg-[#00f5ff]" style={{ transform: 'translateY(calc(-50% + 2rem))' }} />
-
-        <div className="absolute top-1/2 left-full w-px bg-[#00f5ff]" style={{ height: `${(adGroups.length - 1) * 4.5}rem`, transform: `translate(1.5rem, calc(-${((adGroups.length - 1) * 4.5) / 2}rem + 2rem))` }} />
-        
-        <div className="flex flex-col justify-center relative" style={{ marginLeft: '3rem' }}>
-            <StructureColumn items={adGroups} title="Ad Group" />
-            {adGroups.map((_, index) => (
-                 <div key={index} className="absolute left-[-2rem] w-8 h-px bg-[#00f5ff]" style={{ top: `calc(4.5rem * ${index} + 2rem)`}} />
-            ))}
-        </div>
-
-         <div className="flex flex-col justify-center relative" style={{ marginLeft: '1rem' }}>
-            <StructureAdsColumn items={ads} />
-             {ads.map((ad, index) => (
-               !ad.isQuote && <div key={index} className="absolute left-[-2rem] w-8 h-px border-t-2 border-dashed border-[#00f5ff]" style={{ top: `calc(4.s5rem * ${index} + 2rem)`}} />
-            ))}
-         </div>
-      </div>
+      ))}
     </div>
   );
 };
+
+  const summaryFunnelData = useMemo(() => ([
+    {
+      stage: 'ลูกค้าใหม่',
+      campaign: {
+        title: 'CBO / ABO',
+        budget: `${F.formatCurrency(calculated.tofuBudgetPerAccountDaily)} ฿`,
+        accounts: `${F.formatInt(numAccounts)} บัญชี`,
+      },
+      adGroups: [
+        { title: 'Demographic', subtitle: '(ประชากรศาสตร์)' },
+        { title: 'Interest', subtitle: '(ความสนใจ)' },
+        { title: 'Behavior', subtitle: '(พฤติกรรม)' },
+        { title: 'Lookalike' },
+      ],
+      ads: ['VDO 1', 'VDO 2', 'รูปภาพ'],
+    },
+    {
+      stage: 'Retarget',
+      campaign: {
+        title: 'CBO / ABO',
+        budget: `${F.formatCurrency(calculated.bofuBudgetPerAccountDaily)} ฿`,
+        accounts: `${F.formatInt(numAccounts)} บัญชี`,
+      },
+      adGroups: [
+        { title: 'INBOX', subtitle: '7,15,30 วัน' },
+        { title: 'VDO75%', subtitle: '3,7,15,30 วัน' },
+        { title: 'ENGAGE', subtitle: '3,7,15,30 วัน' },
+      ],
+      ads: ['VDO ปิด', 'โปรโมชั่น', 'รีวิว/ผลลัพธ์'],
+    },
+  ]), [calculated, numAccounts]);
 
 
   const SummaryInfoCard = ({ title, value, subValue, icon: Icon }) => (
@@ -1064,7 +1092,7 @@ const FunnelStructure = ({ title, target, campaign, adGroups, ads }) => {
                     </div>
                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-center">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudgetPerAccountMonthly)}</p></div>
+                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudgetPerAccountMonthly)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p></div>
                       <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{F.formatInt(numAccounts)}</p></div>
                     </div>
@@ -1076,69 +1104,7 @@ const FunnelStructure = ({ title, target, campaign, adGroups, ads }) => {
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white">Funnel Structure</h3>
               <div className="neumorphic-card p-6 space-y-12 overflow-x-auto">
-                 <FunnelStructure
-                  title="ลูกค้าใหม่"
-                  target={
-                    <>
-                      <p>ใช้กลุ่มเป้าหมาย</p>
-                      <ul className="list-disc list-inside mt-1">
-                        <li>Interest</li>
-                        <li>Lookalike</li>
-                      </ul>
-                    </>
-                  }
-                  campaign={{
-                    content: (
-                      <div className="flex flex-col items-center">
-                        <p className="font-bold">Conversion</p>
-                        <p className="font-bold text-xl">CBO</p>
-                        <p>งบ {F.formatCurrency(calculated.tofuBudget)}</p>
-                      </div>
-                    )
-                  }}
-                  adGroups={[
-                    { content: 'กลุ่มเป้าหมาย 1' },
-                    { content: 'กลุ่มเป้าหมาย 2' },
-                    { content: 'กลุ่มเป้าหมาย 3' },
-                    { content: 'กลุ่มเป้าหมาย 4' },
-                    { content: 'กลุ่มเป้าหมาย 5' },
-                  ]}
-                  ads={[
-                    { ads: ['VDO 1', 'VDO 2', 'VDO 3'] },
-                    { ads: ['”'], isQuote: true },
-                    { ads: ['”'], isQuote: true },
-                    { ads: ['”'], isQuote: true },
-                    { ads: ['”'], isQuote: true },
-                  ]}
-                />
-
-                <hr className="border-primary/20 w-full" />
-
-                <FunnelStructure
-                  title="Retarget"
-                  target=""
-                  campaign={{
-                    content: (
-                      <div className="flex flex-col items-center">
-                        <p className="font-bold">Conversion</p>
-                        <p className="font-bold text-xl">CBO</p>
-                        <p>งบ {F.formatCurrency(calculated.bofuBudget)}</p>
-                      </div>
-                    )
-                  }}
-                  adGroups={[
-                    { content: 'VDO 25% 7 วัน' },
-                    { content: 'View Content 7 วัน' },
-                    { content: 'VDO 25% 14 วัน' },
-                    { content: 'VDO 25% 30 วัน' },
-                  ]}
-                  ads={[
-                    { ads: ['VDO ปัง', 'โปรโมชั่น', 'รีวิว/ผลลัพธ์'] },
-                    { ads: ['”'], isQuote: true },
-                    { ads: ['”'], isQuote: true },
-                    { ads: ['”'], isQuote: true },
-                  ]}
-                />
+                 <FunnelStructure data={summaryFunnelData} />
               </div>
             </div>
 
