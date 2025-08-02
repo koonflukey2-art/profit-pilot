@@ -506,23 +506,28 @@ export function ProfitPilotPage() {
     </div>
   );
 
-  const StructureLine = ({ children, isDashed = false }) => (
-    <div className="flex-1 flex items-center justify-center relative">
-      <div className={cn("w-full h-px", isDashed ? "bg-none" : "bg-blue-500")}
-           style={{
-             ...(isDashed ? { backgroundImage: "linear-gradient(to right, #00f5ff 50%, transparent 50%)", backgroundSize: "8px 1px", backgroundRepeat: "repeat-x"} : { backgroundColor: '#00f5ff'})
-           }}
-      />
-      {children}
-    </div>
-  );
-  
-  const StructureBranch = ({ children, className = '' }) => (
-    <div className={cn("flex justify-center relative", className)}>
-      <div className="w-px h-full" style={{backgroundColor: '#00f5ff'}}></div>
-      {children}
-    </div>
-  );
+  const StructureBranchingLine = ({ children, count }) => {
+    return (
+      <div className="flex items-center">
+        <div className="w-8 h-px" style={{ backgroundColor: '#00f5ff' }} />
+        <div className="relative flex flex-col justify-center">
+          <div className="w-px h-full absolute left-0" style={{ backgroundColor: '#00f5ff', height: `${(count - 1) * 3.5}rem` }}/>
+          <div className="flex flex-col gap-4">
+            {children}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const StructureNode = ({ children }) => {
+    return (
+      <div className="flex items-center">
+        <div className="w-8 h-px" style={{ backgroundColor: '#00f5ff' }} />
+        {children}
+      </div>
+    );
+  };
 
   const SummaryInfoCard = ({ title, value, subValue, icon: Icon }) => (
     <Card className="neumorphic-card">
@@ -1028,84 +1033,79 @@ export function ProfitPilotPage() {
             
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white">Funnel Structure</h3>
-              <div className="neumorphic-card p-6 space-y-8 overflow-x-auto">
+              <div className="neumorphic-card p-6 space-y-8 overflow-x-auto min-w-[800px]">
                 {/* New Customer Structure */}
-                <div className="flex items-center gap-4">
-                  <div className="w-48 flex-shrink-0">
-                    <StructureBox>
-                      <h4 className="font-bold text-lg">ลูกค้าใหม่</h4>
-                    </StructureBox>
-                  </div>
-            
-                  <StructureLine />
-            
-                  <div className="w-48 flex-shrink-0">
-                    <StructureBox header="Campaign">
-                      <p className="font-bold text-lg">CBO / ABO</p>
-                      <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}</p>
-                      <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
-                    </StructureBox>
-                  </div>
-            
-                  <StructureLine />
-            
-                  <div className="flex flex-col gap-4">
-                    <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
-                    <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
-                    <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
-                    <StructureBox><p>Lookalike</p></StructureBox>
-                  </div>
-            
-                  <StructureLine />
-            
-                  <div className="flex flex-col gap-4">
-                    <StructureBox header="Ads">
-                      <p className="bg-white/10 rounded px-2 py-0.5">VDO 1</p>
-                      <p className="bg-white/10 rounded px-2 py-0.5">VDO 2</p>
-                      <p className="bg-white/10 rounded px-2 py-0.5">รูปภาพ</p>
-                    </StructureBox>
-                  </div>
+                <div className="flex items-center">
+                  <StructureBox><h4 className="font-bold text-lg">ลูกค้าใหม่</h4></StructureBox>
+                  <StructureBranchingLine count={1}>
+                    <StructureNode>
+                      <StructureBox header="Campaign">
+                        <p className="font-bold text-lg">CBO / ABO</p>
+                        <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}</p>
+                        <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
+                      </StructureBox>
+                      <StructureBranchingLine count={4}>
+                          <StructureNode>
+                             <StructureBox><p>Demographic</p><p className='text-xs'>(ประชากรศาสตร์)</p></StructureBox>
+                          </StructureNode>
+                          <StructureNode>
+                             <StructureBox><p>Interest</p><p className='text-xs'>(ความสนใจ)</p></StructureBox>
+                          </StructureNode>
+                          <StructureNode>
+                              <StructureBox><p>Behavior</p><p className='text-xs'>(พฤติกรรม)</p></StructureBox>
+                          </StructureNode>
+                           <StructureNode>
+                              <StructureBox><p>Lookalike</p></StructureBox>
+                           </StructureNode>
+                      </StructureBranchingLine>
+                      <StructureBranchingLine count={3}>
+                        <StructureNode>
+                          <StructureBox header="Ads">
+                            <p className="bg-white/10 rounded px-2 py-0.5">VDO 1</p>
+                            <p className="bg-white/10 rounded px-2 py-0.5">VDO 2</p>
+                            <p className="bg-white/10 rounded px-2 py-0.5">รูปภาพ</p>
+                          </StructureBox>
+                        </StructureNode>
+                      </StructureBranchingLine>
+                    </StructureNode>
+                  </StructureBranchingLine>
                 </div>
 
                 <hr className="border-primary/20"/>
 
                 {/* Retarget Structure */}
-                <div className="flex items-center gap-4">
-                  <div className="w-48 flex-shrink-0">
-                    <StructureBox>
-                      <h4 className="font-bold text-lg">Retarget</h4>
-                    </StructureBox>
-                  </div>
-            
-                  <StructureLine />
-                  
-                  <div className="w-48 flex-shrink-0">
-                    <StructureBox header="Campaign">
-                      <p className="font-bold text-lg">CBO / ABO</p>
-                       <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p>
-                       <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
-                    </StructureBox>
-                  </div>
-                  
-                  <StructureLine />
-
-                  <div className="flex flex-col gap-4">
-                    <StructureBox><p>INBOX 7,15,30 วัน</p></StructureBox>
-                    <StructureBox><p>VDO75% 3,7,15,30 วัน</p></StructureBox>
-                    <StructureBox><p>ENGAGE 3,7,15,30 วัน</p></StructureBox>
-                  </div>
-
-                  <StructureLine />
-                  
-                  <div className="flex flex-col gap-4">
-                    <StructureBox header="Ads">
-                      <p className="bg-white/10 rounded px-2 py-0.5">VDO ปิด</p>
-                      <p className="bg-white/10 rounded px-2 py-0.5">โปรโมชั่น</p>
-                      <p className="bg-white/10 rounded px-2 py-0.5">รีวิว/ผลลัพธ์</p>
-                    </StructureBox>
-                  </div>
+                <div className="flex items-center">
+                  <StructureBox><h4 className="font-bold text-lg">Retarget</h4></StructureBox>
+                  <StructureBranchingLine count={1}>
+                    <StructureNode>
+                      <StructureBox header="Campaign">
+                        <p className="font-bold text-lg">CBO / ABO</p>
+                        <p className="text-xs text-white/70 mt-1">งบ/วัน: {F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p>
+                        <p className="text-xs text-white/70 mt-1">จำนวน {F.formatInt(numAccounts)} บัญชี</p>
+                      </StructureBox>
+                      <StructureBranchingLine count={3}>
+                          <StructureNode>
+                             <StructureBox><p>INBOX 7,15,30 วัน</p></StructureBox>
+                          </StructureNode>
+                          <StructureNode>
+                              <StructureBox><p>VDO75% 3,7,15,30 วัน</p></StructureBox>
+                          </StructureNode>
+                          <StructureNode>
+                             <StructureBox><p>ENGAGE 3,7,15,30 วัน</p></StructureBox>
+                          </StructureNode>
+                      </StructureBranchingLine>
+                       <StructureBranchingLine count={3}>
+                        <StructureNode>
+                          <StructureBox header="Ads">
+                            <p className="bg-white/10 rounded px-2 py-0.5">VDO ปิด</p>
+                            <p className="bg-white/10 rounded px-2 py-0.5">โปรโมชั่น</p>
+                            <p className="bg-white/10 rounded px-2 py-0.5">รีวิว/ผลลัพธ์</p>
+                          </StructureBox>
+                        </StructureNode>
+                      </StructureBranchingLine>
+                    </StructureNode>
+                  </StructureBranchingLine>
                 </div>
-
               </div>
             </div>
 
