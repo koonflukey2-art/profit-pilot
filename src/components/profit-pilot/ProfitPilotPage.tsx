@@ -498,64 +498,68 @@ export function ProfitPilotPage() {
   };
   
 const FunnelStructure = ({ data }) => {
+  if (!data || data.length === 0) return null;
+
+  const AdGroupNode = ({ group }) => (
+    <div className="flex-col items-center justify-center border rounded-lg p-2 h-14 text-center w-48 text-xs bg-[#000814] border-primary">
+      <p className="font-bold">{group.title}</p>
+      {group.subtitle && <p>{group.subtitle}</p>}
+    </div>
+  );
+
+  const AdsNode = ({ ads }) => (
+     <div className="flex flex-col items-center justify-center border rounded-lg p-2 min-h-20 w-48 text-center text-sm bg-[#000814] border-primary space-y-1">
+       {ads.map((ad, adIndex) => (
+          <div key={adIndex} className={cn("font-bold w-full", adIndex < ads.length - 1 && 'border-b border-primary/50 pb-1')}>
+            {ad}
+          </div>
+       ))}
+    </div>
+  );
+
   return (
-    <div className="flex flex-col items-center gap-12 py-8">
+    <div className="flex flex-col items-center gap-12 py-8 overflow-x-auto">
       {data.map((funnel, funnelIndex) => (
-        <div key={funnelIndex} className="relative grid grid-cols-[150px_1fr_1fr_1fr] items-center gap-x-8 w-full">
+        <div key={funnelIndex} className="flex items-start justify-center gap-x-8 px-4">
+          
           {/* Col 1: Stage */}
-          <div className="flex justify-center items-center">
-            <div className="flex items-center justify-center border rounded-lg h-20 w-36 text-center bg-[#000814] border-primary">
+          <div className="flex-shrink-0 w-36 mt-10">
+            <div className="flex items-center justify-center border rounded-lg h-20 text-center bg-[#000814] border-primary">
               <span className="font-bold text-lg">{funnel.stage}</span>
             </div>
           </div>
-          <div className="h-px w-8 bg-primary absolute left-[150px] top-1/2 -translate-y-1/2" />
 
           {/* Col 2: Campaign */}
-          <div className="flex justify-center items-center">
-            <div className="flex flex-col items-center justify-center border rounded-lg p-2 h-20 w-48 text-center text-sm bg-[#000814] border-primary">
+          <div className="flex-shrink-0 w-48 mt-10">
+             <div className="flex flex-col items-center justify-center border rounded-lg p-2 h-20 text-center text-sm bg-[#000814] border-primary">
               <p className="font-bold">{funnel.campaign.title}</p>
               <p>งบ/วัน: {funnel.campaign.budget}</p>
               <p>จำนวน {funnel.campaign.accounts}</p>
             </div>
           </div>
-          <div className="h-px w-8 bg-primary absolute left-[calc(150px+8rem+2rem)] top-1/2 -translate-y-1/2" />
-
-
+          
           {/* Col 3: Ad Groups */}
-          <div className="relative flex justify-center">
-            <div className="flex flex-col gap-y-4">
+          <div className="relative flex-shrink-0 w-48">
+            <div className="absolute top-1/2 left-[-1rem] w-4 h-px bg-primary" />
+            <div className="absolute top-10 left-0 w-px bg-primary" style={{ height: `calc(100% - 5rem)` }} />
+            <div className="flex flex-col items-start gap-y-4">
               {funnel.adGroups.map((group, groupIndex) => (
-                <div key={groupIndex} className="flex flex-col items-center justify-center border rounded-lg p-2 h-14 text-center w-48 text-xs bg-[#000814] border-primary">
-                  <p className="font-bold">{group.title}</p>
-                  {group.subtitle && <p>{group.subtitle}</p>}
+                <div key={groupIndex} className="relative flex items-center">
+                   <div className="absolute left-0 w-4 h-px bg-primary"/>
+                   <div className="ml-4">
+                     <AdGroupNode group={group} />
+                   </div>
                 </div>
               ))}
             </div>
-            {/* Vertical connector for Ad Groups */}
-            <div className="absolute left-0 top-1/2 -translate-x-4 w-px bg-primary" style={{ height: `calc(${funnel.adGroups.length * 3.5 + (funnel.adGroups.length - 1) * 1}rem - 3.5rem)` }} />
-            {/* Branching lines for Ad Groups */}
-            {funnel.adGroups.map((_, groupIndex) => (
-               <div key={groupIndex} className="absolute left-0 w-4 h-px bg-primary" style={{ top: `calc(${groupIndex * 4.5 + 1.75}rem)` }}/>
-            ))}
           </div>
-
-          <div className="h-px w-8 bg-primary absolute left-[calc(150px+8rem+2rem+12rem+2rem)] top-1/2 -translate-y-1/2" />
           
-          {/* Col 4: Ads */}
-          <div className="relative flex justify-center">
-             <div className="flex flex-col items-center justify-center border rounded-lg p-2 min-h-20 w-48 text-center text-sm bg-[#000814] border-primary">
-               {funnel.ads.map((ad, adIndex) => (
-                  <div key={adIndex} className={cn("font-bold w-full", adIndex < funnel.ads.length-1 && 'border-b border-primary/50 mb-1 pb-1')}>{ad}</div>
-               ))}
-            </div>
-             {/* Vertical connector for Ads */}
-             <div className="absolute left-0 top-1/2 -translate-x-4 w-px bg-primary" style={{ height: `calc(${funnel.ads.length * 1.5 + (funnel.ads.length - 1) * 0.5}rem - 1rem)` }} />
-
-            {/* Branching lines for Ads */}
-            {funnel.ads.map((_, adIndex) => (
-               <div key={adIndex} className="absolute left-0 w-4 h-px bg-primary" style={{ top: `calc(${adIndex * 2 + 1}rem)`}}/>
-            ))}
+           {/* Col 4: Ads */}
+          <div className="relative flex-shrink-0 w-48 mt-[4.5rem]">
+            <div className="absolute top-1/2 left-[-1rem] w-4 h-px bg-primary" />
+             <AdsNode ads={funnel.ads} />
           </div>
+
         </div>
       ))}
     </div>
