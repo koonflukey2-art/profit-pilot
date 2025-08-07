@@ -497,73 +497,60 @@ export function ProfitPilotPage() {
     );
   };
   
-const FunnelStructure = ({ data }) => {
-  if (!data || data.length === 0) return null;
+  const FunnelStructure = ({ data }) => {
+    if (!data || data.length === 0) return null;
 
-  const AdGroupNode = ({ group }) => (
-    <div className="flex-col items-center justify-center border rounded-lg p-2 h-14 text-center w-48 text-xs bg-[#000814] border-primary">
-      <p className="font-bold">{group.title}</p>
-      {group.subtitle && <p>{group.subtitle}</p>}
-    </div>
-  );
+    return (
+        <div className="flex flex-col items-stretch gap-y-10 py-8 px-4 overflow-x-auto">
+            {data.map((funnel, funnelIndex) => (
+                <div key={funnelIndex} className="grid grid-cols-[120px_1fr] gap-x-4">
+                    {/* Stage & Campaign */}
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                        <div className="neumorphic-card w-full h-20 flex items-center justify-center text-center">
+                            <span className="font-bold text-lg">{funnel.stage}</span>
+                        </div>
+                        <div className="neumorphic-card w-full h-24 flex flex-col items-center justify-center text-center text-sm p-2">
+                            <p className="font-bold">{funnel.campaign.title}</p>
+                            <p>{funnel.campaign.budget}</p>
+                            <p>{funnel.campaign.accounts}</p>
+                        </div>
+                    </div>
 
-  const AdsNode = ({ ads }) => (
-     <div className="flex flex-col items-center justify-center border rounded-lg p-2 min-h-20 w-48 text-center text-sm bg-[#000814] border-primary space-y-1">
-       {ads.map((ad, adIndex) => (
-          <div key={adIndex} className={cn("font-bold w-full", adIndex < ads.length - 1 && 'border-b border-primary/50 pb-1')}>
-            {ad}
-          </div>
-       ))}
-    </div>
-  );
-
-  return (
-    <div className="flex flex-col items-center gap-12 py-8 overflow-x-auto">
-      {data.map((funnel, funnelIndex) => (
-        <div key={funnelIndex} className="flex items-start justify-center gap-x-8 px-4">
-          
-          {/* Col 1: Stage */}
-          <div className="flex-shrink-0 w-36 mt-10">
-            <div className="flex items-center justify-center border rounded-lg h-20 text-center bg-[#000814] border-primary">
-              <span className="font-bold text-lg">{funnel.stage}</span>
-            </div>
-          </div>
-
-          {/* Col 2: Campaign */}
-          <div className="flex-shrink-0 w-48 mt-10">
-             <div className="flex flex-col items-center justify-center border rounded-lg p-2 h-20 text-center text-sm bg-[#000814] border-primary">
-              <p className="font-bold">{funnel.campaign.title}</p>
-              <p>งบ/วัน: {funnel.campaign.budget}</p>
-              <p>จำนวน {funnel.campaign.accounts}</p>
-            </div>
-          </div>
-          
-          {/* Col 3: Ad Groups */}
-          <div className="relative flex-shrink-0 w-48">
-            <div className="absolute top-1/2 left-[-1rem] w-4 h-px bg-primary" />
-            <div className="absolute top-10 left-0 w-px bg-primary" style={{ height: `calc(100% - 5rem)` }} />
-            <div className="flex flex-col items-start gap-y-4">
-              {funnel.adGroups.map((group, groupIndex) => (
-                <div key={groupIndex} className="relative flex items-center">
-                   <div className="absolute left-0 w-4 h-px bg-primary"/>
-                   <div className="ml-4">
-                     <AdGroupNode group={group} />
-                   </div>
+                    {/* Ad Groups & Ads */}
+                    <div className="grid grid-cols-[1fr_1fr] gap-x-4">
+                        {/* Ad Groups with connecting lines */}
+                        <div className="flex items-center">
+                            <div className="w-full h-full flex items-center">
+                                <div className="w-px bg-primary h-3/4" />
+                                <div className="flex flex-col justify-around w-full h-full pl-4">
+                                    {funnel.adGroups.map((group, groupIndex) => (
+                                        <div key={groupIndex} className="flex items-center">
+                                            <div className="w-4 h-px bg-primary" />
+                                            <div className="neumorphic-card flex-col items-center justify-center p-2 h-16 w-40 text-xs text-center ml-2">
+                                                <p className="font-bold">{group.title}</p>
+                                                {group.subtitle && <p>{group.subtitle}</p>}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {/* Ads */}
+                        <div className="flex items-center justify-center">
+                            <div className="neumorphic-card flex flex-col items-center justify-center p-2 min-h-20 w-48 text-center text-sm space-y-2">
+                                {funnel.ads.map((ad, adIndex) => (
+                                    <div key={adIndex} className={cn("font-bold w-full", adIndex < funnel.ads.length - 1 && 'border-b border-primary/50 pb-2')}>
+                                        {ad}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              ))}
-            </div>
-          </div>
-          
-           {/* Col 4: Ads */}
-          <div className="relative flex-shrink-0 w-48 mt-[4.5rem]">
-            <div className="absolute top-1/2 left-[-1rem] w-4 h-px bg-primary" />
-             <AdsNode ads={funnel.ads} />
-          </div>
-
+            ))}
         </div>
-      ))}
-    </div>
-  );
+    );
 };
   
   const summaryFunnelData = useMemo(() => ([
@@ -571,7 +558,7 @@ const FunnelStructure = ({ data }) => {
       stage: 'ลูกค้าใหม่',
       campaign: {
         title: 'CBO / ABO',
-        budget: `${F.formatCurrency(calculated.tofuBudgetPerAccountDaily)} ฿`,
+        budget: `งบ/วัน: ${F.formatCurrency(calculated.tofuBudgetPerAccountDaily)} ฿`,
         accounts: `${F.formatInt(numAccounts)} บัญชี`,
       },
       adGroups: [
@@ -586,7 +573,7 @@ const FunnelStructure = ({ data }) => {
       stage: 'Retarget',
       campaign: {
         title: 'CBO / ABO',
-        budget: `${F.formatCurrency(calculated.bofuBudgetPerAccountDaily)} ฿`,
+        budget: `งบ/วัน: ${F.formatCurrency(calculated.bofuBudgetPerAccountDaily)} ฿`,
         accounts: `${F.formatInt(numAccounts)} บัญชี`,
       },
       adGroups: [
@@ -1131,16 +1118,27 @@ const FunnelStructure = ({ data }) => {
             </div>
           </TabsContent>
           <TabsContent value="automation">
-            <div className="flex justify-between items-center mb-6">
-               <div>
-                  <Label htmlFor="automation-tool" className="block text-sm mb-2 font-medium opacity-80">เครื่องมืออัตโนมัติ</Label>
-                   <Select value={inputs.automationTool} onValueChange={(val) => handleInputChange('automationTool', val)}>
-                    <SelectTrigger id="automation-tool" className="neumorphic-select w-48"><SelectValue/></SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(automationToolsConfig).map(([key, {name}]) => <SelectItem key={key} value={key}>{name}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="md:col-span-1">
+                    <Label htmlFor="metricsPlan-automation" className="block text-sm mb-2 font-medium opacity-80">แผน Metrics</Label>
+                    <Select value={inputs.metricsPlan} onValueChange={(val) => handleInputChange('metricsPlan', val)}>
+                        <SelectTrigger id="metricsPlan-automation" className="neumorphic-select"><SelectValue/></SelectTrigger>
+                        <SelectContent>
+                            {Object.entries(metricsPlans).map(([key, {name}]) => <SelectItem key={key} value={key}>{name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="md:col-span-2">
+                     <Label htmlFor="automation-tool" className="block text-sm mb-2 font-medium opacity-80">เครื่องมืออัตโนมัติ</Label>
+                       <Select value={inputs.automationTool} onValueChange={(val) => handleInputChange('automationTool', val)}>
+                        <SelectTrigger id="automation-tool" className="neumorphic-select w-full"><SelectValue/></SelectTrigger>
+                        <SelectContent>
+                          {Object.entries(automationToolsConfig).map(([key, {name}]) => <SelectItem key={key} value={key}>{name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                </div>
               </div>
+            <div className="flex justify-end items-center mb-6">
               <Button onClick={addRule} className="neon-button"><Plus className="w-4 h-4"/> เพิ่ม Rule ใหม่</Button>
             </div>
             <div className="space-y-4">
