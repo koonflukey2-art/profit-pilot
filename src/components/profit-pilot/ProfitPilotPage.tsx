@@ -497,36 +497,43 @@ export function ProfitPilotPage() {
     );
   };
   
-  const FunnelStructure = ({ data }) => {
+ const FunnelStructure = ({ data }) => {
     if (!data || data.length === 0) return null;
 
     return (
-        <div className="flex flex-col items-stretch gap-y-10 py-8 px-4 overflow-x-auto">
+        <div className="flex flex-col items-stretch gap-y-12 py-8 px-4 overflow-x-auto">
             {data.map((funnel, funnelIndex) => (
-                <div key={funnelIndex} className="grid grid-cols-[120px_1fr] gap-x-4">
-                    {/* Stage & Campaign */}
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                        <div className="neumorphic-card w-full h-20 flex items-center justify-center text-center">
+                <div key={funnelIndex} className="grid grid-cols-[100px_1fr] gap-x-6 relative">
+                    {/* Stage */}
+                    <div className="flex flex-col items-center justify-start pt-5">
+                        <div className="neumorphic-card w-full h-16 flex items-center justify-center text-center">
                             <span className="font-bold text-lg">{funnel.stage}</span>
-                        </div>
-                        <div className="neumorphic-card w-full h-24 flex flex-col items-center justify-center text-center text-sm p-2">
-                            <p className="font-bold">{funnel.campaign.title}</p>
-                            <p>{funnel.campaign.budget}</p>
-                            <p>{funnel.campaign.accounts}</p>
                         </div>
                     </div>
 
-                    {/* Ad Groups & Ads */}
-                    <div className="grid grid-cols-[1fr_1fr] gap-x-4">
-                        {/* Ad Groups with connecting lines */}
+                    {/* Main Content with connecting lines */}
+                    <div className="grid grid-cols-[150px_1fr_1fr] gap-x-6">
+                        {/* Campaign */}
+                        <div className="flex flex-col items-center justify-center text-sm text-center">
+                            <div className="neumorphic-card w-full h-24 flex flex-col items-center justify-center p-2">
+                                <p className="font-bold">{funnel.campaign.title}</p>
+                                <p>{funnel.campaign.budget}</p>
+                                <p>{funnel.campaign.accounts}</p>
+                            </div>
+                        </div>
+
+                        {/* Ad Groups */}
                         <div className="flex items-center">
-                            <div className="w-full h-full flex items-center">
-                                <div className="w-px bg-primary h-3/4" />
-                                <div className="flex flex-col justify-around w-full h-full pl-4">
+                            <div className="w-full h-full flex items-center relative">
+                                {/* Vertical line */}
+                                <div className="w-px bg-primary h-full absolute left-0" />
+                                
+                                <div className="flex flex-col justify-around w-full h-full pl-6 space-y-2">
                                     {funnel.adGroups.map((group, groupIndex) => (
-                                        <div key={groupIndex} className="flex items-center">
-                                            <div className="w-4 h-px bg-primary" />
-                                            <div className="neumorphic-card flex-col items-center justify-center p-2 h-16 w-40 text-xs text-center ml-2">
+                                        <div key={groupIndex} className="flex items-center relative">
+                                            {/* Horizontal line from vertical line to box */}
+                                            <div className="w-6 h-px bg-primary absolute -left-6" />
+                                            <div className="neumorphic-card flex-col items-center justify-center p-2 min-h-12 w-36 text-xs text-center">
                                                 <p className="font-bold">{group.title}</p>
                                                 {group.subtitle && <p>{group.subtitle}</p>}
                                             </div>
@@ -537,13 +544,25 @@ export function ProfitPilotPage() {
                         </div>
                         
                         {/* Ads */}
-                        <div className="flex items-center justify-center">
-                            <div className="neumorphic-card flex flex-col items-center justify-center p-2 min-h-20 w-48 text-center text-sm space-y-2">
-                                {funnel.ads.map((ad, adIndex) => (
-                                    <div key={adIndex} className={cn("font-bold w-full", adIndex < funnel.ads.length - 1 && 'border-b border-primary/50 pb-2')}>
-                                        {ad}
-                                    </div>
-                                ))}
+                        <div className="flex items-center">
+                             <div className="w-full h-full flex items-center relative">
+                                {/* Main connecting line from AdGroups column */}
+                                <div className="w-12 h-px bg-primary absolute -left-6" />
+                                
+                                {/* Vertical line for Ads */}
+                                <div className="w-px bg-primary h-full absolute left-6" />
+
+                                <div className="flex flex-col justify-around w-full h-full pl-12 space-y-2">
+                                    {funnel.ads.map((ad, adIndex) => (
+                                       <div key={adIndex} className="flex items-center relative">
+                                            {/* Horizontal line from vertical line to box */}
+                                            <div className="w-6 h-px bg-primary absolute -left-6" />
+                                            <div className={cn("neumorphic-card p-2 min-h-10 w-36 text-sm text-center flex items-center justify-center font-bold")}>
+                                                {ad}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
