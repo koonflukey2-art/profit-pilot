@@ -146,6 +146,7 @@ export const funnelObjectivesData = {
 export const automationToolsConfig = {
   facebook: {
       name: 'Facebook Ads',
+      icon: 'Facebook',
       metrics: [
           { value: 'cpa', text: 'Cost per Result' },
           { value: 'roas', text: 'Purchase ROAS' },
@@ -176,6 +177,7 @@ export const automationToolsConfig = {
   },
   revealbot: {
       name: 'Revealbot',
+      icon: 'Bot',
        metrics: [
           { value: 'roas', text: 'ROAS (Purchase)' },
           { value: 'cpa', text: 'CPA (Purchase)' },
@@ -215,6 +217,7 @@ export const automationToolsConfig = {
   },
   madgicx: {
       name: 'Madgicx',
+      icon: 'Wand',
        metrics: [
           { value: 'roas', text: 'ROAS' },
           { value: 'cpa', text: 'CPA' },

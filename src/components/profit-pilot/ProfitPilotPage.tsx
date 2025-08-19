@@ -28,7 +28,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy } from 'lucide-react';
+import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy, Facebook, Wand } from 'lucide-react';
 import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
 
@@ -64,6 +64,12 @@ const initialInputs = {
   metricsPlan: 'fb_s1_plan',
   automationTool: 'facebook',
   budgetingStrategy: 'cbo'
+};
+
+const iconMap = {
+  Facebook,
+  Bot,
+  Wand,
 };
 
 export function ProfitPilotPage() {
@@ -353,6 +359,7 @@ export function ProfitPilotPage() {
     const toolConfig = automationToolsConfig[inputs.automationTool];
     const newRule = {
       id: Date.now(),
+      name: '',
       metric: toolConfig.metrics[0].value,
       operator: toolConfig.operators[0].value,
       value: F.formatNumber(calculated.targetRoas + 1 || 5, 2),
@@ -504,35 +511,50 @@ export function ProfitPilotPage() {
   
   const FunnelStructure = ({ data }) => {
     if (!data || data.length === 0) return null;
+  
     const stageBoxWidth = 100;
     const campaignBoxWidth = 150;
     const adGroupBoxWidth = 150;
     const adBoxWidth = 144;
-    const mainGap = 24;
+    const mainGap = 48; // Increased gap
     const verticalGap = 16;
-    const subVerticalGap = 8;
   
     return (
       <div className="relative p-4 md:p-8 min-w-[800px]">
         {data.map((funnel, funnelIndex) => {
           const adGroupsHeight = funnel.adGroups.reduce((acc, _, i) => acc + 50 + (i > 0 ? verticalGap : 0), 0);
           const adsHeight = funnel.ads.reduce((acc, _, i) => acc + 40 + (i > 0 ? verticalGap : 0), 0);
-          const funnelHeight = Math.max(100, adGroupsHeight, adsHeight);
+          const funnelHeight = Math.max(adGroupsHeight, adsHeight, 100) + 2 * verticalGap;
   
           const campaignY = (funnelHeight / 2) - 48;
-          const campaignX = stageBoxWidth + mainGap;
+          const stageX = 0;
+          const campaignX = stageX + stageBoxWidth + mainGap;
+          const adGroupX = campaignX + campaignBoxWidth + mainGap;
+          const adX = adGroupX + adGroupBoxWidth + mainGap;
+  
+          const adGroupYPositions = funnel.adGroups.map((_, i) => {
+            const totalHeight = funnel.adGroups.length * 50 + (funnel.adGroups.length - 1) * verticalGap;
+            const startY = (funnelHeight - totalHeight) / 2;
+            return startY + i * (50 + verticalGap) + 25;
+          });
+  
+          const adYPositions = funnel.ads.map((_, i) => {
+            const totalHeight = funnel.ads.length * 40 + (funnel.ads.length - 1) * verticalGap;
+            const startY = (funnelHeight - totalHeight) / 2;
+            return startY + i * (40 + verticalGap) + 20;
+          });
   
           return (
-            <div key={funnelIndex} className="relative" style={{ height: funnelHeight + verticalGap }}>
+            <div key={funnel.stage} className="relative" style={{ height: funnelHeight + verticalGap }}>
               {/* Stage Box */}
-              <div className="absolute top-0 left-0 flex flex-col items-center justify-center" style={{ height: funnelHeight }}>
-                <div className="neumorphic-card w-full h-16 flex items-center justify-center text-center" style={{ width: stageBoxWidth }}>
+              <div className="absolute flex flex-col items-center justify-center" style={{ left: stageX, top: 0, height: funnelHeight, width: stageBoxWidth }}>
+                <div className="neumorphic-card w-full h-16 flex items-center justify-center text-center">
                   <span className="font-bold text-lg">{funnel.stage}</span>
                 </div>
               </div>
   
               {/* Campaign Box */}
-              <div className="absolute" style={{ top: campaignY, left: campaignX }}>
+              <div className="absolute" style={{ left: campaignX, top: campaignY }}>
                 <div className="neumorphic-card w-[150px] h-24 flex flex-col items-center justify-center p-2 text-sm text-center">
                   <p className="font-bold">{funnel.campaign.title}</p>
                   <p>{funnel.campaign.budget}</p>
@@ -541,10 +563,10 @@ export function ProfitPilotPage() {
               </div>
   
               {/* Ad Group Boxes */}
-              <div className="absolute" style={{ top: 0, left: campaignX + campaignBoxWidth + mainGap }}>
-                <div className="flex flex-col justify-center gap-4" style={{ height: funnelHeight }}>
+              <div className="absolute" style={{ left: adGroupX, top: (funnelHeight - (funnel.adGroups.length * 50 + (funnel.adGroups.length - 1) * verticalGap)) / 2 }}>
+                <div className="flex flex-col gap-4">
                   {funnel.adGroups.map((group, groupIndex) => (
-                    <div key={groupIndex} className="neumorphic-card flex-col items-center justify-center p-2 min-h-12 w-full text-xs text-center" style={{ width: adGroupBoxWidth }}>
+                    <div key={groupIndex} className="neumorphic-card flex flex-col items-center justify-center p-2 h-[50px] w-full text-xs text-center" style={{ width: adGroupBoxWidth }}>
                       <p className="font-bold">{group.title}</p>
                       {group.subtitle && <p>{group.subtitle}</p>}
                     </div>
@@ -553,10 +575,10 @@ export function ProfitPilotPage() {
               </div>
   
               {/* Ad Boxes */}
-              <div className="absolute" style={{ top: 0, left: campaignX + campaignBoxWidth + mainGap + adGroupBoxWidth + mainGap }}>
-                <div className="flex flex-col justify-center gap-4" style={{ height: funnelHeight }}>
+              <div className="absolute" style={{ left: adX, top: (funnelHeight - (funnel.ads.length * 40 + (funnel.ads.length - 1) * verticalGap)) / 2 }}>
+                <div className="flex flex-col gap-4">
                   {funnel.ads.map((ad, adIndex) => (
-                    <div key={adIndex} className={cn("neumorphic-card p-2 min-h-10 text-sm text-center flex items-center justify-center font-bold")} style={{ width: adBoxWidth }}>
+                    <div key={adIndex} className={cn("neumorphic-card p-2 h-[40px] text-sm text-center flex items-center justify-center font-bold")} style={{ width: adBoxWidth }}>
                       {ad}
                     </div>
                   ))}
@@ -564,57 +586,27 @@ export function ProfitPilotPage() {
               </div>
   
               {/* Connecting Lines */}
-              <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ height: funnelHeight }}>
-                <line 
-                  x1={stageBoxWidth} y1={funnelHeight / 2} 
-                  x2={campaignX} y2={funnelHeight / 2} 
-                  stroke="hsl(var(--primary))" strokeWidth="2" />
+              <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
+                {/* Stage -> Campaign */}
+                <line x1={stageX + stageBoxWidth} y1={funnelHeight / 2} x2={campaignX} y2={funnelHeight / 2} stroke="hsl(var(--primary))" strokeWidth="2" />
+  
+                {/* Campaign -> AdGroup Vertical Line */}
+                <line x1={campaignX + campaignBoxWidth} y1={funnelHeight / 2} x2={adGroupX} y2={funnelHeight / 2} stroke="hsl(var(--primary))" strokeWidth="2" />
+                <line x1={adGroupX} y1={adGroupYPositions[0]} x2={adGroupX} y2={adGroupYPositions[adGroupYPositions.length - 1]} stroke="hsl(var(--primary))" strokeWidth="2" />
                 
-                {/* Main line from Campaign */}
-                <line 
-                  x1={campaignX + campaignBoxWidth} y1={funnelHeight / 2} 
-                  x2={campaignX + campaignBoxWidth + mainGap} y2={funnelHeight / 2}
-                  stroke="hsl(var(--primary))" strokeWidth="2" />
+                {/* AdGroup Branches */}
+                {adGroupYPositions.map((y, i) => (
+                  <line key={`adgroup-branch-${i}`} x1={adGroupX} y1={y} x2={adGroupX - 10} y2={y} stroke="hsl(var(--primary))" strokeWidth="2" />
+                ))}
   
-                {/* Vertical line before ad groups */}
-                <line
-                  x1={campaignX + campaignBoxWidth + mainGap} y1={funnel.adGroups.length > 1 ? 25 : funnelHeight/2}
-                  x2={campaignX + campaignBoxWidth + mainGap} y2={funnel.adGroups.length > 1 ? funnelHeight - 25 : funnelHeight/2}
-                  stroke="hsl(var(--primary))" strokeWidth="2" />
-                  
-                {/* Lines to Ad Groups */}
-                {funnel.adGroups.map((_, i) => {
-                   const adGroupY = (funnelHeight / funnel.adGroups.length) * (i + 0.5);
-                   return(
-                     <line key={`ad-group-line-${i}`}
-                      x1={campaignX + campaignBoxWidth + mainGap} y1={adGroupY}
-                      x2={campaignX + campaignBoxWidth + mainGap} y2={adGroupY}
-                      stroke="hsl(var(--primary))" strokeWidth="2" />
-                   )
-                })}
+                {/* AdGroup -> Ad Vertical Line */}
+                <line x1={adGroupX + adGroupBoxWidth} y1={funnelHeight / 2} x2={adX} y2={funnelHeight / 2} stroke="hsl(var(--primary))" strokeWidth="2" />
+                <line x1={adX} y1={adYPositions[0]} x2={adX} y2={adYPositions[adYPositions.length - 1]} stroke="hsl(var(--primary))" strokeWidth="2" strokeDasharray="5 5"/>
   
-                {/* Main line after Ad Groups */}
-                 <line 
-                  x1={campaignX + campaignBoxWidth + mainGap + adGroupBoxWidth} y1={funnelHeight / 2} 
-                  x2={campaignX + campaignBoxWidth + mainGap + adGroupBoxWidth + mainGap} y2={funnelHeight / 2}
-                  stroke="hsl(var(--primary))" strokeWidth="2" />
-  
-                {/* Vertical line before ads */}
-                 <line
-                  x1={campaignX + campaignBoxWidth + mainGap + adGroupBoxWidth + mainGap} y1={funnel.ads.length > 1 ? 20 : funnelHeight/2}
-                  x2={campaignX + campaignBoxWidth + mainGap + adGroupBoxWidth + mainGap} y2={funnel.ads.length > 1 ? funnelHeight - 20 : funnelHeight/2}
-                  stroke="hsl(var(--primary))" strokeWidth="2" />
-  
-                {/* Lines to Ads */}
-                {funnel.ads.map((_, i) => {
-                  const adY = (funnelHeight / funnel.ads.length) * (i + 0.5);
-                  return (
-                    <line key={`ad-line-${i}`}
-                      x1={campaignX + campaignBoxWidth + mainGap + adGroupBoxWidth + mainGap} y1={adY}
-                      x2={campaignX + campaignBoxWidth + mainGap + adGroupBoxWidth + mainGap + adBoxWidth} y2={adY}
-                      stroke="hsl(var(--primary))" strokeWidth="2" strokeDasharray="4 4" />
-                  )
-                })}
+                {/* Ad Branches */}
+                {adYPositions.map((y, i) => (
+                  <line key={`ad-branch-${i}`} x1={adX} y1={y} x2={adX + adBoxWidth} y2={y} stroke="hsl(var(--primary))" strokeWidth="2" strokeDasharray="5 5"/>
+                ))}
               </svg>
             </div>
           );
@@ -1222,6 +1214,35 @@ export function ProfitPilotPage() {
                         </Select>
                     </div>
                 </div>
+                 <Card className="neumorphic-card mb-6">
+                    <CardHeader>
+                        <CardTitle>สรุปกฎทั้งหมด</CardTitle>
+                        <CardDescription>นี่คือรายการกฎทั้งหมดที่คุณได้สร้างไว้</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {automationRules.length > 0 ? (
+                           <ol className="list-decimal list-inside space-y-2 text-sm">
+                            {automationRules.map((rule, index) => {
+                                const toolConfig = automationToolsConfig[inputs.automationTool];
+                                const metricText = toolConfig.metrics.find(m => m.value === rule.metric)?.text;
+                                const operatorText = toolConfig.operators.find(o => o.value === rule.operator)?.text;
+                                const actionText = toolConfig.actions.find(a => a.value === rule.action)?.text;
+                                const timeText = toolConfig.timeframes.find(t => t.value === rule.timeframe)?.text;
+                                return (
+                                    <li key={rule.id} className="text-white">
+                                        <b>{rule.name ? `${rule.name}: ` : ''}</b>
+                                        ถ้า {metricText} {operatorText} {rule.value} 
+                                        ภายใน {timeText}, 
+                                        ให้ {actionText} {rule.actionValue && `${rule.actionValue}%`}
+                                    </li>
+                                );
+                            })}
+                           </ol>
+                        ) : (
+                            <p className="text-muted-foreground text-center">ยังไม่มีการสร้าง Rule</p>
+                        )}
+                    </CardContent>
+                  </Card>
                 <div className="flex justify-end items-center mb-6">
                   <Button onClick={addRule} className="neon-button"><Plus className="w-4 h-4"/> เพิ่ม Rule ใหม่</Button>
                 </div>
@@ -1229,11 +1250,16 @@ export function ProfitPilotPage() {
                   {automationRules.map(rule => {
                     const toolConfig = automationToolsConfig[inputs.automationTool];
                     const actionConfig = toolConfig.actions.find(a => a.value === rule.action);
+                    const ToolIcon = iconMap[toolConfig.icon] || Bot;
 
                     return (
-                      <div key={rule.id} className="neumorphic-card p-4">
-                        <div className="flex justify-end -mt-2 -mr-2"><Button variant="ghost" size="icon" onClick={() => deleteRule(rule.id)}><X className="w-4 h-4 text-red-400"/></Button></div>
-                          <div className="flex items-center gap-4 flex-wrap">
+                      <div key={rule.id} className="neumorphic-card p-4 space-y-3">
+                        <div className="flex justify-between items-center">
+                            <Input value={rule.name} onChange={(e) => updateRule(rule.id, 'name', e.target.value)} className="neumorphic-input flex-grow" placeholder="ชื่อกฎ (เช่น 'ปิด Ad Set ขาดทุน')"/>
+                            <Button variant="ghost" size="icon" onClick={() => deleteRule(rule.id)}><X className="w-4 h-4 text-red-400"/></Button>
+                        </div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <ToolIcon className="w-5 h-5 text-primary"/>
                             <span className="font-bold text-primary">IF</span>
                             <Select value={rule.metric} onValueChange={(v) => updateRule(rule.id, 'metric', v)}><SelectTrigger className="neumorphic-select w-40"/><SelectContent>{toolConfig.metrics.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
                             <Select value={rule.operator} onValueChange={(v) => updateRule(rule.id, 'operator', v)}><SelectTrigger className="neumorphic-select w-40"/><SelectContent>{toolConfig.operators.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
@@ -1312,35 +1338,6 @@ export function ProfitPilotPage() {
                     <Input id="n8nPrimaryGoal" placeholder="เป้าหมายหลัก (เช่น 'Scale Revenue & Optimize CPA')" className="neumorphic-input" />
                   </div>
                   
-                  <Card className="neumorphic-card mb-6">
-                    <CardHeader>
-                        <CardTitle>สรุปกฎทั้งหมด</CardTitle>
-                        <CardDescription>นี่คือรายการกฎทั้งหมดที่คุณได้สร้างไว้</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {automationRules.length > 0 ? (
-                           <ol className="list-decimal list-inside space-y-2 text-sm">
-                            {automationRules.map((rule, index) => {
-                                const toolConfig = automationToolsConfig[inputs.automationTool];
-                                const metricText = toolConfig.metrics.find(m => m.value === rule.metric)?.text;
-                                const operatorText = toolConfig.operators.find(o => o.value === rule.operator)?.text;
-                                const actionText = toolConfig.actions.find(a => a.value === rule.action)?.text;
-                                const timeText = toolConfig.timeframes.find(t => t.value === rule.timeframe)?.text;
-                                return (
-                                    <li key={rule.id}>
-                                        ถ้า <span className="font-bold text-primary">{metricText}</span> <span className="font-bold text-primary">{operatorText}</span> <span className="font-bold text-primary">{rule.value}</span> 
-                                        ภายใน <span className="font-bold text-yellow-500">{timeText}</span>, 
-                                        ให้ <span className="font-bold text-accent">{actionText} {rule.actionValue && `${rule.actionValue}%`}</span>
-                                    </li>
-                                );
-                            })}
-                           </ol>
-                        ) : (
-                            <p className="text-muted-foreground text-center">ยังไม่มีการสร้าง Rule</p>
-                        )}
-                    </CardContent>
-                  </Card>
-
                   <Button onClick={handleGenerateN8nWorkflow} className="neon-button w-full" disabled={n8nWorkflow.loading || automationRules.length === 0}>
                     {n8nWorkflow.loading ? "กำลังสร้าง..." : (automationRules.length === 0 ? "โปรดสร้าง Rule ก่อน" : "สร้าง n8n Workflow JSON")}
                   </Button>
