@@ -63,6 +63,7 @@ const initialInputs = {
   numberOfAccounts: '1',
   metricsPlan: 'fb_s1_plan',
   automationTool: 'facebook',
+  budgetingStrategy: 'cbo'
 };
 
 export function ProfitPilotPage() {
@@ -381,8 +382,8 @@ export function ProfitPilotPage() {
       const result = await generateAutomationWorkflow({
         workflowName: n8nWorkflowName || "Profit Pilot Workflow",
         primaryGoal: n8nPrimaryGoal || "scale-revenue",
-        platforms: ["facebook", "sheets", "slack", "email"],
-        features: ["budget optimization", "creative refresh"],
+        platforms: [inputs.automationTool],
+        features: ["budget optimization", "creative refresh", "performance notifications"],
         rules: automationRules
       });
       setN8nWorkflow({ json: result.workflowJson, loading: false });
@@ -504,23 +505,14 @@ export function ProfitPilotPage() {
         <div className="flex flex-col items-stretch gap-y-12 py-8 px-4 overflow-x-auto">
             {data.map((funnel, funnelIndex) => (
                 <div key={funnelIndex} className="grid grid-cols-[100px_1fr] items-start gap-x-6 relative">
-                    {/* Stage */}
                     <div className="flex flex-col items-center justify-start pt-1 sticky left-4">
                         <div className="neumorphic-card w-full h-16 flex items-center justify-center text-center">
                             <span className="font-bold text-lg">{funnel.stage}</span>
                         </div>
                     </div>
 
-                    {/* Main Content */}
                     <div className="grid grid-cols-[160px_1fr_160px] items-start gap-x-8">
-                        {/* Campaign & Ad Groups */}
                         <div className="flex flex-col items-center gap-y-4 relative">
-                            {/* Line from CBO to vertical line */}
-                            <div className="absolute top-12 left-[150px] w-8 h-px bg-primary"></div>
-                            {/* Vertical Line for Ad Groups */}
-                            <div className="absolute top-12 left-[calc(150px+2rem)] w-px bg-primary h-[calc(100%-3rem)]"></div>
-
-                            {/* Campaign */}
                             <div className="relative w-full flex justify-center">
                                 <div className="neumorphic-card w-[150px] h-24 flex flex-col items-center justify-center p-2 text-sm text-center">
                                     <p className="font-bold">{funnel.campaign.title}</p>
@@ -529,13 +521,10 @@ export function ProfitPilotPage() {
                                 </div>
                             </div>
                             
-                            {/* Ad Groups */}
                             <div className="relative w-full flex justify-center mt-auto">
                                 <div className="flex flex-col justify-around items-center w-full h-full space-y-4 py-2">
                                     {funnel.adGroups.map((group, groupIndex) => (
                                         <div key={groupIndex} className="relative w-[150px] flex justify-center">
-                                            {/* Line from vertical line to ad group */}
-                                            <div className="absolute top-1/2 left-[-2rem] w-8 h-px bg-primary"></div>
                                             <div className="neumorphic-card flex-col items-center justify-center p-2 min-h-12 w-full text-xs text-center">
                                                 <p className="font-bold">{group.title}</p>
                                                 {group.subtitle && <p>{group.subtitle}</p>}
@@ -546,13 +535,10 @@ export function ProfitPilotPage() {
                             </div>
                         </div>
 
-                        {/* Ads */}
                         <div className="relative flex items-center h-full">
-                           <div className="absolute top-0 left-0 w-px h-full bg-primary/50 border-dashed border-l-2 border-primary"></div>
                             <div className="flex flex-col justify-around w-full h-full pl-8 space-y-4">
                                 {funnel.ads.map((ad, adIndex) => (
                                     <div key={adIndex} className="relative flex items-center">
-                                        <div className="absolute top-1/2 left-[-2rem] w-8 h-px bg-primary/50 border-dashed border-t-2 border-primary"></div>
                                         <div className={cn("neumorphic-card p-2 min-h-10 w-36 text-sm text-center flex items-center justify-center font-bold")}>
                                             {ad}
                                         </div>
@@ -560,7 +546,6 @@ export function ProfitPilotPage() {
                                 ))}
                             </div>
                         </div>
-                         {/* Empty column for spacing */}
                         <div></div>
                     </div>
                 </div>
@@ -1024,13 +1009,24 @@ export function ProfitPilotPage() {
                 การกระจายงบประมาณ
               </h3>
               <div className="neumorphic-card p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <div>
                     <Label htmlFor="funnelPlan" className="block text-sm mb-2 font-medium opacity-80">แผนกลยุทธ์ Funnel</Label>
                     <Select value={inputs.funnelPlan} onValueChange={(val) => handleInputChange('funnelPlan', val)}>
                       <SelectTrigger id="funnelPlan" className="neumorphic-select"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {Object.entries(funnelPlans).map(([key, { name }]) => <SelectItem key={key} value={key}>{name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                   <div>
+                    <Label htmlFor="budgetingStrategy" className="block text-sm mb-2 font-medium opacity-80">รูปแบบการตั้งงบ</Label>
+                    <Select value={inputs.budgetingStrategy} onValueChange={(val) => handleInputChange('budgetingStrategy', val)}>
+                      <SelectTrigger id="budgetingStrategy" className="neumorphic-select"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cbo">ตั้งงบที่แคมเปญ (CBO)</SelectItem>
+                        <SelectItem value="abo">ตั้งงบที่ชุดโฆษณา (ABO)</SelectItem>
+                        <SelectItem value="max_spending">ตั้งวงเงินสูงสุด ที่ชุดโฆษณา (Max Spending Limit)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

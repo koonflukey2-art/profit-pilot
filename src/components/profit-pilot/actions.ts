@@ -21,10 +21,19 @@ export async function generateUiTitles(input: UiTitlesInput) {
 export async function generateAutomationWorkflow(input: AutomationWorkflowGeneratorInput) {
     try {
         const result = await genWorkflow(input);
+        // The flow might return a JSON object or a stringified JSON.
+        // We ensure it's always a nicely formatted string.
         if (typeof result.workflowJson === 'object') {
              return { workflowJson: JSON.stringify(result.workflowJson, null, 2) };
         }
-        return result;
+        // If it's already a string, try to parse and re-stringify for consistent formatting.
+        try {
+            const parsed = JSON.parse(result.workflowJson);
+            return { workflowJson: JSON.stringify(parsed, null, 2) };
+        } catch (e) {
+            // If parsing fails, return the original string.
+            return result;
+        }
     } catch (error) {
         console.error("Error generating workflow:", error);
         throw new Error("Failed to generate automation workflow.");
