@@ -28,7 +28,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap } from 'lucide-react';
+import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy } from 'lucide-react';
 import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
 
@@ -212,7 +212,7 @@ export function ProfitPilotPage() {
 
   useEffect(() => {
     calculateAll();
-  }, [inputs.sellingPrice, inputs.vatProduct, inputs.cogs, inputs.platformFee, inputs.paymentFee, inputs.kolFee, inputs.packagingCost, inputs.shippingCost, inputs.profitGoal, inputs.profitGoalTimeframe, inputs.fixedCosts, inputs.targetRoas, inputs.targetCpa, inputs.adCostPercent, inputs.calcDriver, inputs.funnelPlan, inputs.numberOfAccounts, calculateAll]);
+  }, [inputs.sellingPrice, inputs.vatProduct, inputs.cogs, inputs.platformFee, inputs.paymentFee, inputs.kolFee, inputs.packagingCost, inputs.shippingCost, inputs.profitGoal, inputs.profitGoalTimeframe, inputs.fixedCosts, inputs.targetRoas, inputs.targetCpa, inputs.adCostPercent, inputs.calcDriver, inputs.funnelPlan, inputs.numberOfAccounts, inputs.budgetingStrategy, calculateAll]);
 
   useEffect(() => {
     setIsClient(true);
@@ -372,6 +372,10 @@ export function ProfitPilotPage() {
   };
 
   const handleGenerateN8nWorkflow = async () => {
+    if (automationRules.length === 0) {
+      toast({ variant: "destructive", title: "No Rules", description: "Please add at least one automation rule." });
+      return;
+    }
     setN8nWorkflow({ json: null, loading: true });
     
     const n8nWorkflowName = (document.getElementById('n8nWorkflowName') as HTMLInputElement)?.value;
@@ -381,9 +385,9 @@ export function ProfitPilotPage() {
       const { generateAutomationWorkflow } = await import('./actions');
       const result = await generateAutomationWorkflow({
         workflowName: n8nWorkflowName || "Profit Pilot Workflow",
-        primaryGoal: n8nPrimaryGoal || "scale-revenue",
+        primaryGoal: n8nPrimaryGoal || "Scale Revenue & Optimize CPA",
         platforms: [inputs.automationTool],
-        features: ["budget optimization", "creative refresh", "performance notifications"],
+        features: automationRules.map(r => r.action),
         rules: automationRules
       });
       setN8nWorkflow({ json: result.workflowJson, loading: false });
@@ -498,61 +502,126 @@ export function ProfitPilotPage() {
     );
   };
   
- const FunnelStructure = ({ data }) => {
+  const FunnelStructure = ({ data }) => {
     if (!data || data.length === 0) return null;
-
+    const stageBoxWidth = 100;
+    const campaignBoxWidth = 150;
+    const adGroupBoxWidth = 150;
+    const adBoxWidth = 144;
+    const mainGap = 24;
+    const verticalGap = 16;
+    const subVerticalGap = 8;
+  
     return (
-        <div className="flex flex-col items-stretch gap-y-12 py-8 px-4 overflow-x-auto">
-            {data.map((funnel, funnelIndex) => (
-                <div key={funnelIndex} className="grid grid-cols-[100px_1fr] items-start gap-x-6 relative">
-                    <div className="flex flex-col items-center justify-start pt-1 sticky left-4">
-                        <div className="neumorphic-card w-full h-16 flex items-center justify-center text-center">
-                            <span className="font-bold text-lg">{funnel.stage}</span>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-[160px_1fr_160px] items-start gap-x-8">
-                        <div className="flex flex-col items-center gap-y-4 relative">
-                            <div className="relative w-full flex justify-center">
-                                <div className="neumorphic-card w-[150px] h-24 flex flex-col items-center justify-center p-2 text-sm text-center">
-                                    <p className="font-bold">{funnel.campaign.title}</p>
-                                    <p>{funnel.campaign.budget}</p>
-                                    <p>{funnel.campaign.accounts}</p>
-                                </div>
-                            </div>
-                            
-                            <div className="relative w-full flex justify-center mt-auto">
-                                <div className="flex flex-col justify-around items-center w-full h-full space-y-4 py-2">
-                                    {funnel.adGroups.map((group, groupIndex) => (
-                                        <div key={groupIndex} className="relative w-[150px] flex justify-center">
-                                            <div className="neumorphic-card flex-col items-center justify-center p-2 min-h-12 w-full text-xs text-center">
-                                                <p className="font-bold">{group.title}</p>
-                                                {group.subtitle && <p>{group.subtitle}</p>}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="relative flex items-center h-full">
-                            <div className="flex flex-col justify-around w-full h-full pl-8 space-y-4">
-                                {funnel.ads.map((ad, adIndex) => (
-                                    <div key={adIndex} className="relative flex items-center">
-                                        <div className={cn("neumorphic-card p-2 min-h-10 w-36 text-sm text-center flex items-center justify-center font-bold")}>
-                                            {ad}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div></div>
-                    </div>
+      <div className="relative p-4 md:p-8 min-w-[800px]">
+        {data.map((funnel, funnelIndex) => {
+          const adGroupsHeight = funnel.adGroups.reduce((acc, _, i) => acc + 50 + (i > 0 ? verticalGap : 0), 0);
+          const adsHeight = funnel.ads.reduce((acc, _, i) => acc + 40 + (i > 0 ? verticalGap : 0), 0);
+          const funnelHeight = Math.max(100, adGroupsHeight, adsHeight);
+  
+          const campaignY = (funnelHeight / 2) - 48;
+          const campaignX = stageBoxWidth + mainGap;
+  
+          return (
+            <div key={funnelIndex} className="relative" style={{ height: funnelHeight + verticalGap }}>
+              {/* Stage Box */}
+              <div className="absolute top-0 left-0 flex flex-col items-center justify-center" style={{ height: funnelHeight }}>
+                <div className="neumorphic-card w-full h-16 flex items-center justify-center text-center" style={{ width: stageBoxWidth }}>
+                  <span className="font-bold text-lg">{funnel.stage}</span>
                 </div>
-            ))}
-        </div>
+              </div>
+  
+              {/* Campaign Box */}
+              <div className="absolute" style={{ top: campaignY, left: campaignX }}>
+                <div className="neumorphic-card w-[150px] h-24 flex flex-col items-center justify-center p-2 text-sm text-center">
+                  <p className="font-bold">{funnel.campaign.title}</p>
+                  <p>{funnel.campaign.budget}</p>
+                  <p>{funnel.campaign.accounts}</p>
+                </div>
+              </div>
+  
+              {/* Ad Group Boxes */}
+              <div className="absolute" style={{ top: 0, left: campaignX + campaignBoxWidth + mainGap }}>
+                <div className="flex flex-col justify-center gap-4" style={{ height: funnelHeight }}>
+                  {funnel.adGroups.map((group, groupIndex) => (
+                    <div key={groupIndex} className="neumorphic-card flex-col items-center justify-center p-2 min-h-12 w-full text-xs text-center" style={{ width: adGroupBoxWidth }}>
+                      <p className="font-bold">{group.title}</p>
+                      {group.subtitle && <p>{group.subtitle}</p>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+  
+              {/* Ad Boxes */}
+              <div className="absolute" style={{ top: 0, left: campaignX + campaignBoxWidth + mainGap + adGroupBoxWidth + mainGap }}>
+                <div className="flex flex-col justify-center gap-4" style={{ height: funnelHeight }}>
+                  {funnel.ads.map((ad, adIndex) => (
+                    <div key={adIndex} className={cn("neumorphic-card p-2 min-h-10 text-sm text-center flex items-center justify-center font-bold")} style={{ width: adBoxWidth }}>
+                      {ad}
+                    </div>
+                  ))}
+                </div>
+              </div>
+  
+              {/* Connecting Lines */}
+              <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ height: funnelHeight }}>
+                <line 
+                  x1={stageBoxWidth} y1={funnelHeight / 2} 
+                  x2={campaignX} y2={funnelHeight / 2} 
+                  stroke="hsl(var(--primary))" strokeWidth="2" />
+                
+                {/* Main line from Campaign */}
+                <line 
+                  x1={campaignX + campaignBoxWidth} y1={funnelHeight / 2} 
+                  x2={campaignX + campaignBoxWidth + mainGap} y2={funnelHeight / 2}
+                  stroke="hsl(var(--primary))" strokeWidth="2" />
+  
+                {/* Vertical line before ad groups */}
+                <line
+                  x1={campaignX + campaignBoxWidth + mainGap} y1={funnel.adGroups.length > 1 ? 25 : funnelHeight/2}
+                  x2={campaignX + campaignBoxWidth + mainGap} y2={funnel.adGroups.length > 1 ? funnelHeight - 25 : funnelHeight/2}
+                  stroke="hsl(var(--primary))" strokeWidth="2" />
+                  
+                {/* Lines to Ad Groups */}
+                {funnel.adGroups.map((_, i) => {
+                   const adGroupY = (funnelHeight / funnel.adGroups.length) * (i + 0.5);
+                   return(
+                     <line key={`ad-group-line-${i}`}
+                      x1={campaignX + campaignBoxWidth + mainGap} y1={adGroupY}
+                      x2={campaignX + campaignBoxWidth + mainGap} y2={adGroupY}
+                      stroke="hsl(var(--primary))" strokeWidth="2" />
+                   )
+                })}
+  
+                {/* Main line after Ad Groups */}
+                 <line 
+                  x1={campaignX + campaignBoxWidth + mainGap + adGroupBoxWidth} y1={funnelHeight / 2} 
+                  x2={campaignX + campaignBoxWidth + mainGap + adGroupBoxWidth + mainGap} y2={funnelHeight / 2}
+                  stroke="hsl(var(--primary))" strokeWidth="2" />
+  
+                {/* Vertical line before ads */}
+                 <line
+                  x1={campaignX + campaignBoxWidth + mainGap + adGroupBoxWidth + mainGap} y1={funnel.ads.length > 1 ? 20 : funnelHeight/2}
+                  x2={campaignX + campaignBoxWidth + mainGap + adGroupBoxWidth + mainGap} y2={funnel.ads.length > 1 ? funnelHeight - 20 : funnelHeight/2}
+                  stroke="hsl(var(--primary))" strokeWidth="2" />
+  
+                {/* Lines to Ads */}
+                {funnel.ads.map((_, i) => {
+                  const adY = (funnelHeight / funnel.ads.length) * (i + 0.5);
+                  return (
+                    <line key={`ad-line-${i}`}
+                      x1={campaignX + campaignBoxWidth + mainGap + adGroupBoxWidth + mainGap} y1={adY}
+                      x2={campaignX + campaignBoxWidth + mainGap + adGroupBoxWidth + mainGap + adBoxWidth} y2={adY}
+                      stroke="hsl(var(--primary))" strokeWidth="2" strokeDasharray="4 4" />
+                  )
+                })}
+              </svg>
+            </div>
+          );
+        })}
+      </div>
     );
-};
+  };
   
   const summaryFunnelData = useMemo(() => ([
     {
@@ -776,11 +845,12 @@ export function ProfitPilotPage() {
       
       <div className="neumorphic-card p-6 mt-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="tab-nav mb-6 grid w-full grid-cols-2 md:grid-cols-6 bg-background shadow-inner">
+          <TabsList className="tab-nav mb-6 grid w-full grid-cols-3 md:grid-cols-7 bg-background shadow-inner">
             <TabsTrigger value="metrics" className="tab-button"><CalendarCheck className="w-4 h-4"/>Metrics แนะนำ</TabsTrigger>
             <TabsTrigger value="planning" className="tab-button"><GanttChartSquare className="w-4 h-4"/>การวางแผน</TabsTrigger>
             <TabsTrigger value="funnel" className="tab-button"><Filter className="w-4 h-4"/>กลยุทธ์ Funnel</TabsTrigger>
-            <TabsTrigger value="automation" className="tab-button"><Bot className="w-4 h-4"/>ระบบอัตโนมัติ</TabsTrigger>
+            <TabsTrigger value="automation" className="tab-button"><Bot className="w-4 h-4"/>สร้าง Rule</TabsTrigger>
+            <TabsTrigger value="workflow" className="tab-button"><Zap className="w-4 h-4"/>Workflow Generator</TabsTrigger>
             <TabsTrigger value="summary" className="tab-button"><FileText className="w-4 h-4"/>สรุปแผน</TabsTrigger>
             <TabsTrigger value="history" className="tab-button"><History className="w-4 h-4"/>ประวัติ</TabsTrigger>
           </TabsList>
@@ -1101,7 +1171,7 @@ export function ProfitPilotPage() {
             
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white">Funnel Structure</h3>
-              <div className="neumorphic-card p-2 md:p-6 space-y-12 overflow-x-auto">
+              <div className="neumorphic-card p-2 md:p-6 space-y-4 overflow-x-auto">
                  <FunnelStructure data={summaryFunnelData} />
               </div>
             </div>
@@ -1179,23 +1249,6 @@ export function ProfitPilotPage() {
                     )
                   })}
                 </div>
-                <div className="neumorphic-card mt-6 p-6">
-                  <h3 className="text-xl font-bold mb-4 gradient-text">n8n Workflow Generator</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <Input id="n8nWorkflowName" placeholder="Workflow Name" className="neumorphic-input" />
-                    <Input id="n8nPrimaryGoal" placeholder="Primary Goal" className="neumorphic-input" />
-                  </div>
-                  <Button onClick={handleGenerateN8nWorkflow} className="neon-button w-full" disabled={n8nWorkflow.loading}>
-                    {n8nWorkflow.loading ? "Generating..." : "Generate n8n Workflow JSON"}
-                  </Button>
-                  {n8nWorkflow.loading && <Progress value={50} className="w-full mt-4" />}
-                  {n8nWorkflow.json && (
-                    <div className="mt-4 p-4 bg-background rounded-lg max-h-96 overflow-auto">
-                      <Button size="sm" onClick={() => navigator.clipboard.writeText(n8nWorkflow.json)} className="absolute top-2 right-2">Copy</Button>
-                      <pre className="text-xs">{n8nWorkflow.json}</pre>
-                    </div>
-                  )}
-                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:mt-0">
                   <Card className="neumorphic-card h-full">
@@ -1248,6 +1301,65 @@ export function ProfitPilotPage() {
                   </Card>
               </div>
             </div>
+          </TabsContent>
+           <TabsContent value="workflow">
+             <div className="neumorphic-card mt-6 p-6">
+                  <h3 className="text-xl font-bold mb-4 gradient-text">n8n Workflow Generator</h3>
+                  <p className="text-sm opacity-80 mb-6">สร้าง Workflow JSON สำหรับ n8n โดยอัตโนมัติตามกฎที่คุณสร้างไว้</p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <Input id="n8nWorkflowName" placeholder="ชื่อ Workflow (เช่น 'Profit Pilot Automation')" className="neumorphic-input" />
+                    <Input id="n8nPrimaryGoal" placeholder="เป้าหมายหลัก (เช่น 'Scale Revenue & Optimize CPA')" className="neumorphic-input" />
+                  </div>
+                  
+                  <Card className="neumorphic-card mb-6">
+                    <CardHeader>
+                        <CardTitle>สรุปกฎทั้งหมด</CardTitle>
+                        <CardDescription>นี่คือรายการกฎทั้งหมดที่คุณได้สร้างไว้</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {automationRules.length > 0 ? (
+                           <ol className="list-decimal list-inside space-y-2 text-sm">
+                            {automationRules.map((rule, index) => {
+                                const toolConfig = automationToolsConfig[inputs.automationTool];
+                                const metricText = toolConfig.metrics.find(m => m.value === rule.metric)?.text;
+                                const operatorText = toolConfig.operators.find(o => o.value === rule.operator)?.text;
+                                const actionText = toolConfig.actions.find(a => a.value === rule.action)?.text;
+                                const timeText = toolConfig.timeframes.find(t => t.value === rule.timeframe)?.text;
+                                return (
+                                    <li key={rule.id}>
+                                        ถ้า <span className="font-bold text-primary">{metricText}</span> <span className="font-bold text-primary">{operatorText}</span> <span className="font-bold text-primary">{rule.value}</span> 
+                                        ภายใน <span className="font-bold text-yellow-500">{timeText}</span>, 
+                                        ให้ <span className="font-bold text-accent">{actionText} {rule.actionValue && `${rule.actionValue}%`}</span>
+                                    </li>
+                                );
+                            })}
+                           </ol>
+                        ) : (
+                            <p className="text-muted-foreground text-center">ยังไม่มีการสร้าง Rule</p>
+                        )}
+                    </CardContent>
+                  </Card>
+
+                  <Button onClick={handleGenerateN8nWorkflow} className="neon-button w-full" disabled={n8nWorkflow.loading || automationRules.length === 0}>
+                    {n8nWorkflow.loading ? "กำลังสร้าง..." : (automationRules.length === 0 ? "โปรดสร้าง Rule ก่อน" : "สร้าง n8n Workflow JSON")}
+                  </Button>
+
+                  {n8nWorkflow.loading && <Progress value={50} className="w-full mt-4" />}
+                  
+                  {n8nWorkflow.json && (
+                    <div className="mt-6 relative">
+                      <h4 className="font-bold mb-2">Generated Workflow JSON</h4>
+                       <div className="p-4 bg-background rounded-lg max-h-96 overflow-auto relative">
+                        <Button size="sm" onClick={() => {
+                            navigator.clipboard.writeText(n8nWorkflow.json);
+                            toast({ title: "Copied!", description: "คัดลอก Workflow JSON แล้ว" });
+                        }} className="absolute top-2 right-2 z-10 neon-button secondary"><ClipboardCopy className="w-4 h-4"/>คัดลอก</Button>
+                        <pre className="text-xs whitespace-pre-wrap">{n8nWorkflow.json}</pre>
+                      </div>
+                    </div>
+                  )}
+              </div>
           </TabsContent>
           <TabsContent value="history">
             <div className="flex justify-between items-center mb-4">

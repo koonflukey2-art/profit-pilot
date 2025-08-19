@@ -4,7 +4,7 @@
  * @fileOverview This file defines a Genkit flow for generating n8n workflow configurations based on user settings.
  *
  * The flow takes user-defined settings and goals related to ad campaign automation
- * and generates a basic n8n workflow JSON configuration.
+ * and generates a basic n8n workflow JSON configuration that includes a human-readable summary of the rules.
  *
  * @interface AutomationWorkflowGeneratorInput - Defines the input schema for the flow.
  * @interface AutomationWorkflowGeneratorOutput - Defines the output schema for the flow.
@@ -25,7 +25,7 @@ const AutomationWorkflowGeneratorInputSchema = z.object({
 export type AutomationWorkflowGeneratorInput = z.infer<typeof AutomationWorkflowGeneratorInputSchema>;
 
 const AutomationWorkflowGeneratorOutputSchema = z.object({
-  workflowJson: z.string().describe('The generated n8n workflow JSON configuration.'),
+  workflowJson: z.string().describe('The generated n8n workflow JSON configuration, including a human-readable summary of the rules.'),
 });
 
 export type AutomationWorkflowGeneratorOutput = z.infer<typeof AutomationWorkflowGeneratorOutputSchema>;
@@ -46,10 +46,18 @@ const prompt = ai.definePrompt({
   Primary Goal: {{{primaryGoal}}}
   Platforms: {{#each platforms}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
   Features: {{#each features}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
-  Rules: {{#each rules}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
+  
+  The core logic will be based on these human-readable rules. Translate them into the appropriate n8n node structure.
+  Rules:
+  {{#each rules}}
+  - Rule {{@index}}: IF {{metric}} is {{operator}} {{value}} over the {{timeframe}}, THEN {{action}} {{#if actionValue}}by {{actionValue}}%{{/if}}.
+  {{/each}}
 
-  Ensure the output is a valid JSON configuration that can be directly imported into n8n.  The JSON MUST be complete and valid.
-  `, // Changed from Handlebars to regular template literals
+  Ensure the output is a valid JSON configuration that can be directly imported into n8n. The JSON MUST be complete and valid.
+  The JSON should contain nodes that check the conditions and execute the specified actions. Start with a "Schedule Trigger" node that runs daily.
+  For each rule, create a corresponding "IF" node to check the condition. If the condition is true, it should lead to a node that performs the specified action (e.g., using an "HTTP Request" node to call the ad platform's API).
+  Include a summary of the rules in a "Sticky Note" node within the n8n workflow for user reference.
+  `,
 });
 
 const automationWorkflowGeneratorFlow = ai.defineFlow(
