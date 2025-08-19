@@ -28,7 +28,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText } from 'lucide-react';
+import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap } from 'lucide-react';
 import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
 
@@ -501,74 +501,66 @@ export function ProfitPilotPage() {
     if (!data || data.length === 0) return null;
 
     return (
-        <div className="flex flex-col items-stretch gap-y-12 py-8 px-4 overflow-x-auto">
-            {data.map((funnel, funnelIndex) => (
-                <div key={funnelIndex} className="grid grid-cols-[100px_1fr] gap-x-6 relative">
-                    {/* Stage */}
-                    <div className="flex flex-col items-center justify-start pt-5">
-                        <div className="neumorphic-card w-full h-16 flex items-center justify-center text-center">
-                            <span className="font-bold text-lg">{funnel.stage}</span>
-                        </div>
-                    </div>
-
-                    {/* Main Content with connecting lines */}
-                    <div className="grid grid-cols-[150px_1fr_1fr] gap-x-6">
-                        {/* Campaign */}
-                        <div className="flex flex-col items-center justify-center text-sm text-center">
-                            <div className="neumorphic-card w-full h-24 flex flex-col items-center justify-center p-2">
-                                <p className="font-bold">{funnel.campaign.title}</p>
-                                <p>{funnel.campaign.budget}</p>
-                                <p>{funnel.campaign.accounts}</p>
-                            </div>
-                        </div>
-
-                        {/* Ad Groups */}
-                        <div className="flex items-center">
-                            <div className="w-full h-full flex items-center relative">
-                                {/* Vertical line */}
-                                <div className="w-px bg-primary h-full absolute left-0" />
-                                
-                                <div className="flex flex-col justify-around w-full h-full pl-6 space-y-2">
-                                    {funnel.adGroups.map((group, groupIndex) => (
-                                        <div key={groupIndex} className="flex items-center relative">
-                                            {/* Horizontal line from vertical line to box */}
-                                            <div className="w-6 h-px bg-primary absolute -left-6" />
-                                            <div className="neumorphic-card flex-col items-center justify-center p-2 min-h-12 w-36 text-xs text-center">
-                                                <p className="font-bold">{group.title}</p>
-                                                {group.subtitle && <p>{group.subtitle}</p>}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        {/* Ads */}
-                        <div className="flex items-center">
-                             <div className="w-full h-full flex items-center relative">
-                                {/* Main connecting line from AdGroups column */}
-                                <div className="w-12 h-px bg-primary absolute -left-6" />
-                                
-                                {/* Vertical line for Ads */}
-                                <div className="w-px bg-primary h-full absolute left-6" />
-
-                                <div className="flex flex-col justify-around w-full h-full pl-12 space-y-2">
-                                    {funnel.ads.map((ad, adIndex) => (
-                                       <div key={adIndex} className="flex items-center relative">
-                                            {/* Horizontal line from vertical line to box */}
-                                            <div className="w-6 h-px bg-primary absolute -left-6" />
-                                            <div className={cn("neumorphic-card p-2 min-h-10 w-36 text-sm text-center flex items-center justify-center font-bold")}>
-                                                {ad}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+      <div className="flex flex-col items-stretch gap-y-12 py-8 px-4 overflow-x-auto">
+        {data.map((funnel, funnelIndex) => (
+          <div key={funnelIndex} className="grid grid-cols-[100px_1fr] items-start gap-x-6 relative">
+            {/* Stage */}
+            <div className="flex flex-col items-center justify-start pt-5 sticky left-4">
+              <div className="neumorphic-card w-full h-16 flex items-center justify-center text-center">
+                <span className="font-bold text-lg">{funnel.stage}</span>
+              </div>
+            </div>
+            
+            {/* Main Content */}
+            <div className="grid grid-cols-[160px_1fr] items-start gap-x-8">
+              {/* Campaign & Ad Groups */}
+              <div className="flex flex-col items-center gap-y-4">
+                {/* Campaign */}
+                <div className="relative w-full flex justify-center">
+                   <div className="neumorphic-card w-[150px] h-24 flex flex-col items-center justify-center p-2 text-sm text-center">
+                    <p className="font-bold">{funnel.campaign.title}</p>
+                    <p>{funnel.campaign.budget}</p>
+                    <p>{funnel.campaign.accounts}</p>
+                  </div>
+                   {/* Line to Ad Groups */}
+                  <div className="absolute top-1/2 right-[-2rem] w-8 h-px bg-primary" />
                 </div>
-            ))}
-        </div>
+                
+                {/* Ad Groups */}
+                <div className="relative w-full flex justify-center">
+                  <div className="absolute top-0 left-1/2 w-px bg-primary h-full" />
+                  <div className="flex flex-col justify-around items-center w-full h-full space-y-4 py-2">
+                    {funnel.adGroups.map((group, groupIndex) => (
+                      <div key={groupIndex} className="relative w-[150px] flex justify-center">
+                        <div className="neumorphic-card flex-col items-center justify-center p-2 min-h-12 w-full text-xs text-center">
+                          <p className="font-bold">{group.title}</p>
+                          {group.subtitle && <p>{group.subtitle}</p>}
+                        </div>
+                         <div className="absolute top-1/2 right-[-2rem] w-8 h-px bg-primary" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Ads */}
+              <div className="relative flex items-center h-full">
+                <div className="absolute top-0 left-0 w-px bg-primary h-full" />
+                <div className="flex flex-col justify-around w-full h-full pl-8 space-y-4">
+                  {funnel.ads.map((ad, adIndex) => (
+                    <div key={adIndex} className="relative flex items-center">
+                      <div className="absolute top-1/2 left-[-2rem] w-8 h-px bg-primary" />
+                      <div className={cn("neumorphic-card p-2 min-h-10 w-36 text-sm text-center flex items-center justify-center font-bold")}>
+                        {ad}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     );
 };
   
@@ -1137,69 +1129,99 @@ export function ProfitPilotPage() {
             </div>
           </TabsContent>
           <TabsContent value="automation">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <div className="md:col-span-1">
-                    <Label htmlFor="metricsPlan-automation" className="block text-sm mb-2 font-medium opacity-80">แผน Metrics</Label>
-                    <Select value={inputs.metricsPlan} onValueChange={(val) => handleInputChange('metricsPlan', val)}>
-                        <SelectTrigger id="metricsPlan-automation" className="neumorphic-select"><SelectValue/></SelectTrigger>
-                        <SelectContent>
-                            {Object.entries(metricsPlans).map(([key, {name}]) => <SelectItem key={key} value={key}>{name}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div className="md:col-span-1">
+                        <Label htmlFor="metricsPlan-automation" className="block text-sm mb-2 font-medium opacity-80">แผน Metrics</Label>
+                        <Select value={inputs.metricsPlan} onValueChange={(val) => handleInputChange('metricsPlan', val)}>
+                            <SelectTrigger id="metricsPlan-automation" className="neumorphic-select"><SelectValue/></SelectTrigger>
+                            <SelectContent>
+                                {Object.entries(metricsPlans).map(([key, {name}]) => <SelectItem key={key} value={key}>{name}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="md:col-span-1">
+                        <Label htmlFor="automation-tool" className="block text-sm mb-2 font-medium opacity-80">เครื่องมืออัตโนมัติ</Label>
+                        <Select value={inputs.automationTool} onValueChange={(val) => handleInputChange('automationTool', val)}>
+                            <SelectTrigger id="automation-tool" className="neumorphic-select w-full"><SelectValue/></SelectTrigger>
+                            <SelectContent>
+                            {Object.entries(automationToolsConfig).map(([key, {name}]) => <SelectItem key={key} value={key}>{name}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
-                <div className="md:col-span-2">
-                     <Label htmlFor="automation-tool" className="block text-sm mb-2 font-medium opacity-80">เครื่องมืออัตโนมัติ</Label>
-                       <Select value={inputs.automationTool} onValueChange={(val) => handleInputChange('automationTool', val)}>
-                        <SelectTrigger id="automation-tool" className="neumorphic-select w-full"><SelectValue/></SelectTrigger>
-                        <SelectContent>
-                          {Object.entries(automationToolsConfig).map(([key, {name}]) => <SelectItem key={key} value={key}>{name}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
+                <div className="flex justify-end items-center mb-6">
+                  <Button onClick={addRule} className="neon-button"><Plus className="w-4 h-4"/> เพิ่ม Rule ใหม่</Button>
                 </div>
-              </div>
-            <div className="flex justify-end items-center mb-6">
-              <Button onClick={addRule} className="neon-button"><Plus className="w-4 h-4"/> เพิ่ม Rule ใหม่</Button>
-            </div>
-            <div className="space-y-4">
-              {automationRules.map(rule => {
-                const toolConfig = automationToolsConfig[inputs.automationTool];
-                const actionConfig = toolConfig.actions.find(a => a.value === rule.action);
+                <div className="space-y-4">
+                  {automationRules.map(rule => {
+                    const toolConfig = automationToolsConfig[inputs.automationTool];
+                    const actionConfig = toolConfig.actions.find(a => a.value === rule.action);
 
-                return (
-                  <div key={rule.id} className="neumorphic-card p-4">
-                     <div className="flex justify-end -mt-2 -mr-2"><Button variant="ghost" size="icon" onClick={() => deleteRule(rule.id)}><X className="w-4 h-4 text-red-400"/></Button></div>
-                      <div className="flex items-center gap-4 flex-wrap">
-                        <span className="font-bold text-primary">IF</span>
-                        <Select value={rule.metric} onValueChange={(v) => updateRule(rule.id, 'metric', v)}><SelectTrigger className="neumorphic-select w-40"/><SelectContent>{toolConfig.metrics.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
-                        <Select value={rule.operator} onValueChange={(v) => updateRule(rule.id, 'operator', v)}><SelectTrigger className="neumorphic-select w-40"/><SelectContent>{toolConfig.operators.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
-                        <Input value={rule.value} onChange={(e) => updateRule(rule.id, 'value', e.target.value)} className="neumorphic-input w-24" placeholder="Value"/>
-                        <span className="font-bold text-accent">THEN</span>
-                        <Select value={rule.action} onValueChange={(v) => updateRule(rule.id, 'action', v)}><SelectTrigger className="neumorphic-select w-48"/><SelectContent>{toolConfig.actions.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
-                        {actionConfig?.needsValue && (
-                          <Input value={rule.actionValue} onChange={(e) => updateRule(rule.id, 'actionValue', e.target.value)} className="neumorphic-input w-24" placeholder="Action Value"/>
-                        )}
-                        <Select value={rule.timeframe} onValueChange={(v) => updateRule(rule.id, 'timeframe', v)}><SelectTrigger className="neumorphic-select w-40"/><SelectContent>{toolConfig.timeframes.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
+                    return (
+                      <div key={rule.id} className="neumorphic-card p-4">
+                        <div className="flex justify-end -mt-2 -mr-2"><Button variant="ghost" size="icon" onClick={() => deleteRule(rule.id)}><X className="w-4 h-4 text-red-400"/></Button></div>
+                          <div className="flex items-center gap-4 flex-wrap">
+                            <span className="font-bold text-primary">IF</span>
+                            <Select value={rule.metric} onValueChange={(v) => updateRule(rule.id, 'metric', v)}><SelectTrigger className="neumorphic-select w-40"/><SelectContent>{toolConfig.metrics.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
+                            <Select value={rule.operator} onValueChange={(v) => updateRule(rule.id, 'operator', v)}><SelectTrigger className="neumorphic-select w-40"/><SelectContent>{toolConfig.operators.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
+                            <Input value={rule.value} onChange={(e) => updateRule(rule.id, 'value', e.target.value)} className="neumorphic-input w-24" placeholder="Value"/>
+                            <span className="font-bold text-accent">THEN</span>
+                            <Select value={rule.action} onValueChange={(v) => updateRule(rule.id, 'action', v)}><SelectTrigger className="neumorphic-select w-48"/><SelectContent>{toolConfig.actions.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
+                            {actionConfig?.needsValue && (
+                              <Input value={rule.actionValue} onChange={(e) => updateRule(rule.id, 'actionValue', e.target.value)} className="neumorphic-input w-24" placeholder="Action Value"/>
+                            )}
+                            <Select value={rule.timeframe} onValueChange={(v) => updateRule(rule.id, 'timeframe', v)}><SelectTrigger className="neumorphic-select w-40"/><SelectContent>{toolConfig.timeframes.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
+                          </div>
                       </div>
-                  </div>
-                )
-              })}
-            </div>
-             <div className="neumorphic-card mt-6 p-6">
-              <h3 className="text-xl font-bold mb-4 gradient-text">n8n Workflow Generator</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <Input id="n8nWorkflowName" placeholder="Workflow Name" className="neumorphic-input" />
-                <Input id="n8nPrimaryGoal" placeholder="Primary Goal" className="neumorphic-input" />
-              </div>
-              <Button onClick={handleGenerateN8nWorkflow} className="neon-button w-full" disabled={n8nWorkflow.loading}>
-                {n8nWorkflow.loading ? "Generating..." : "Generate n8n Workflow JSON"}
-              </Button>
-              {n8nWorkflow.loading && <Progress value={50} className="w-full mt-4" />}
-              {n8nWorkflow.json && (
-                <div className="mt-4 p-4 bg-background rounded-lg max-h-96 overflow-auto">
-                   <Button size="sm" onClick={() => navigator.clipboard.writeText(n8nWorkflow.json)} className="absolute top-2 right-2">Copy</Button>
-                  <pre className="text-xs">{n8nWorkflow.json}</pre>
+                    )
+                  })}
                 </div>
-              )}
+                <div className="neumorphic-card mt-6 p-6">
+                  <h3 className="text-xl font-bold mb-4 gradient-text">n8n Workflow Generator</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <Input id="n8nWorkflowName" placeholder="Workflow Name" className="neumorphic-input" />
+                    <Input id="n8nPrimaryGoal" placeholder="Primary Goal" className="neumorphic-input" />
+                  </div>
+                  <Button onClick={handleGenerateN8nWorkflow} className="neon-button w-full" disabled={n8nWorkflow.loading}>
+                    {n8nWorkflow.loading ? "Generating..." : "Generate n8n Workflow JSON"}
+                  </Button>
+                  {n8nWorkflow.loading && <Progress value={50} className="w-full mt-4" />}
+                  {n8nWorkflow.json && (
+                    <div className="mt-4 p-4 bg-background rounded-lg max-h-96 overflow-auto">
+                      <Button size="sm" onClick={() => navigator.clipboard.writeText(n8nWorkflow.json)} className="absolute top-2 right-2">Copy</Button>
+                      <pre className="text-xs">{n8nWorkflow.json}</pre>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="lg:mt-0">
+                  <Card className="neumorphic-card h-full">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Zap className="w-5 h-5 text-primary"/>กฎรูปแบบการชี้วัดด้วย ROAS</CardTitle>
+                        <CardDescription>แนวทางการตั้งกฎอัตโนมัติพื้นฐานสำหรับ Revealbot</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                      {[
+                        "ปิด ที่เวลา ...",
+                        "เปิด ที่เวลา ...",
+                        "ปิด เมื่อ ไม่มีทัก ไม่มีซื้อ",
+                        "ปิด เมื่อ มีทัก ไม่มีซื้อ",
+                        "ปิด เมื่อ มีซื้อ Roas < xxx",
+                        "เปิด คืนชีพ เมื่อ Roas > xxx",
+                        "Daily Scale เมื่อ Roas > xxx",
+                        "หยุด Scale เมื่อ Roas < xxx และ ใช้เงินไปแล้ว > xxx // รักษากำไร",
+                        "Reset งบ xxx ที่เวลา ...",
+                      ].map((rule, index) => (
+                        <div key={index} className="flex items-start gap-3 p-3 bg-background/50 rounded-lg">
+                          <span className="font-bold text-primary">{index + 1}.</span>
+                          <p>{rule}</p>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+              </div>
             </div>
           </TabsContent>
           <TabsContent value="history">
