@@ -147,6 +147,11 @@ export const automationToolsConfig = {
   facebook: {
       name: 'Facebook Ads',
       icon: 'Facebook',
+      levels: [
+          { value: 'campaign', text: 'แคมเปญ' },
+          { value: 'adset', text: 'ชุดโฆษณา' },
+          { value: 'ad', text: 'โฆษณา' },
+      ],
       metrics: [
           { value: 'cpa', text: 'Cost per Result' },
           { value: 'roas', text: 'Purchase ROAS' },
@@ -178,6 +183,11 @@ export const automationToolsConfig = {
   revealbot: {
       name: 'Revealbot',
       icon: 'Bot',
+       levels: [
+          { value: 'campaign', text: 'Campaign' },
+          { value: 'adset', text: 'Ad Set' },
+          { value: 'ad', text: 'Ad' },
+      ],
        metrics: [
           { value: 'roas', text: 'ROAS (Purchase)' },
           { value: 'cpa', text: 'CPA (Purchase)' },
@@ -218,6 +228,11 @@ export const automationToolsConfig = {
   madgicx: {
       name: 'Madgicx',
       icon: 'Wand',
+       levels: [
+          { value: 'campaign', text: 'Campaign' },
+          { value: 'adset', text: 'Ad Set' },
+          { value: 'ad', text: 'Ad' },
+      ],
        metrics: [
           { value: 'roas', text: 'ROAS' },
           { value: 'cpa', text: 'CPA' },

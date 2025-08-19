@@ -360,6 +360,7 @@ export function ProfitPilotPage() {
     const newRule = {
       id: Date.now(),
       name: '',
+      level: toolConfig.levels[0].value,
       metric: toolConfig.metrics[0].value,
       operator: toolConfig.operators[0].value,
       value: F.formatNumber(calculated.targetRoas + 1 || 5, 2),
@@ -516,7 +517,7 @@ export function ProfitPilotPage() {
     const campaignBoxWidth = 150;
     const adGroupBoxWidth = 150;
     const adBoxWidth = 144;
-    const mainGap = 48; // Increased gap
+    const mainGap = 48; 
     const verticalGap = 16;
   
     return (
@@ -590,17 +591,17 @@ export function ProfitPilotPage() {
                 {/* Stage -> Campaign */}
                 <line x1={stageX + stageBoxWidth} y1={funnelHeight / 2} x2={campaignX} y2={funnelHeight / 2} stroke="hsl(var(--primary))" strokeWidth="2" />
   
-                {/* Campaign -> AdGroup Vertical Line */}
+                {/* Main vertical line from Campaign to AdGroup area */}
                 <line x1={campaignX + campaignBoxWidth} y1={funnelHeight / 2} x2={adGroupX} y2={funnelHeight / 2} stroke="hsl(var(--primary))" strokeWidth="2" />
                 <line x1={adGroupX} y1={adGroupYPositions[0]} x2={adGroupX} y2={adGroupYPositions[adGroupYPositions.length - 1]} stroke="hsl(var(--primary))" strokeWidth="2" />
                 
-                {/* AdGroup Branches */}
+                {/* AdGroup Branches from vertical line */}
                 {adGroupYPositions.map((y, i) => (
-                  <line key={`adgroup-branch-${i}`} x1={adGroupX} y1={y} x2={adGroupX - 10} y2={y} stroke="hsl(var(--primary))" strokeWidth="2" />
+                  <line key={`adgroup-branch-${i}`} x1={adGroupX} y1={y} x2={adGroupX + adGroupBoxWidth} y2={y} stroke="hsl(var(--primary))" strokeWidth="2" />
                 ))}
   
                 {/* AdGroup -> Ad Vertical Line */}
-                <line x1={adGroupX + adGroupBoxWidth} y1={funnelHeight / 2} x2={adX} y2={funnelHeight / 2} stroke="hsl(var(--primary))" strokeWidth="2" />
+                <line x1={adGroupX + adGroupBoxWidth} y1={funnelHeight / 2} x2={adX} y2={funnelHeight / 2} stroke="hsl(var(--primary))" strokeWidth="2" strokeDasharray="5 5"/>
                 <line x1={adX} y1={adYPositions[0]} x2={adX} y2={adYPositions[adYPositions.length - 1]} stroke="hsl(var(--primary))" strokeWidth="2" strokeDasharray="5 5"/>
   
                 {/* Ad Branches */}
@@ -1152,7 +1153,7 @@ export function ProfitPilotPage() {
                     </div>
                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-center">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudgetPerAccountMonthly)}</p></div>
+                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(mofuBudgetPerAccountMonthly)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p></div>
                       <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{F.formatInt(numAccounts)}</p></div>
                     </div>
@@ -1214,35 +1215,7 @@ export function ProfitPilotPage() {
                         </Select>
                     </div>
                 </div>
-                 <Card className="neumorphic-card mb-6">
-                    <CardHeader>
-                        <CardTitle>สรุปกฎทั้งหมด</CardTitle>
-                        <CardDescription>นี่คือรายการกฎทั้งหมดที่คุณได้สร้างไว้</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {automationRules.length > 0 ? (
-                           <ol className="list-decimal list-inside space-y-2 text-sm">
-                            {automationRules.map((rule, index) => {
-                                const toolConfig = automationToolsConfig[inputs.automationTool];
-                                const metricText = toolConfig.metrics.find(m => m.value === rule.metric)?.text;
-                                const operatorText = toolConfig.operators.find(o => o.value === rule.operator)?.text;
-                                const actionText = toolConfig.actions.find(a => a.value === rule.action)?.text;
-                                const timeText = toolConfig.timeframes.find(t => t.value === rule.timeframe)?.text;
-                                return (
-                                    <li key={rule.id} className="text-white">
-                                        <b>{rule.name ? `${rule.name}: ` : ''}</b>
-                                        ถ้า {metricText} {operatorText} {rule.value} 
-                                        ภายใน {timeText}, 
-                                        ให้ {actionText} {rule.actionValue && `${rule.actionValue}%`}
-                                    </li>
-                                );
-                            })}
-                           </ol>
-                        ) : (
-                            <p className="text-muted-foreground text-center">ยังไม่มีการสร้าง Rule</p>
-                        )}
-                    </CardContent>
-                  </Card>
+                
                 <div className="flex justify-end items-center mb-6">
                   <Button onClick={addRule} className="neon-button"><Plus className="w-4 h-4"/> เพิ่ม Rule ใหม่</Button>
                 </div>
@@ -1260,21 +1233,52 @@ export function ProfitPilotPage() {
                         </div>
                           <div className="flex items-center gap-2 flex-wrap">
                             <ToolIcon className="w-5 h-5 text-primary"/>
+                            <Select value={rule.level} onValueChange={(v) => updateRule(rule.id, 'level', v)}><SelectTrigger className="neumorphic-select w-32 !text-white"/><SelectContent>{toolConfig.levels.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
                             <span className="font-bold text-primary">IF</span>
-                            <Select value={rule.metric} onValueChange={(v) => updateRule(rule.id, 'metric', v)}><SelectTrigger className="neumorphic-select w-40"/><SelectContent>{toolConfig.metrics.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
-                            <Select value={rule.operator} onValueChange={(v) => updateRule(rule.id, 'operator', v)}><SelectTrigger className="neumorphic-select w-40"/><SelectContent>{toolConfig.operators.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
+                            <Select value={rule.metric} onValueChange={(v) => updateRule(rule.id, 'metric', v)}><SelectTrigger className="neumorphic-select w-40 !text-white"/><SelectContent>{toolConfig.metrics.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
+                            <Select value={rule.operator} onValueChange={(v) => updateRule(rule.id, 'operator', v)}><SelectTrigger className="neumorphic-select w-40 !text-white"/><SelectContent>{toolConfig.operators.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
                             <Input value={rule.value} onChange={(e) => updateRule(rule.id, 'value', e.target.value)} className="neumorphic-input w-24" placeholder="Value"/>
                             <span className="font-bold text-accent">THEN</span>
-                            <Select value={rule.action} onValueChange={(v) => updateRule(rule.id, 'action', v)}><SelectTrigger className="neumorphic-select w-48"/><SelectContent>{toolConfig.actions.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
+                            <Select value={rule.action} onValueChange={(v) => updateRule(rule.id, 'action', v)}><SelectTrigger className="neumorphic-select w-48 !text-white"/><SelectContent>{toolConfig.actions.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
                             {actionConfig?.needsValue && (
                               <Input value={rule.actionValue} onChange={(e) => updateRule(rule.id, 'actionValue', e.target.value)} className="neumorphic-input w-24" placeholder="Action Value"/>
                             )}
-                            <Select value={rule.timeframe} onValueChange={(v) => updateRule(rule.id, 'timeframe', v)}><SelectTrigger className="neumorphic-select w-40"/><SelectContent>{toolConfig.timeframes.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
+                            <Select value={rule.timeframe} onValueChange={(v) => updateRule(rule.id, 'timeframe', v)}><SelectTrigger className="neumorphic-select w-40 !text-white"/><SelectContent>{toolConfig.timeframes.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
                           </div>
                       </div>
                     )
                   })}
                 </div>
+                 <Card className="neumorphic-card mt-6">
+                    <CardHeader>
+                        <CardTitle>สรุปกฎทั้งหมด</CardTitle>
+                        <CardDescription>นี่คือรายการกฎทั้งหมดที่คุณได้สร้างไว้</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {automationRules.length > 0 ? (
+                           <ol className="list-decimal list-inside space-y-2 text-sm">
+                            {automationRules.map((rule, index) => {
+                                const toolConfig = automationToolsConfig[inputs.automationTool];
+                                const levelText = toolConfig.levels.find(l => l.value === rule.level)?.text;
+                                const metricText = toolConfig.metrics.find(m => m.value === rule.metric)?.text;
+                                const operatorText = toolConfig.operators.find(o => o.value === rule.operator)?.text;
+                                const actionText = toolConfig.actions.find(a => a.value === rule.action)?.text;
+                                const timeText = toolConfig.timeframes.find(t => t.value === rule.timeframe)?.text;
+                                return (
+                                    <li key={rule.id} className="text-white">
+                                        <b>{rule.name ? `${rule.name}: ` : ''}</b>
+                                        ที่ระดับ {levelText}, ถ้า {metricText} {operatorText} {rule.value} 
+                                        ภายใน {timeText}, 
+                                        ให้ {actionText} {rule.actionValue && `${rule.actionValue}%`}
+                                    </li>
+                                );
+                            })}
+                           </ol>
+                        ) : (
+                            <p className="text-muted-foreground text-center">ยังไม่มีการสร้าง Rule</p>
+                        )}
+                    </CardContent>
+                  </Card>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:mt-0">
                   <Card className="neumorphic-card h-full">
