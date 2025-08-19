@@ -501,66 +501,71 @@ export function ProfitPilotPage() {
     if (!data || data.length === 0) return null;
 
     return (
-      <div className="flex flex-col items-stretch gap-y-12 py-8 px-4 overflow-x-auto">
-        {data.map((funnel, funnelIndex) => (
-          <div key={funnelIndex} className="grid grid-cols-[100px_1fr] items-start gap-x-6 relative">
-            {/* Stage */}
-            <div className="flex flex-col items-center justify-start pt-5 sticky left-4">
-              <div className="neumorphic-card w-full h-16 flex items-center justify-center text-center">
-                <span className="font-bold text-lg">{funnel.stage}</span>
-              </div>
-            </div>
-            
-            {/* Main Content */}
-            <div className="grid grid-cols-[160px_1fr] items-start gap-x-8">
-              {/* Campaign & Ad Groups */}
-              <div className="flex flex-col items-center gap-y-4">
-                {/* Campaign */}
-                <div className="relative w-full flex justify-center">
-                   <div className="neumorphic-card w-[150px] h-24 flex flex-col items-center justify-center p-2 text-sm text-center">
-                    <p className="font-bold">{funnel.campaign.title}</p>
-                    <p>{funnel.campaign.budget}</p>
-                    <p>{funnel.campaign.accounts}</p>
-                  </div>
-                   {/* Line to Ad Groups */}
-                  <div className="absolute top-1/2 right-[-2rem] w-8 h-px bg-primary" />
-                </div>
-                
-                {/* Ad Groups */}
-                <div className="relative w-full flex justify-center">
-                  <div className="absolute top-0 left-1/2 w-px bg-primary h-full" />
-                  <div className="flex flex-col justify-around items-center w-full h-full space-y-4 py-2">
-                    {funnel.adGroups.map((group, groupIndex) => (
-                      <div key={groupIndex} className="relative w-[150px] flex justify-center">
-                        <div className="neumorphic-card flex-col items-center justify-center p-2 min-h-12 w-full text-xs text-center">
-                          <p className="font-bold">{group.title}</p>
-                          {group.subtitle && <p>{group.subtitle}</p>}
+        <div className="flex flex-col items-stretch gap-y-12 py-8 px-4 overflow-x-auto">
+            {data.map((funnel, funnelIndex) => (
+                <div key={funnelIndex} className="grid grid-cols-[100px_1fr] items-start gap-x-6 relative">
+                    {/* Stage */}
+                    <div className="flex flex-col items-center justify-start pt-1 sticky left-4">
+                        <div className="neumorphic-card w-full h-16 flex items-center justify-center text-center">
+                            <span className="font-bold text-lg">{funnel.stage}</span>
                         </div>
-                         <div className="absolute top-1/2 right-[-2rem] w-8 h-px bg-primary" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Ads */}
-              <div className="relative flex items-center h-full">
-                <div className="absolute top-0 left-0 w-px bg-primary h-full" />
-                <div className="flex flex-col justify-around w-full h-full pl-8 space-y-4">
-                  {funnel.ads.map((ad, adIndex) => (
-                    <div key={adIndex} className="relative flex items-center">
-                      <div className="absolute top-1/2 left-[-2rem] w-8 h-px bg-primary" />
-                      <div className={cn("neumorphic-card p-2 min-h-10 w-36 text-sm text-center flex items-center justify-center font-bold")}>
-                        {ad}
-                      </div>
                     </div>
-                  ))}
+
+                    {/* Main Content */}
+                    <div className="grid grid-cols-[160px_1fr_160px] items-start gap-x-8">
+                        {/* Campaign & Ad Groups */}
+                        <div className="flex flex-col items-center gap-y-4 relative">
+                            {/* Line from CBO to vertical line */}
+                            <div className="absolute top-12 left-[150px] w-8 h-px bg-primary"></div>
+                            {/* Vertical Line for Ad Groups */}
+                            <div className="absolute top-12 left-[calc(150px+2rem)] w-px bg-primary h-[calc(100%-3rem)]"></div>
+
+                            {/* Campaign */}
+                            <div className="relative w-full flex justify-center">
+                                <div className="neumorphic-card w-[150px] h-24 flex flex-col items-center justify-center p-2 text-sm text-center">
+                                    <p className="font-bold">{funnel.campaign.title}</p>
+                                    <p>{funnel.campaign.budget}</p>
+                                    <p>{funnel.campaign.accounts}</p>
+                                </div>
+                            </div>
+                            
+                            {/* Ad Groups */}
+                            <div className="relative w-full flex justify-center mt-auto">
+                                <div className="flex flex-col justify-around items-center w-full h-full space-y-4 py-2">
+                                    {funnel.adGroups.map((group, groupIndex) => (
+                                        <div key={groupIndex} className="relative w-[150px] flex justify-center">
+                                            {/* Line from vertical line to ad group */}
+                                            <div className="absolute top-1/2 left-[-2rem] w-8 h-px bg-primary"></div>
+                                            <div className="neumorphic-card flex-col items-center justify-center p-2 min-h-12 w-full text-xs text-center">
+                                                <p className="font-bold">{group.title}</p>
+                                                {group.subtitle && <p>{group.subtitle}</p>}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Ads */}
+                        <div className="relative flex items-center h-full">
+                           <div className="absolute top-0 left-0 w-px h-full bg-primary/50 border-dashed border-l-2 border-primary"></div>
+                            <div className="flex flex-col justify-around w-full h-full pl-8 space-y-4">
+                                {funnel.ads.map((ad, adIndex) => (
+                                    <div key={adIndex} className="relative flex items-center">
+                                        <div className="absolute top-1/2 left-[-2rem] w-8 h-px bg-primary/50 border-dashed border-t-2 border-primary"></div>
+                                        <div className={cn("neumorphic-card p-2 min-h-10 w-36 text-sm text-center flex items-center justify-center font-bold")}>
+                                            {ad}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                         {/* Empty column for spacing */}
+                        <div></div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+            ))}
+        </div>
     );
 };
   
@@ -1100,7 +1105,7 @@ export function ProfitPilotPage() {
             
             <div className="mt-8">
               <h3 className="text-xl font-bold mb-4 text-white">Funnel Structure</h3>
-              <div className="neumorphic-card p-6 space-y-12 overflow-x-auto">
+              <div className="neumorphic-card p-2 md:p-6 space-y-12 overflow-x-auto">
                  <FunnelStructure data={summaryFunnelData} />
               </div>
             </div>
@@ -1196,7 +1201,7 @@ export function ProfitPilotPage() {
                   )}
                 </div>
               </div>
-              <div className="lg:mt-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:mt-0">
                   <Card className="neumorphic-card h-full">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Zap className="w-5 h-5 text-primary"/>กฎรูปแบบการชี้วัดด้วย ROAS</CardTitle>
@@ -1213,6 +1218,30 @@ export function ProfitPilotPage() {
                         "Daily Scale เมื่อ Roas > xxx",
                         "หยุด Scale เมื่อ Roas < xxx และ ใช้เงินไปแล้ว > xxx // รักษากำไร",
                         "Reset งบ xxx ที่เวลา ...",
+                      ].map((rule, index) => (
+                        <div key={index} className="flex items-start gap-3 p-3 bg-background/50 rounded-lg">
+                          <span className="font-bold text-primary">{index + 1}.</span>
+                          <p>{rule}</p>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                  <Card className="neumorphic-card h-full">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Zap className="w-5 h-5 text-primary"/>กฎรูปแบบการชี้วัดด้วยต้นทุนซื้อ</CardTitle>
+                        <CardDescription>แนวทางการตั้งกฎอัตโนมัติพื้นฐานสำหรับ Revealbot</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                      {[
+                          "ปิด ที่เวลา ...",
+                          "เปิด ที่เวลา ...",
+                          "ปิด เมื่อ ไม่มีทัก ไม่มีซื้อ",
+                          "ปิด เมื่อ มีทัก ไม่มีซื้อ",
+                          "ปิด เมื่อ มีซื้อ และ ต้นทุนซื้อ > xxx",
+                          "เปิด คืนชีพ เมื่อ ต้นทุนซื้อ < xxx",
+                          "Daily Scale เมื่อ มีซื้อ และ ต้นทุนซื้อ < xxx",
+                          "หยุด Scale เมื่อ ต้นทุนซื้อ > xxx และ ใช้เงินไปแล้ว > xxx // รักษากำไร",
+                          "Reset งบ xxx ที่เวลา ...",
                       ].map((rule, index) => (
                         <div key={index} className="flex items-start gap-3 p-3 bg-background/50 rounded-lg">
                           <span className="font-bold text-primary">{index + 1}.</span>
