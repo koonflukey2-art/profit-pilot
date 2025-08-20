@@ -6,7 +6,6 @@ import {
   faTiktok,
   faTwitter,
   faMedium,
-  faSalesforce,
 } from "@fortawesome/free-brands-svg-icons";
 import {
   faPlay,
@@ -18,6 +17,10 @@ import {
   faRobot,
   faCode,
   faMagic,
+  faTrash,
+  faBell,
+  faClock,
+  faBullseye,
 } from "@fortawesome/free-solid-svg-icons";
 
 // Convert a FontAwesome icon into a data URI. Encoded for direct use in <img> tags.
@@ -44,6 +47,15 @@ const ACTION_DETAILS: Record<string, { labelTH: string; labelEN: string; icon: s
   scaleUp: { labelTH: "ขยายขึ้น", labelEN: "Scale up", icon: faToDataUri(faArrowUpRightFromSquare, "#FACC15") },
   scaleDown: { labelTH: "ขยายลง", labelEN: "Scale down", icon: faToDataUri(faArrowDown, "#FACC15") },
   resetLimit: { labelTH: "รีเซ็ตวงเงิน", labelEN: "Reset limit", icon: faToDataUri(faArrowUp, "#FACC15") },
+  // Additional actions reflecting the full set of options shown in
+  // Revealbot and other automation tools. These actions correspond
+  // closely to the real options available in the task/action
+  // selector. The Thai and English labels are provided for clarity.
+  delete: { labelTH: "ลบ", labelEN: "Delete", icon: faToDataUri(faTrash, "#FACC15") },
+  notify: { labelTH: "แจ้งเตือน", labelEN: "Notify", icon: faToDataUri(faBell, "#FACC15") },
+  extendEndDate: { labelTH: "ขยายวันสิ้นสุด", labelEN: "Extend end date", icon: faToDataUri(faClock, "#FACC15") },
+  scaleBudgetByTarget: { labelTH: "ปรับงบตามเป้าหมาย", labelEN: "Scale budget by target", icon: faToDataUri(faBullseye, "#FACC15") },
+  scaleBidByTarget: { labelTH: "ปรับการประมูลตามเป้าหมาย", labelEN: "Scale bid by target", icon: faToDataUri(faBullseye, "#FACC15") },
 };
 
 // Supported actions per automation tool. These lists emulate the set of
@@ -51,52 +63,122 @@ const ACTION_DETAILS: Record<string, { labelTH: string; labelEN: string; icon: s
 // entries here to reflect actual functionality.
 const TOOL_ACTIONS: Record<string, string[]> = {
   Revealbot: [
+    // General actions
     "start",
     "pause",
+    "delete",
+    "duplicate",
+    "notify",
+    "extendEndDate",
+    // Budget actions
     "increaseBudget",
     "decreaseBudget",
     "setBudget",
+    "scaleBudgetByTarget",
+    // Bid actions
     "increaseBid",
     "decreaseBid",
     "setBid",
-    "duplicate",
+    "scaleBidByTarget",
+    // Limit actions
     "increaseLimit",
     "setLimit",
   ],
   "Facebook Ads Manager Rules": [
     "start",
     "pause",
+    "delete",
+    "duplicate",
+    "notify",
+    "extendEndDate",
     "increaseBudget",
     "decreaseBudget",
     "setBudget",
+    "scaleBudgetByTarget",
+    "increaseBid",
+    "decreaseBid",
+    "setBid",
+    "scaleBidByTarget",
   ],
   "Google Ads Script": [
     "start",
     "pause",
+    "delete",
+    "notify",
+    "extendEndDate",
     "increaseBudget",
     "decreaseBudget",
     "setBudget",
+    "increaseBid",
+    "decreaseBid",
+    "setBid",
   ],
   "TikTok Ads Automation": [
     "start",
     "pause",
+    "delete",
+    "notify",
     "increaseBudget",
     "decreaseBudget",
     "setBudget",
+    "increaseBid",
+    "decreaseBid",
+    "setBid",
   ],
   Madgicx: [
     "start",
     "pause",
+    "delete",
+    "duplicate",
+    "notify",
+    "extendEndDate",
     "increaseBudget",
     "decreaseBudget",
     "setBudget",
-    "duplicate",
-    "increaseLimit",
-    "setLimit",
+    "scaleBudgetByTarget",
     "increaseBid",
     "decreaseBid",
+    "setBid",
+    "scaleBidByTarget",
+    "increaseLimit",
+    "setLimit",
   ],
-  "Custom API": ["start", "pause"],
+  "Custom API": [
+    "start",
+    "pause",
+    "delete",
+    "notify",
+  ],
+};
+
+// Mapping of each action to a logical category. This is used to group
+// actions into optgroups in the UI. Categories reflect the grouping
+// shown in Revealbot and other automation tools (General, Budget,
+// Bid, Limits).
+const ACTION_CATEGORY: Record<string, string> = {
+  // General actions
+  start: "General",
+  pause: "General",
+  delete: "General",
+  duplicate: "General",
+  notify: "General",
+  extendEndDate: "General",
+  // Budget-related actions
+  increaseBudget: "Budget",
+  decreaseBudget: "Budget",
+  setBudget: "Budget",
+  scaleBudgetByTarget: "Budget",
+  // Bid-related actions
+  increaseBid: "Bid",
+  decreaseBid: "Bid",
+  setBid: "Bid",
+  scaleBidByTarget: "Bid",
+  // Limit-related actions (treated as Budget for grouping)
+  increaseLimit: "Budget",
+  setLimit: "Budget",
+  resetLimit: "Budget",
+  scaleUp: "General",
+  scaleDown: "General",
 };
 
 // Operators with Thai and English descriptors.
@@ -213,6 +295,7 @@ export default function AutomationRuleBuilder() {
         operator: OPERATORS[0].value,
         value: 0,
         unit: "day",
+        // Use the first available action for the current tool as default
         action: getDefaultAction(tool),
       },
     ]);
@@ -422,14 +505,26 @@ export default function AutomationRuleBuilder() {
                   onChange={(e) => updateCondition(idx, { action: e.target.value })}
                   className="bg-zinc-700 border border-zinc-600 text-white px-2 py-1 rounded"
                 >
-                  {TOOL_ACTIONS[tool].map((actVal) => {
-                    const act = ACTION_DETAILS[actVal];
-                    return (
-                      <option key={actVal} value={actVal} className="bg-zinc-700 text-white">
-                        {act.labelEN} ({act.labelTH})
-                      </option>
-                    );
-                  })}
+                  {/* Group actions by category to mirror the real Revealbot UI */}
+                  {Object.entries(
+                    TOOL_ACTIONS[tool].reduce((groups: Record<string, string[]>, actKey: string) => {
+                      const cat = ACTION_CATEGORY[actKey] || "Other";
+                      if (!groups[cat]) groups[cat] = [];
+                      groups[cat].push(actKey);
+                      return groups;
+                    }, {})
+                  ).map(([category, actionKeys]) => (
+                    <optgroup key={category} label={category} className="bg-zinc-700 text-white">
+                      {actionKeys.map((actVal) => {
+                        const act = ACTION_DETAILS[actVal];
+                        return (
+                          <option key={actVal} value={actVal} className="bg-zinc-700 text-white">
+                            {act.labelEN} ({act.labelTH})
+                          </option>
+                        );
+                      })}
+                    </optgroup>
+                  ))}
                 </select>
                 {conditions.length > 1 && (
                   <button
