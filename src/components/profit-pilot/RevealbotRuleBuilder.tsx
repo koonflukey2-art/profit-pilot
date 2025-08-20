@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { icon } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -6,7 +7,6 @@ import {
   faTiktok,
   faTwitter,
   faMedium,
-  faMagic,
 } from "@fortawesome/free-brands-svg-icons";
 import {
   faPlay,
@@ -15,103 +15,49 @@ import {
   faArrowUp,
 } from "@fortawesome/free-solid-svg-icons";
 
-// Convert a FontAwesome icon into a data URI for use in <img> tags.
+// Convert a FontAwesome icon into a data URI. Encoded for direct use in <img> tags.
 function faToDataUri(fa: any, color: string) {
   const svgString = icon(fa, { styles: { color } }).html.join("");
   return `data:image/svg+xml;utf8,${encodeURIComponent(svgString)}`;
 }
 
-// List of available actions and their corresponding icons. This can be
-// extended or adjusted per tool if needed. Each action has a label in
-// Thai (for display) and English (for internal use), plus an icon.
+// Actions supported across tools: labels in Thai and English plus a yellow icon.
 const ACTIONS = [
-  { value: "start", label: "เปิดแอด", icon: faToDataUri(faPlay, "#FACC15") },
-  { value: "pause", label: "หยุดแอด", icon: faToDataUri(faPause, "#FACC15") },
-  { value: "increaseBudget", label: "เพิ่มงบประมาณ", icon: faToDataUri(faArrowUpRightFromSquare, "#FACC15") },
-  { value: "setBudget", label: "ตั้งงบประมาณ", icon: faToDataUri(faArrowUp, "#FACC15") },
-  { value: "increaseLimit", label: "เพิ่มวงเงิน", icon: faToDataUri(faArrowUpRightFromSquare, "#FACC15") },
-  { value: "setLimit", label: "ตั้งวงเงิน", icon: faToDataUri(faArrowUp, "#FACC15") },
+  { value: "start", labelTH: "เปิดแอด", labelEN: "Start", icon: faToDataUri(faPlay, "#FACC15") },
+  { value: "pause", labelTH: "หยุดแอด", labelEN: "Pause", icon: faToDataUri(faPause, "#FACC15") },
+  { value: "increaseBudget", labelTH: "เพิ่มงบประมาณ", labelEN: "Increase budget", icon: faToDataUri(faArrowUpRightFromSquare, "#FACC15") },
+  { value: "setBudget", labelTH: "ตั้งงบประมาณ", labelEN: "Set budget", icon: faToDataUri(faArrowUp, "#FACC15") },
+  { value: "increaseLimit", labelTH: "เพิ่มวงเงิน", labelEN: "Increase spending limits", icon: faToDataUri(faArrowUpRightFromSquare, "#FACC15") },
+  { value: "setLimit", labelTH: "ตั้งวงเงิน", labelEN: "Set spending limits", icon: faToDataUri(faArrowUp, "#FACC15") },
 ];
 
-// Metrics definitions per tool. If you connect to real APIs, replace
-// these arrays with data fetched from the respective platforms.
+// Operators with Thai and English descriptors.
+const OPERATORS = [
+  { value: "greater_than", labelTH: "มากกว่า", labelEN: "greater than" },
+  { value: "less_than", labelTH: "น้อยกว่า", labelEN: "less than" },
+  { value: "equal", labelTH: "เท่ากับ", labelEN: "equal to" },
+];
+
+// Predefined metrics per tool. Replace with real data when integrating APIs.
 const TOOL_METRICS: Record<string, string[]> = {
-  "Revealbot": [
-    "Cost per Result",
-    "Purchase ROAS",
-    "Lifetime Spend",
-    "Frequency",
-    "CPM",
-  ],
-  "Google Ads Script": [
-    "Conversions",
-    "CTR",
-    "CPC",
-    "CPM",
-    "Impressions",
-  ],
-  "Facebook Ads Manager Rules": [
-    "Cost per Result",
-    "Purchase ROAS",
-    "Lifetime Spend",
-    "Frequency",
-    "CPM",
-  ],
-  "TikTok Ads Automation": [
-    "CPA",
-    "CPC",
-    "CPM",
-    "CTR",
-    "Conversions",
-  ],
-  "Madgicx": [
-    "ROAS",
-    "CPA",
-    "CPC",
-    "CPM",
-    "CTR",
-  ],
-  "Custom API": [
-    "Custom Metric 1",
-    "Custom Metric 2",
-    "Custom Metric 3",
-  ],
+  Revealbot: ["Cost per Result", "Purchase ROAS", "Lifetime Spend", "Frequency", "CPM"],
+  "Google Ads Script": ["Conversions", "CTR", "CPC", "CPM", "Impressions"],
+  "Facebook Ads Manager Rules": ["Cost per Result", "Purchase ROAS", "Lifetime Spend", "Frequency", "CPM"],
+  "TikTok Ads Automation": ["CPA", "CPC", "CPM", "CTR", "Conversions"],
+  Madgicx: ["ROAS", "CPA", "CPC", "CPM", "CTR"],
+  "Custom API": ["Custom Metric 1", "Custom Metric 2", "Custom Metric 3"],
 };
 
-// Operators available for all tools. If you need more granular control
-// per tool, define a similar map like TOOL_METRICS.
-const OPERATORS = [
-  { value: "greater_than", label: "มากกว่า" },
-  { value: "less_than", label: "น้อยกว่า" },
-  { value: "equal", label: "เท่ากับ" },
-];
-
-// Platform definitions with their brand icons. Logos are displayed
-// next to the selected platform. You can extend this list.
+// Advertising platforms with associated icons and brand colors.
 const PLATFORMS = [
-  {
-    name: "Facebook Ads",
-    icon: faToDataUri(faFacebook, "#1877F2"),
-  },
-  {
-    name: "Google Ads",
-    icon: faToDataUri(faGoogle, "#4285F4"),
-  },
-  {
-    name: "TikTok Ads",
-    icon: faToDataUri(faTiktok, "#010101"),
-  },
-  {
-    name: "X Ads",
-    icon: faToDataUri(faTwitter, "#1DA1F2"),
-  },
-  {
-    name: "Other",
-    icon: faToDataUri(faMedium, "#000000"),
-  },
+  { name: "Facebook Ads", icon: faToDataUri(faFacebook, "#1877F2"), color: "#1877F2" },
+  { name: "Google Ads", icon: faToDataUri(faGoogle, "#4285F4"), color: "#4285F4" },
+  { name: "TikTok Ads", icon: faToDataUri(faTiktok, "#25F4EE"), color: "#25F4EE" },
+  { name: "X Ads", icon: faToDataUri(faTwitter, "#1DA1F2"), color: "#1DA1F2" },
+  { name: "Other", icon: faToDataUri(faMedium, "#000000"), color: "#333333" },
 ];
 
-// Tool list. Each tool corresponds to a set of metrics defined above.
+// Available automation tools.
 const TOOLS = [
   "Revealbot",
   "Google Ads Script",
@@ -121,7 +67,7 @@ const TOOLS = [
   "Custom API",
 ];
 
-interface RuleData {
+interface Condition {
   metric: string;
   operator: string;
   value: number;
@@ -129,116 +75,114 @@ interface RuleData {
   action: string;
 }
 
-// Component for building a rule for a selected tool. It pulls metrics
-// from TOOL_METRICS and actions from ACTIONS. When the Add Rule
-// button is clicked, it calls the onAddRule callback with a summary.
-function RuleBuilder({
-  toolName,
-  onAddRule,
-}: {
-  toolName: string;
-  onAddRule: (summary: string) => void;
-}) {
-  const metrics = TOOL_METRICS[toolName] || [];
-  const [metric, setMetric] = useState(metrics[0] || "");
-  const [operator, setOperator] = useState(OPERATORS[0].value);
-  const [value, setValue] = useState(0);
-  const [unit, setUnit] = useState("day");
-  const [action, setAction] = useState(ACTIONS[0].value);
-  const getOperatorLabel = (op: string) => OPERATORS.find((o) => o.value === op)?.label || "";
-  const getActionLabel = (act: string) => ACTIONS.find((a) => a.value === act)?.label || "";
+export default function AutomationRuleBuilder() {
+  // Platform and tool selection
+  const [platform, setPlatform] = useState<string>(PLATFORMS[0].name);
+  const [tool, setTool] = useState<string>(TOOLS[0]);
 
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="font-medium">Metric:</label>
-        <select
-          value={metric}
-          onChange={(e) => setMetric(e.target.value)}
-          className="bg-zinc-800 border border-zinc-700 text-white px-2 py-1 rounded"
-        >
-          {metrics.map((m) => (
-            <option key={m} value={m} className="bg-zinc-800 text-white">
-              {m}
-            </option>
-          ))}
-        </select>
-        <label className="font-medium">Operator:</label>
-        <select
-          value={operator}
-          onChange={(e) => setOperator(e.target.value)}
-          className="bg-zinc-800 border border-zinc-700 text-white px-2 py-1 rounded"
-        >
-          {OPERATORS.map((op) => (
-            <option key={op.value} value={op.value} className="bg-zinc-800 text-white">
-              {op.label}
-            </option>
-          ))}
-        </select>
-        <label className="font-medium">Value:</label>
-        <input
-          type="number"
-          value={value}
-          onChange={(e) => setValue(parseFloat(e.target.value))}
-          className="bg-zinc-800 border border-zinc-700 text-white px-2 py-1 rounded w-20"
-        />
-        <label className="font-medium">Unit:</label>
-        <select
-          value={unit}
-          onChange={(e) => setUnit(e.target.value)}
-          className="bg-zinc-800 border border-zinc-700 text-white px-2 py-1 rounded"
-        >
-          <option value="day">วัน</option>
-          <option value="week">สัปดาห์</option>
-          <option value="month">เดือน</option>
-        </select>
-        <label className="font-medium">Action:</label>
-        <select
-          value={action}
-          onChange={(e) => setAction(e.target.value)}
-          className="bg-zinc-800 border border-zinc-700 text-white px-2 py-1 rounded"
-        >
-          {ACTIONS.map((act) => (
-            <option key={act.value} value={act.value} className="bg-zinc-800 text-white">
-              {act.label}
-            </option>
-          ))}
-        </select>
-      </div>
-      <button
-        onClick={() => {
-          const operatorLabel = getOperatorLabel(operator);
-          const actionLabel = getActionLabel(action);
-          const summary = `${metric} ${operatorLabel} ${value} ใน 1 ${unit}, ให้${actionLabel}`;
-          onAddRule(summary);
-        }}
-        className="bg-teal-600 hover:bg-teal-700 text-white px-3 py-1 rounded"
-      >
-        เพิ่มกฎนี้
-      </button>
-    </div>
-  );
-}
-
-export default function EnhancedToolSelectorShell() {
-  const [platform, setPlatform] = useState(PLATFORMS[0].name);
-  const [tool, setTool] = useState(TOOLS[0]);
+  // List of saved rules
   const [rules, setRules] = useState<string[]>([]);
 
-  const handleAddRule = (summary: string) => {
-    setRules((prev) => [...prev, summary]);
+  // Whether the rule builder is visible
+  const [showBuilder, setShowBuilder] = useState<boolean>(false);
+
+  // Rule details
+  const [ruleName, setRuleName] = useState<string>("");
+  const [purpose, setPurpose] = useState<string>("");
+  const getDefaultMetric = (toolName: string) => TOOL_METRICS[toolName][0] || "";
+  const [conditions, setConditions] = useState<Condition[]>([
+    {
+      metric: getDefaultMetric(TOOLS[0]),
+      operator: OPERATORS[0].value,
+      value: 0,
+      unit: "day",
+      action: ACTIONS[0].value,
+    },
+  ]);
+
+  // Update conditions when tool changes
+  const handleToolChange = (value: string) => {
+    setTool(value);
+    setConditions([
+      {
+        metric: getDefaultMetric(value),
+        operator: OPERATORS[0].value,
+        value: 0,
+        unit: "day",
+        action: ACTIONS[0].value,
+      },
+    ]);
   };
-  const handleDeleteRule = (index: number) => {
+
+  // Update a particular condition by index
+  const updateCondition = (index: number, updates: Partial<Condition>) => {
+    setConditions((prev) => prev.map((cond, i) => (i === index ? { ...cond, ...updates } : cond)));
+  };
+
+  // Add a new empty condition row
+  const addCondition = () => {
+    setConditions((prev) => [
+      ...prev,
+      {
+        metric: getDefaultMetric(tool),
+        operator: OPERATORS[0].value,
+        value: 0,
+        unit: "day",
+        action: ACTIONS[0].value,
+      },
+    ]);
+  };
+
+  // Remove a condition row
+  const removeCondition = (index: number) => {
+    setConditions((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Save the rule and reset builder
+  const saveRule = () => {
+    if (!ruleName.trim()) {
+      alert("โปรดระบุชื่อกฎ");
+      return;
+    }
+    const summaryParts = conditions.map((cond, idx) => {
+      const op = OPERATORS.find((o) => o.value === cond.operator);
+      const action = ACTIONS.find((a) => a.value === cond.action);
+      const opLabel = op ? `${op.labelTH} (${op.labelEN})` : "";
+      const actionLabel = action ? `${action.labelEN} (${action.labelTH})` : "";
+      return `${idx + 1}) ${cond.metric} ${opLabel} ${cond.value} ${cond.unit}, ${actionLabel}`;
+    });
+    const summary = `กฏ: ${ruleName} — จุดประสงค์: ${purpose || "—"}. เงื่อนไข: ${summaryParts.join("; ")}`;
+    setRules((prev) => [...prev, summary]);
+    // Reset builder
+    setRuleName("");
+    setPurpose("");
+    setConditions([
+      {
+        metric: getDefaultMetric(tool),
+        operator: OPERATORS[0].value,
+        value: 0,
+        unit: "day",
+        action: ACTIONS[0].value,
+      },
+    ]);
+    setShowBuilder(false);
+  };
+
+  // Delete a saved rule
+  const deleteRule = (index: number) => {
     setRules((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Current platform object to access color and icon
   const currentPlatform = PLATFORMS.find((p) => p.name === platform);
 
   return (
     <div className="max-w-4xl mx-auto mt-8 text-white">
-      <h2 className="text-xl font-bold mb-4">Dark UI webapp mockup</h2>
+      {/* Heading */}
+      <h2 className="text-xl font-bold mb-4">สร้างกฏอัตโนมัติ</h2>
+
+      {/* Selection row */}
       <div className="flex flex-col md:flex-row gap-4 mb-4 items-end">
-        {/* Platform selector */}
         <div className="flex-1">
           <label className="block mb-1 text-sm">แพลตฟอร์มโฆษณา</label>
           <div className="relative">
@@ -260,13 +204,12 @@ export default function EnhancedToolSelectorShell() {
             </div>
           </div>
         </div>
-        {/* Tool selector */}
         <div className="flex-1">
           <label className="block mb-1 text-sm">เลือกเครื่องมืออัตโนมัติ</label>
           <div className="relative">
             <select
               value={tool}
-              onChange={(e) => setTool(e.target.value)}
+              onChange={(e) => handleToolChange(e.target.value)}
               className="w-full px-4 py-2 pr-8 rounded bg-zinc-800 border border-zinc-700 appearance-none"
             >
               {TOOLS.map((t) => (
@@ -282,32 +225,152 @@ export default function EnhancedToolSelectorShell() {
             </div>
           </div>
         </div>
-        {/* Placeholder button remains for potential future expansions */}
+        {/* Create rule button */}
         <button
-          onClick={() => {
-            // Only call Add Rule if the tool has its builder or default builder.
-            if (!tool) return;
-            // Use default summary when no builder is displayed.
-            handleAddRule(`สร้างกฎสำหรับ ${platform} โดยใช้ ${tool}`);
-          }}
           className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded self-start md:self-auto"
+          onClick={() => setShowBuilder(true)}
         >
-          + เพิ่ม Rule ใหม่
+          สร้างกฏ
         </button>
       </div>
-      {/* Display selected platform logo */}
-      <div className="mb-4 flex items-center gap-2">
-        {currentPlatform && (
+
+      {/* Platform header with brand color background */}
+      {currentPlatform && (
+        <div
+          className="flex items-center gap-2 p-2 rounded mb-4"
+          style={{ backgroundColor: currentPlatform.color, color: "#FFFFFF" }}
+        >
           <img src={currentPlatform.icon} alt={currentPlatform.name} className="h-6 w-6" />
-        )}
-        <span className="font-medium">{platform}</span>
-      </div>
-      {/* Tool-specific builder UI */}
-      <div className="mb-4">
-        {/* Render rule builder for the selected tool */}
-        <RuleBuilder toolName={tool} onAddRule={handleAddRule} />
-      </div>
-      {/* Rules summary section */}
+          <span className="font-semibold">{currentPlatform.name}</span>
+        </div>
+      )}
+
+      {/* Rule builder section */}
+      {showBuilder && (
+        <div className="bg-zinc-800 p-4 rounded mb-4 space-y-4">
+          <h3 className="text-lg font-bold">กำหนดกฏใหม่</h3>
+          <div className="flex flex-col gap-3">
+            <label className="flex flex-col">
+              <span className="text-sm mb-1">ชื่อกฎ</span>
+              <input
+                type="text"
+                value={ruleName}
+                onChange={(e) => setRuleName(e.target.value)}
+                className="bg-zinc-700 border border-zinc-600 text-white px-2 py-1 rounded"
+                placeholder="ระบุชื่อกฎ (เช่น ปิด Ad Set ขาดทุน)"
+              />
+            </label>
+            <label className="flex flex-col">
+              <span className="text-sm mb-1">จุดประสงค์</span>
+              <input
+                type="text"
+                value={purpose}
+                onChange={(e) => setPurpose(e.target.value)}
+                className="bg-zinc-700 border border-zinc-600 text-white px-2 py-1 rounded"
+                placeholder="วัตถุประสงค์ของกฎ"
+              />
+            </label>
+          </div>
+          <div className="space-y-4">
+            {conditions.map((cond, idx) => (
+              <div key={idx} className="flex flex-wrap items-center gap-2">
+                <span className="font-medium">{idx + 1}.</span>
+                <select
+                  value={cond.metric}
+                  onChange={(e) => updateCondition(idx, { metric: e.target.value })}
+                  className="bg-zinc-700 border border-zinc-600 text-white px-2 py-1 rounded"
+                >
+                  {TOOL_METRICS[tool].map((m) => (
+                    <option key={m} value={m} className="bg-zinc-700 text-white">
+                      {m}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={cond.operator}
+                  onChange={(e) => updateCondition(idx, { operator: e.target.value })}
+                  className="bg-zinc-700 border border-zinc-600 text-white px-2 py-1 rounded"
+                >
+                  {OPERATORS.map((op) => (
+                    <option key={op.value} value={op.value} className="bg-zinc-700 text-white">
+                      {op.labelTH} ({op.labelEN})
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  value={cond.value}
+                  onChange={(e) => updateCondition(idx, { value: parseFloat(e.target.value) })}
+                  className="bg-zinc-700 border border-zinc-600 text-white px-2 py-1 rounded w-20"
+                />
+                <select
+                  value={cond.unit}
+                  onChange={(e) => updateCondition(idx, { unit: e.target.value })}
+                  className="bg-zinc-700 border border-zinc-600 text-white px-2 py-1 rounded"
+                >
+                  <option value="day">วัน (day)</option>
+                  <option value="week">สัปดาห์ (week)</option>
+                  <option value="month">เดือน (month)</option>
+                </select>
+                <select
+                  value={cond.action}
+                  onChange={(e) => updateCondition(idx, { action: e.target.value })}
+                  className="bg-zinc-700 border border-zinc-600 text-white px-2 py-1 rounded"
+                >
+                  {ACTIONS.map((act) => (
+                    <option key={act.value} value={act.value} className="bg-zinc-700 text-white">
+                      {act.labelEN} ({act.labelTH})
+                    </option>
+                  ))}
+                </select>
+                {conditions.length > 1 && (
+                  <button
+                    onClick={() => removeCondition(idx)}
+                    className="text-red-500 hover:text-red-400 px-2"
+                  >
+                    ลบ
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <button
+            onClick={addCondition}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded"
+          >
+            + เพิ่มเงื่อนไข
+          </button>
+          <div className="flex gap-2 mt-4">
+            <button
+              onClick={saveRule}
+              className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded"
+            >
+              บันทึกกฎ
+            </button>
+            <button
+              onClick={() => {
+                setShowBuilder(false);
+                setRuleName("");
+                setPurpose("");
+                setConditions([
+                  {
+                    metric: getDefaultMetric(tool),
+                    operator: OPERATORS[0].value,
+                    value: 0,
+                    unit: "day",
+                    action: ACTIONS[0].value,
+                  },
+                ]);
+              }}
+              className="bg-zinc-700 hover:bg-zinc-600 text-white px-4 py-2 rounded"
+            >
+              ยกเลิก
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Summary of saved rules */}
       <div className="bg-zinc-800 p-4 rounded">
         <h3 className="text-lg font-bold mb-2">สรุปกฎทั้งหมด</h3>
         {rules.length === 0 ? (
@@ -319,7 +382,7 @@ export default function EnhancedToolSelectorShell() {
                 <span>{idx + 1}. {rule}</span>
                 <button
                   className="text-red-500 hover:text-red-400"
-                  onClick={() => handleDeleteRule(idx)}
+                  onClick={() => deleteRule(idx)}
                 >
                   ลบกฎ
                 </button>
@@ -331,3 +394,5 @@ export default function EnhancedToolSelectorShell() {
     </div>
   );
 }
+
+    
