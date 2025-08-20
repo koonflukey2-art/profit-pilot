@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { icon } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -13,6 +12,11 @@ import {
   faPause,
   faArrowUpRightFromSquare,
   faArrowUp,
+  faArrowDown,
+  faCopy,
+  faRobot,
+  faCode,
+  faMagic,
 } from "@fortawesome/free-solid-svg-icons";
 
 // Convert a FontAwesome icon into a data URI. Encoded for direct use in <img> tags.
@@ -21,15 +25,78 @@ function faToDataUri(fa: any, color: string) {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svgString)}`;
 }
 
-// Actions supported across tools: labels in Thai and English plus a yellow icon.
-const ACTIONS = [
-  { value: "start", labelTH: "เปิดแอด", labelEN: "Start", icon: faToDataUri(faPlay, "#FACC15") },
-  { value: "pause", labelTH: "หยุดแอด", labelEN: "Pause", icon: faToDataUri(faPause, "#FACC15") },
-  { value: "increaseBudget", labelTH: "เพิ่มงบประมาณ", labelEN: "Increase budget", icon: faToDataUri(faArrowUpRightFromSquare, "#FACC15") },
-  { value: "setBudget", labelTH: "ตั้งงบประมาณ", labelEN: "Set budget", icon: faToDataUri(faArrowUp, "#FACC15") },
-  { value: "increaseLimit", labelTH: "เพิ่มวงเงิน", labelEN: "Increase spending limits", icon: faToDataUri(faArrowUpRightFromSquare, "#FACC15") },
-  { value: "setLimit", labelTH: "ตั้งวงเงิน", labelEN: "Set spending limits", icon: faToDataUri(faArrowUp, "#FACC15") },
-];
+// Details of all possible actions. Each entry includes English and Thai
+// labels and an associated icon. These are used for tool-specific
+// actions. Feel free to expand with more actions from the real tool.
+const ACTION_DETAILS: Record<string, { labelTH: string; labelEN: string; icon: string }> = {
+  start: { labelTH: "เปิดแอด", labelEN: "Start", icon: faToDataUri(faPlay, "#FACC15") },
+  pause: { labelTH: "หยุดแอด", labelEN: "Pause", icon: faToDataUri(faPause, "#FACC15") },
+  increaseBudget: { labelTH: "เพิ่มงบประมาณ", labelEN: "Increase budget", icon: faToDataUri(faArrowUpRightFromSquare, "#FACC15") },
+  decreaseBudget: { labelTH: "ลดงบประมาณ", labelEN: "Decrease budget", icon: faToDataUri(faArrowDown, "#FACC15") },
+  setBudget: { labelTH: "ตั้งงบประมาณ", labelEN: "Set budget", icon: faToDataUri(faArrowUp, "#FACC15") },
+  increaseBid: { labelTH: "เพิ่มการประมูล", labelEN: "Increase bid", icon: faToDataUri(faArrowUpRightFromSquare, "#FACC15") },
+  decreaseBid: { labelTH: "ลดการประมูล", labelEN: "Decrease bid", icon: faToDataUri(faArrowDown, "#FACC15") },
+  setBid: { labelTH: "ตั้งการประมูล", labelEN: "Set bid", icon: faToDataUri(faArrowUp, "#FACC15") },
+  duplicate: { labelTH: "ทำซ้ำ", labelEN: "Duplicate", icon: faToDataUri(faCopy, "#FACC15") },
+  increaseLimit: { labelTH: "เพิ่มวงเงิน", labelEN: "Increase spending limits", icon: faToDataUri(faArrowUpRightFromSquare, "#FACC15") },
+  setLimit: { labelTH: "ตั้งวงเงิน", labelEN: "Set spending limits", icon: faToDataUri(faArrowUp, "#FACC15") },
+  scaleUp: { labelTH: "ขยายขึ้น", labelEN: "Scale up", icon: faToDataUri(faArrowUpRightFromSquare, "#FACC15") },
+  scaleDown: { labelTH: "ขยายลง", labelEN: "Scale down", icon: faToDataUri(faArrowDown, "#FACC15") },
+  resetLimit: { labelTH: "รีเซ็ตวงเงิน", labelEN: "Reset limit", icon: faToDataUri(faArrowUp, "#FACC15") },
+};
+
+// Supported actions per automation tool. These lists emulate the set of
+// actions available on the real automation platforms. Add or remove
+// entries here to reflect actual functionality.
+const TOOL_ACTIONS: Record<string, string[]> = {
+  Revealbot: [
+    "start",
+    "pause",
+    "increaseBudget",
+    "decreaseBudget",
+    "setBudget",
+    "increaseBid",
+    "decreaseBid",
+    "setBid",
+    "duplicate",
+    "increaseLimit",
+    "setLimit",
+  ],
+  "Facebook Ads Manager Rules": [
+    "start",
+    "pause",
+    "increaseBudget",
+    "decreaseBudget",
+    "setBudget",
+  ],
+  "Google Ads Script": [
+    "start",
+    "pause",
+    "increaseBudget",
+    "decreaseBudget",
+    "setBudget",
+  ],
+  "TikTok Ads Automation": [
+    "start",
+    "pause",
+    "increaseBudget",
+    "decreaseBudget",
+    "setBudget",
+  ],
+  Madgicx: [
+    "start",
+    "pause",
+    "increaseBudget",
+    "decreaseBudget",
+    "setBudget",
+    "duplicate",
+    "increaseLimit",
+    "setLimit",
+    "increaseBid",
+    "decreaseBid",
+  ],
+  "Custom API": ["start", "pause"],
+};
 
 // Operators with Thai and English descriptors.
 const OPERATORS = [
@@ -55,6 +122,17 @@ const PLATFORMS = [
   { name: "TikTok Ads", icon: faToDataUri(faTiktok, "#25F4EE"), color: "#25F4EE" },
   { name: "X Ads", icon: faToDataUri(faTwitter, "#1DA1F2"), color: "#1DA1F2" },
   { name: "Other", icon: faToDataUri(faMedium, "#000000"), color: "#333333" },
+];
+
+// Details for automation tools: name, icon, and brand color. Colors and
+// icons are approximate defaults; adjust to match the real tool branding.
+const AUTOMATION_TOOLS = [
+  { name: "Revealbot", icon: faToDataUri(faRobot, "#FFE344"), color: "#FFE344" },
+  { name: "Google Ads Script", icon: faToDataUri(faCode, "#4285F4"), color: "#4285F4" },
+  { name: "Facebook Ads Manager Rules", icon: faToDataUri(faFacebook, "#1877F2"), color: "#1877F2" },
+  { name: "TikTok Ads Automation", icon: faToDataUri(faTiktok, "#25F4EE"), color: "#25F4EE" },
+  { name: "Madgicx", icon: faToDataUri(faMagic, "#673AB7"), color: "#673AB7" },
+  { name: "Custom API", icon: faToDataUri(faCode, "#5E5E5E"), color: "#5E5E5E" },
 ];
 
 // Available automation tools.
@@ -90,13 +168,19 @@ export default function AutomationRuleBuilder() {
   const [ruleName, setRuleName] = useState<string>("");
   const [purpose, setPurpose] = useState<string>("");
   const getDefaultMetric = (toolName: string) => TOOL_METRICS[toolName][0] || "";
+  // Helper to get default action for a tool
+  const getDefaultAction = (toolName: string) => {
+    const acts = TOOL_ACTIONS[toolName];
+    return acts && acts.length > 0 ? acts[0] : "";
+  };
+
   const [conditions, setConditions] = useState<Condition[]>([
     {
       metric: getDefaultMetric(TOOLS[0]),
       operator: OPERATORS[0].value,
       value: 0,
       unit: "day",
-      action: ACTIONS[0].value,
+      action: getDefaultAction(TOOLS[0]),
     },
   ]);
 
@@ -109,7 +193,7 @@ export default function AutomationRuleBuilder() {
         operator: OPERATORS[0].value,
         value: 0,
         unit: "day",
-        action: ACTIONS[0].value,
+        action: getDefaultAction(value),
       },
     ]);
   };
@@ -146,7 +230,7 @@ export default function AutomationRuleBuilder() {
     }
     const summaryParts = conditions.map((cond, idx) => {
       const op = OPERATORS.find((o) => o.value === cond.operator);
-      const action = ACTIONS.find((a) => a.value === cond.action);
+      const action = ACTION_DETAILS[cond.action];
       const opLabel = op ? `${op.labelTH} (${op.labelEN})` : "";
       const actionLabel = action ? `${action.labelEN} (${action.labelTH})` : "";
       return `${idx + 1}) ${cond.metric} ${opLabel} ${cond.value} ${cond.unit}, ${actionLabel}`;
@@ -162,7 +246,7 @@ export default function AutomationRuleBuilder() {
         operator: OPERATORS[0].value,
         value: 0,
         unit: "day",
-        action: ACTIONS[0].value,
+        action: getDefaultAction(tool),
       },
     ]);
     setShowBuilder(false);
@@ -175,6 +259,9 @@ export default function AutomationRuleBuilder() {
 
   // Current platform object to access color and icon
   const currentPlatform = PLATFORMS.find((p) => p.name === platform);
+
+  // Current automation tool info to access its color and icon
+  const currentToolInfo = AUTOMATION_TOOLS.find((t) => t.name === tool);
 
   return (
     <div className="max-w-4xl mx-auto mt-8 text-white">
@@ -245,6 +332,17 @@ export default function AutomationRuleBuilder() {
         </div>
       )}
 
+      {/* Automation tool header with its own branding */}
+      {currentToolInfo && (
+        <div
+          className="flex items-center gap-2 p-2 rounded mb-4"
+          style={{ backgroundColor: currentToolInfo.color, color: "#FFFFFF" }}
+        >
+          <img src={currentToolInfo.icon} alt={currentToolInfo.name} className="h-6 w-6" />
+          <span className="font-semibold">{currentToolInfo.name}</span>
+        </div>
+      )}
+
       {/* Rule builder section */}
       {showBuilder && (
         <div className="bg-zinc-800 p-4 rounded mb-4 space-y-4">
@@ -312,16 +410,25 @@ export default function AutomationRuleBuilder() {
                   <option value="week">สัปดาห์ (week)</option>
                   <option value="month">เดือน (month)</option>
                 </select>
+                {/* Action icon for selected action */}
+                <img
+                  src={ACTION_DETAILS[cond.action].icon}
+                  alt="action icon"
+                  className="h-4 w-4"
+                />
                 <select
                   value={cond.action}
                   onChange={(e) => updateCondition(idx, { action: e.target.value })}
                   className="bg-zinc-700 border border-zinc-600 text-white px-2 py-1 rounded"
                 >
-                  {ACTIONS.map((act) => (
-                    <option key={act.value} value={act.value} className="bg-zinc-700 text-white">
-                      {act.labelEN} ({act.labelTH})
-                    </option>
-                  ))}
+                  {TOOL_ACTIONS[tool].map((actVal) => {
+                    const act = ACTION_DETAILS[actVal];
+                    return (
+                      <option key={actVal} value={actVal} className="bg-zinc-700 text-white">
+                        {act.labelEN} ({act.labelTH})
+                      </option>
+                    );
+                  })}
                 </select>
                 {conditions.length > 1 && (
                   <button
@@ -358,7 +465,7 @@ export default function AutomationRuleBuilder() {
                     operator: OPERATORS[0].value,
                     value: 0,
                     unit: "day",
-                    action: ACTIONS[0].value,
+                    action: getDefaultAction(tool),
                   },
                 ]);
               }}
@@ -394,5 +501,3 @@ export default function AutomationRuleBuilder() {
     </div>
   );
 }
-
-    
