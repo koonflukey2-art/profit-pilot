@@ -611,16 +611,16 @@ export function ProfitPilotPage() {
   
   const FunnelStructure = ({ data }) => {
     if (!data || data.length === 0) return null;
-  
+
     const stageBoxWidth = 100;
     const campaignBoxWidth = 150;
     const adGroupBoxWidth = 150;
     const adBoxWidth = 144;
-    const mainGap = 48;
+    const mainGap = 48; 
     const verticalGap = 16;
   
     return (
-      <div className="relative p-4 md:p-8 min-w-[800px]">
+      <div className="relative p-4 md:p-8 min-w-[800px] overflow-x-auto">
         {data.map((funnel, funnelIndex) => {
           const adGroupsHeight = funnel.adGroups.reduce((acc, _, i) => acc + 50 + (i > 0 ? verticalGap : 0), 0);
           const adsHeight = funnel.ads.reduce((acc, _, i) => acc + 40 + (i > 0 ? verticalGap : 0), 0);
@@ -635,17 +635,75 @@ export function ProfitPilotPage() {
           const adGroupYPositions = funnel.adGroups.map((_, i) => {
             const totalHeight = funnel.adGroups.length * 50 + (funnel.adGroups.length - 1) * verticalGap;
             const startY = (funnelHeight - totalHeight) / 2;
-            return startY + i * (50 + verticalGap) + 25;
+            return startY + i * (50 + verticalGap);
           });
   
           const adYPositions = funnel.ads.map((_, i) => {
             const totalHeight = funnel.ads.length * 40 + (funnel.ads.length - 1) * verticalGap;
             const startY = (funnelHeight - totalHeight) / 2;
-            return startY + i * (40 + verticalGap) + 20;
+            return startY + i * (40 + verticalGap);
           });
   
           return (
             <div key={funnel.stage} className="relative" style={{ height: funnelHeight + verticalGap }}>
+              {/* Lines SVG */}
+              <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
+                {/* Line from Campaign to Ad Group main vertical line */}
+                <line 
+                  x1={campaignX + campaignBoxWidth} 
+                  y1={campaignY + 48} 
+                  x2={adGroupX} 
+                  y2={campaignY + 48} 
+                  stroke="hsl(var(--primary))" 
+                  strokeWidth="2" 
+                />
+  
+                {/* Ad Group main vertical line */}
+                <line
+                  x1={adGroupX}
+                  y1={adGroupYPositions[0] + 25}
+                  x2={adGroupX}
+                  y2={adGroupYPositions[adGroupYPositions.length - 1] + 25}
+                  stroke="hsl(var(--primary))"
+                  strokeWidth="2"
+                />
+
+                {/* Lines from vertical to each Ad Group */}
+                {adGroupYPositions.map((y, i) => (
+                  <line
+                    key={`adgroup-h-line-${i}`}
+                    x1={adGroupX}
+                    y1={y + 25}
+                    x2={adGroupX + adGroupBoxWidth}
+                    y2={y + 25}
+                    stroke="hsl(var(--primary))"
+                    strokeWidth="2"
+                  />
+                ))}
+
+                {/* Lines from Ad Groups to Ads */}
+                 {adGroupYPositions.map((y, i) => (
+                  <line
+                    key={`adgroup-to-ad-line-${i}`}
+                    x1={adGroupX + adGroupBoxWidth}
+                    y1={y + 25}
+                    x2={adX}
+                    y2={adYPositions[i] + 20}
+                    stroke="hsl(var(--primary))"
+                    strokeWidth="2"
+                  />
+                 ))}
+                 {/* This is a simplified connection. For a more complex one, you'd need more logic */}
+                 <line
+                    x1={adGroupX + adGroupBoxWidth}
+                    y1={adGroupYPositions[adGroupYPositions.length-1] + 25}
+                    x2={adX}
+                    y2={adYPositions[adYPositions.length-1] + 20}
+                    stroke="hsl(var(--primary))"
+                    strokeWidth="2"
+                  />
+              </svg>
+  
               {/* Stage Box */}
               <div className="absolute flex flex-col items-center justify-center" style={{ left: stageX, top: 0, height: funnelHeight, width: stageBoxWidth }}>
                 <div className="neumorphic-card w-full h-16 flex items-center justify-center text-center">
@@ -663,10 +721,10 @@ export function ProfitPilotPage() {
               </div>
   
               {/* Ad Group Boxes */}
-              <div className="absolute" style={{ left: adGroupX, top: (funnelHeight - (funnel.adGroups.length * 50 + (funnel.adGroups.length - 1) * verticalGap)) / 2 }}>
-                <div className="flex flex-col gap-4">
+              <div className="absolute" style={{ left: adGroupX }}>
+                <div className="flex flex-col" style={{gap: `${verticalGap}px`}}>
                   {funnel.adGroups.map((group, groupIndex) => (
-                    <div key={groupIndex} className="neumorphic-card flex flex-col items-center justify-center p-2 h-[50px] w-full text-xs text-center" style={{ width: adGroupBoxWidth }}>
+                    <div key={groupIndex} className="neumorphic-card flex flex-col items-center justify-center p-2 h-[50px] w-full text-xs text-center" style={{ width: adGroupBoxWidth, top: adGroupYPositions[groupIndex] }}>
                       <p className="font-bold">{group.title}</p>
                       {group.subtitle && <p>{group.subtitle}</p>}
                     </div>
@@ -675,27 +733,15 @@ export function ProfitPilotPage() {
               </div>
   
               {/* Ad Boxes */}
-              <div className="absolute" style={{ left: adX, top: (funnelHeight - (funnel.ads.length * 40 + (funnel.ads.length - 1) * verticalGap)) / 2 }}>
-                <div className="flex flex-col gap-4">
+              <div className="absolute" style={{ left: adX }}>
+                <div className="flex flex-col" style={{gap: `${verticalGap}px`}}>
                   {funnel.ads.map((ad, adIndex) => (
-                    <div key={adIndex} className={cn("neumorphic-card p-2 h-[40px] text-sm text-center flex items-center justify-center font-bold")} style={{ width: adBoxWidth }}>
+                    <div key={adIndex} className={cn("neumorphic-card p-2 h-[40px] text-sm text-center flex items-center justify-center font-bold")} style={{ width: adBoxWidth, top: adYPositions[adIndex] }}>
                       {ad}
                     </div>
                   ))}
                 </div>
               </div>
-  
-              {/* Connecting Lines */}
-              <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
-                <line x1={campaignX + campaignBoxWidth} y1={campaignY + 48} x2={adGroupX} y2={campaignY + 48} stroke="hsl(var(--primary))" strokeWidth="2" />
-                
-                <line x1={adGroupX} y1={adGroupYPositions[0]} x2={adGroupX} y2={adGroupYPositions[adGroupYPositions.length - 1]} stroke="hsl(var(--primary))" strokeWidth="2" />
-                
-                {adGroupYPositions.map((y, i) => (
-                    <line key={`adgroup-h-line-${i}`} x1={adGroupX} y1={y} x2={adGroupX + adGroupBoxWidth} y2={y} stroke="hsl(var(--primary))" strokeWidth="2" />
-                ))}
-
-              </svg>
             </div>
           );
         })}
@@ -763,12 +809,6 @@ export function ProfitPilotPage() {
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Profit Pilot</h1>
         <p className="text-base opacity-80">Profit & Metrics Planner v5.3</p>
       </header>
-
-      {/* RevealBot Mockup */}
-      <div className="my-8">
-        <h2 className="text-2xl font-bold text-center text-white mb-4">Revealbot Mockup</h2>
-        <RevealBotMockup />
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-4">
@@ -1287,6 +1327,10 @@ export function ProfitPilotPage() {
             </div>
           </TabsContent>
           <TabsContent value="automation">
+            <div className="my-8">
+              <h2 className="text-2xl font-bold text-center text-white mb-4">ตัวอย่างหน้าจอ Revealbot</h2>
+              <RevealBotMockup />
+            </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -1343,6 +1387,36 @@ export function ProfitPilotPage() {
                     )
                   })}
                 </div>
+                 <Card className="neumorphic-card mt-6">
+                    <CardHeader>
+                        <CardTitle>สรุปกฎทั้งหมด</CardTitle>
+                        <CardDescription>นี่คือรายการกฎทั้งหมดที่คุณได้สร้างไว้</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {automationRules.length > 0 ? (
+                            <ol className="list-decimal list-inside space-y-2 text-sm">
+                            {automationRules.map((rule, index) => {
+                                const toolConfig = automationToolsConfig[inputs.automationTool];
+                                const levelText = toolConfig.levels.find(l => l.value === rule.level)?.text;
+                                const metricText = toolConfig.metrics.find(m => m.value === rule.metric)?.text;
+                                const operatorText = toolConfig.operators.find(o => o.value === rule.operator)?.text;
+                                const actionText = toolConfig.actions.find(a => a.value === rule.action)?.text;
+                                const timeText = toolConfig.timeframes.find(t => t.value === rule.timeframe)?.text;
+                                return (
+                                    <li key={rule.id} className="text-white">
+                                        <b>{rule.name ? `${rule.name}: ` : ''}</b>
+                                        ที่ระดับ {levelText}, ถ้า {metricText} {operatorText} {rule.value} 
+                                        ภายใน {timeText}, 
+                                        ให้ {actionText} {rule.actionValue && `${rule.actionValue}%`}
+                                    </li>
+                                );
+                            })}
+                            </ol>
+                        ) : (
+                            <p className="text-muted-foreground text-center">ยังไม่มีการสร้าง Rule</p>
+                        )}
+                    </CardContent>
+                </Card>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:mt-0">
                   <Card className="neumorphic-card h-full">
@@ -1395,36 +1469,6 @@ export function ProfitPilotPage() {
                   </Card>
               </div>
             </div>
-            <Card className="neumorphic-card mt-6">
-                <CardHeader>
-                    <CardTitle>สรุปกฎทั้งหมด</CardTitle>
-                    <CardDescription>นี่คือรายการกฎทั้งหมดที่คุณได้สร้างไว้</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {automationRules.length > 0 ? (
-                        <ol className="list-decimal list-inside space-y-2 text-sm">
-                        {automationRules.map((rule, index) => {
-                            const toolConfig = automationToolsConfig[inputs.automationTool];
-                            const levelText = toolConfig.levels.find(l => l.value === rule.level)?.text;
-                            const metricText = toolConfig.metrics.find(m => m.value === rule.metric)?.text;
-                            const operatorText = toolConfig.operators.find(o => o.value === rule.operator)?.text;
-                            const actionText = toolConfig.actions.find(a => a.value === rule.action)?.text;
-                            const timeText = toolConfig.timeframes.find(t => t.value === rule.timeframe)?.text;
-                            return (
-                                <li key={rule.id} className="text-white">
-                                    <b>{rule.name ? `${rule.name}: ` : ''}</b>
-                                    ที่ระดับ {levelText}, ถ้า {metricText} {operatorText} {rule.value} 
-                                    ภายใน {timeText}, 
-                                    ให้ {actionText} {rule.actionValue && `${rule.actionValue}%`}
-                                </li>
-                            );
-                        })}
-                        </ol>
-                    ) : (
-                        <p className="text-muted-foreground text-center">ยังไม่มีการสร้าง Rule</p>
-                    )}
-                </CardContent>
-            </Card>
           </TabsContent>
            <TabsContent value="workflow">
              <div className="neumorphic-card mt-6 p-6">
