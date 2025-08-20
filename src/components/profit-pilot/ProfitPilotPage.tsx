@@ -34,49 +34,51 @@ import { Progress } from '../ui/progress';
 
 const RevealBotMockup = () => {
   return (
-    <div className="bg-[#1E2227] p-8 rounded-lg font-sans w-full max-w-4xl mx-auto my-10 shadow-2xl">
+    <div className="bg-[#191C20] p-4 sm:p-6 md:p-8 rounded-lg font-sans w-full max-w-full mx-auto my-6 shadow-2xl border border-[#33373E]">
       <div className="relative">
         {/* Blurred Background for Dropdown */}
-        <div className="absolute top-24 left-0 w-full h-48 bg-black/10 backdrop-blur-sm z-10"></div>
+        <div className="absolute top-[6.2rem] sm:top-[6.5rem] left-0 w-full h-56 bg-black/20 backdrop-blur-sm z-10 rounded-lg"></div>
         
         {/* Rule Name Bar */}
         <div className="relative z-20 mb-4">
           <Input 
             value="ชื่อกฎ (เช่น ‘ปิด Ad Set ขาดทุน’)" 
             readOnly
-            className="w-full bg-[#2A2F36] border-[#4A4F56] text-white text-base py-3 px-4 rounded-md placeholder-gray-400"
+            className="w-full bg-[#2A2F36] border-[#4A4F56] text-white text-base py-3 px-4 rounded-md placeholder-gray-400 focus-visible:ring-primary/50"
           />
         </div>
 
         {/* Condition Row */}
-        <div className="relative z-20 flex items-center space-x-3 bg-[#2A2F36] p-3 rounded-lg border border-[#4A4F56]">
-          <div className="bg-[#1877F2] w-7 h-7 flex items-center justify-center rounded-md">
+        <div className="relative z-20 flex items-center flex-wrap gap-2 bg-[#2A2F36] p-3 rounded-lg border border-[#4A4F56]">
+          <div className="bg-[#1877F2] w-7 h-7 flex items-center justify-center rounded-md shrink-0">
             <Facebook className="w-5 h-5 text-white" fill="white" />
           </div>
 
           <div className="relative">
-            <Button variant="outline" className="bg-[#3A3F46] border-[#5A5F66] text-white">
+            <Button variant="outline" className="bg-[#3A3F46] border-[#5A5F66] text-white hover:bg-[#4a4f56] hover:text-white">
               Purchase ROAS <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </div>
+          
+          <span className="text-gray-400 font-bold hidden sm:inline">IF</span>
 
           <Select>
-            <SelectTrigger className="w-auto bg-[#3A3F46] border-[#5A5F66] text-white">
+            <SelectTrigger className="w-auto bg-[#3A3F46] border-[#5A5F66] text-white focus:ring-primary/50">
               <SelectValue placeholder="is greater than" />
             </SelectTrigger>
           </Select>
 
-          <Input type="number" value="1" readOnly className="w-20 bg-[#3A3F46] border-[#5A5F66] text-white text-center" />
+          <Input type="number" value="1" readOnly className="w-20 bg-[#3A3F46] border-[#5A5F66] text-white text-center focus-visible:ring-primary/50" />
 
           <Select>
-            <SelectTrigger className="w-auto bg-[#3A3F46] border-[#5A5F66] text-white">
+            <SelectTrigger className="w-auto bg-[#3A3F46] border-[#5A5F66] text-white focus:ring-primary/50">
               <SelectValue placeholder="วัน" />
             </SelectTrigger>
           </Select>
         </div>
         
         {/* Forced Open Dropdown */}
-        <div className="absolute top-[7.5rem] left-[5rem] w-64 bg-[#2C3138] rounded-lg shadow-2xl border border-[#4A4F56] z-30">
+        <div className="absolute top-[6.5rem] sm:top-[6.8rem] left-10 sm:left-[3.7rem] w-64 bg-[#2C3138] rounded-lg shadow-2xl border border-[#4A4F56] z-30">
           <div className="p-1">
             <div className="px-3 py-2 text-sm text-gray-400">Common</div>
             <div className="flex items-center justify-between px-3 py-2 text-sm text-white rounded-md cursor-pointer hover:bg-[#3A3F46]">
@@ -99,7 +101,7 @@ const RevealBotMockup = () => {
         </div>
 
         {/* Actions Bar */}
-        <div className="relative z-0 mt-6 ml-10 flex flex-col space-y-3">
+        <div className="relative z-0 mt-8 ml-4 sm:ml-10 flex flex-col space-y-3">
           <div className="flex items-center space-x-3 text-sm text-gray-300">
             <Play className="w-5 h-5 text-yellow-400" />
             <span>Start (เปิดแอด)</span>
@@ -161,7 +163,7 @@ const initialInputs = {
   funnelPlan: 'launch',
   numberOfAccounts: '1',
   metricsPlan: 'fb_s1_plan',
-  automationTool: 'facebook',
+  automationTool: 'revealbot',
   budgetingStrategy: 'cbo'
 };
 
@@ -648,17 +650,7 @@ export function ProfitPilotPage() {
             <div key={funnel.stage} className="relative" style={{ height: funnelHeight + verticalGap }}>
               {/* Lines SVG */}
               <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
-                {/* Line from Campaign to Ad Group main vertical line */}
-                <line 
-                  x1={campaignX + campaignBoxWidth} 
-                  y1={campaignY + 48} 
-                  x2={adGroupX} 
-                  y2={campaignY + 48} 
-                  stroke="hsl(var(--primary))" 
-                  strokeWidth="2" 
-                />
-  
-                {/* Ad Group main vertical line */}
+                {/* Main vertical connector for Ad Groups */}
                 <line
                   x1={adGroupX}
                   y1={adGroupYPositions[0] + 25}
@@ -668,40 +660,38 @@ export function ProfitPilotPage() {
                   strokeWidth="2"
                 />
 
+                {/* Line from Campaign to the middle of the Ad Group vertical connector */}
+                <line
+                  x1={campaignX + campaignBoxWidth}
+                  y1={campaignY + 48}
+                  x2={adGroupX}
+                  y2={(adGroupYPositions[0] + 25 + adGroupYPositions[adGroupYPositions.length - 1] + 25) / 2}
+                  stroke="hsl(var(--primary))"
+                  strokeWidth="2"
+                />
+
                 {/* Lines from vertical to each Ad Group */}
                 {adGroupYPositions.map((y, i) => (
-                  <line
-                    key={`adgroup-h-line-${i}`}
-                    x1={adGroupX}
-                    y1={y + 25}
-                    x2={adGroupX + adGroupBoxWidth}
-                    y2={y + 25}
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="2"
-                  />
+                  <g key={`adgroup-lines-${i}`}>
+                    <line
+                      x1={adGroupX}
+                      y1={y + 25}
+                      x2={adGroupX + adGroupBoxWidth}
+                      y2={y + 25}
+                      stroke="hsl(var(--primary))"
+                      strokeWidth="2"
+                    />
+                    {/* Connection from Ad Group to corresponding Ad */}
+                    <line
+                      x1={adGroupX + adGroupBoxWidth}
+                      y1={y + 25}
+                      x2={adX}
+                      y2={adYPositions[i] ? adYPositions[i] + 20 : y + 25} // Fallback if ad position is missing
+                      stroke="hsl(var(--primary))"
+                      strokeWidth="2"
+                    />
+                  </g>
                 ))}
-
-                {/* Lines from Ad Groups to Ads */}
-                 {adGroupYPositions.map((y, i) => (
-                  <line
-                    key={`adgroup-to-ad-line-${i}`}
-                    x1={adGroupX + adGroupBoxWidth}
-                    y1={y + 25}
-                    x2={adX}
-                    y2={adYPositions[i] + 20}
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="2"
-                  />
-                 ))}
-                 {/* This is a simplified connection. For a more complex one, you'd need more logic */}
-                 <line
-                    x1={adGroupX + adGroupBoxWidth}
-                    y1={adGroupYPositions[adGroupYPositions.length-1] + 25}
-                    x2={adX}
-                    y2={adYPositions[adYPositions.length-1] + 20}
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="2"
-                  />
               </svg>
   
               {/* Stage Box */}
@@ -721,26 +711,22 @@ export function ProfitPilotPage() {
               </div>
   
               {/* Ad Group Boxes */}
-              <div className="absolute" style={{ left: adGroupX }}>
-                <div className="flex flex-col" style={{gap: `${verticalGap}px`}}>
+              <div className="absolute" style={{ left: adGroupX, top: 0, height: '100%' }}>
                   {funnel.adGroups.map((group, groupIndex) => (
-                    <div key={groupIndex} className="neumorphic-card flex flex-col items-center justify-center p-2 h-[50px] w-full text-xs text-center" style={{ width: adGroupBoxWidth, top: adGroupYPositions[groupIndex] }}>
+                    <div key={groupIndex} className="absolute neumorphic-card flex flex-col items-center justify-center p-2 h-[50px] w-full text-xs text-center" style={{ width: adGroupBoxWidth, top: adGroupYPositions[groupIndex] }}>
                       <p className="font-bold">{group.title}</p>
                       {group.subtitle && <p>{group.subtitle}</p>}
                     </div>
                   ))}
-                </div>
               </div>
   
               {/* Ad Boxes */}
-              <div className="absolute" style={{ left: adX }}>
-                <div className="flex flex-col" style={{gap: `${verticalGap}px`}}>
+               <div className="absolute" style={{ left: adX, top: 0, height: '100%' }}>
                   {funnel.ads.map((ad, adIndex) => (
-                    <div key={adIndex} className={cn("neumorphic-card p-2 h-[40px] text-sm text-center flex items-center justify-center font-bold")} style={{ width: adBoxWidth, top: adYPositions[adIndex] }}>
+                    <div key={adIndex} className={cn("absolute neumorphic-card p-2 h-[40px] text-sm text-center flex items-center justify-center font-bold")} style={{ width: adBoxWidth, top: adYPositions[adIndex] }}>
                       {ad}
                     </div>
                   ))}
-                </div>
               </div>
             </div>
           );
@@ -763,7 +749,7 @@ export function ProfitPilotPage() {
         { title: 'Behavior', subtitle: '(พฤติกรรม)' },
         { title: 'Lookalike' },
       ],
-      ads: ['VDO 1', 'VDO 2', 'รูปภาพ'],
+      ads: ['VDO 1', 'VDO 2', 'รูปภาพ', 'ข้อความ'],
     },
     {
       stage: 'Retarget',
@@ -1327,148 +1313,52 @@ export function ProfitPilotPage() {
             </div>
           </TabsContent>
           <TabsContent value="automation">
-            <div className="my-8">
-              <h2 className="text-2xl font-bold text-center text-white mb-4">ตัวอย่างหน้าจอ Revealbot</h2>
-              <RevealBotMockup />
+            <div className="flex justify-end mb-4">
+              <div className="w-full max-w-xs">
+                <Label htmlFor="automation-tool-main" className="block text-sm mb-2 font-medium opacity-80">เลือกเครื่องมืออัตโนมัติ</Label>
+                <Select value={inputs.automationTool} onValueChange={(val) => handleInputChange('automationTool', val)}>
+                    <SelectTrigger id="automation-tool-main" className="neumorphic-select w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="revealbot">Revealbot</SelectItem>
+                      <SelectItem value="google_ads_script">Google Ads Script</SelectItem>
+                      <SelectItem value="facebook_ads_rules">Facebook Ads Manager Rules</SelectItem>
+                      <SelectItem value="tiktok_ads_automation">TikTok Ads Automation</SelectItem>
+                      <SelectItem value="custom_api">Custom API</SelectItem>
+                    </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div className="md:col-span-1">
-                        <Label htmlFor="metricsPlan-automation" className="block text-sm mb-2 font-medium opacity-80">แผน Metrics</Label>
-                        <Select value={inputs.metricsPlan} onValueChange={(val) => handleInputChange('metricsPlan', val)}>
-                            <SelectTrigger id="metricsPlan-automation" className="neumorphic-select"><SelectValue/></SelectTrigger>
-                            <SelectContent>
-                                {Object.entries(metricsPlans).map(([key, {name}]) => <SelectItem key={key} value={key}>{name}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="md:col-span-1">
-                        <Label htmlFor="automation-tool" className="block text-sm mb-2 font-medium opacity-80">เครื่องมืออัตโนมัติ</Label>
-                        <Select value={inputs.automationTool} onValueChange={(val) => handleInputChange('automationTool', val)}>
-                            <SelectTrigger id="automation-tool" className="neumorphic-select w-full"><SelectValue/></SelectTrigger>
-                            <SelectContent>
-                            {Object.entries(automationToolsConfig).map(([key, {name}]) => <SelectItem key={key} value={key}>{name}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-                
-                <div className="flex justify-end items-center mb-6">
-                  <Button onClick={addRule} className="neon-button"><Plus className="w-4 h-4"/> เพิ่ม Rule ใหม่</Button>
-                </div>
-                <div className="space-y-4">
-                  {automationRules.map(rule => {
-                    const toolConfig = automationToolsConfig[inputs.automationTool];
-                    const actionConfig = toolConfig.actions.find(a => a.value === rule.action);
-                    const ToolIcon = iconMap[toolConfig.icon] || Bot;
 
-                    return (
-                      <div key={rule.id} className="neumorphic-card p-4 space-y-3">
-                        <div className="flex justify-between items-center">
-                            <Input value={rule.name} onChange={(e) => updateRule(rule.id, 'name', e.target.value)} className="neumorphic-input flex-grow" placeholder="ชื่อกฎ (เช่น 'ปิด Ad Set ขาดทุน')"/>
-                            <Button variant="ghost" size="icon" onClick={() => deleteRule(rule.id)}><X className="w-4 h-4 text-red-400"/></Button>
-                        </div>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <ToolIcon className="w-5 h-5 text-primary"/>
-                            <Select value={rule.level} onValueChange={(v) => updateRule(rule.id, 'level', v)}><SelectTrigger className="neumorphic-select w-32 !text-white"/><SelectContent>{toolConfig.levels.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
-                            <span className="font-bold text-primary">IF</span>
-                            <Select value={rule.metric} onValueChange={(v) => updateRule(rule.id, 'metric', v)}><SelectTrigger className="neumorphic-select w-40 !text-white"/><SelectContent>{toolConfig.metrics.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
-                            <Select value={rule.operator} onValueChange={(v) => updateRule(rule.id, 'operator', v)}><SelectTrigger className="neumorphic-select w-40 !text-white"/><SelectContent>{toolConfig.operators.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
-                            <Input value={rule.value} onChange={(e) => updateRule(rule.id, 'value', e.target.value)} className="neumorphic-input w-24" placeholder="Value"/>
-                            <span className="font-bold text-accent">THEN</span>
-                            <Select value={rule.action} onValueChange={(v) => updateRule(rule.id, 'action', v)}><SelectTrigger className="neumorphic-select w-48 !text-white"/><SelectContent>{toolConfig.actions.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
-                            {actionConfig?.needsValue && (
-                              <Input value={rule.actionValue} onChange={(e) => updateRule(rule.id, 'actionValue', e.target.value)} className="neumorphic-input w-24" placeholder="Action Value"/>
-                            )}
-                            <Select value={rule.timeframe} onValueChange={(v) => updateRule(rule.id, 'timeframe', v)}><SelectTrigger className="neumorphic-select w-40 !text-white"/><SelectContent>{toolConfig.timeframes.map(o => <SelectItem key={o.value} value={o.value}>{o.text}</SelectItem>)}</SelectContent></Select>
-                          </div>
-                      </div>
-                    )
-                  })}
+            {inputs.automationTool === 'revealbot' && (
+              <>
+                <RevealBotMockup />
+                <Card className="neumorphic-card mt-6">
+                  <CardHeader>
+                      <CardTitle>สรุปกฎทั้งหมด</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                      <ol className="list-decimal list-inside space-y-2 text-sm">
+                          <li className="text-white">
+                              <b>ปิด Ad Set ขาดทุน: </b>
+                              ที่ระดับ ชุดโฆษณา, ถ้า Purchase ROAS น้อยกว่า 2.5 
+                              ภายใน 3 วันล่าสุด, 
+                              ให้ ปิด Ad Set 
+                          </li>
+                      </ol>
+                  </CardContent>
+              </Card>
+              </>
+            )}
+
+             {inputs.automationTool !== 'revealbot' && (
+                <div className="neumorphic-card p-6 mt-6 text-center">
+                    <p className="text-muted-foreground">UI สำหรับเครื่องมือที่เลือกยังไม่พร้อมใช้งาน</p>
                 </div>
-                 <Card className="neumorphic-card mt-6">
-                    <CardHeader>
-                        <CardTitle>สรุปกฎทั้งหมด</CardTitle>
-                        <CardDescription>นี่คือรายการกฎทั้งหมดที่คุณได้สร้างไว้</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {automationRules.length > 0 ? (
-                            <ol className="list-decimal list-inside space-y-2 text-sm">
-                            {automationRules.map((rule, index) => {
-                                const toolConfig = automationToolsConfig[inputs.automationTool];
-                                const levelText = toolConfig.levels.find(l => l.value === rule.level)?.text;
-                                const metricText = toolConfig.metrics.find(m => m.value === rule.metric)?.text;
-                                const operatorText = toolConfig.operators.find(o => o.value === rule.operator)?.text;
-                                const actionText = toolConfig.actions.find(a => a.value === rule.action)?.text;
-                                const timeText = toolConfig.timeframes.find(t => t.value === rule.timeframe)?.text;
-                                return (
-                                    <li key={rule.id} className="text-white">
-                                        <b>{rule.name ? `${rule.name}: ` : ''}</b>
-                                        ที่ระดับ {levelText}, ถ้า {metricText} {operatorText} {rule.value} 
-                                        ภายใน {timeText}, 
-                                        ให้ {actionText} {rule.actionValue && `${rule.actionValue}%`}
-                                    </li>
-                                );
-                            })}
-                            </ol>
-                        ) : (
-                            <p className="text-muted-foreground text-center">ยังไม่มีการสร้าง Rule</p>
-                        )}
-                    </CardContent>
-                </Card>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:mt-0">
-                  <Card className="neumorphic-card h-full">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Zap className="w-5 h-5 text-primary"/>กฎรูปแบบการชี้วัดด้วย ROAS</CardTitle>
-                        <CardDescription>แนวทางการตั้งกฎอัตโนมัติพื้นฐานสำหรับ Revealbot</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                      {[
-                        "ปิด ที่เวลา ...",
-                        "เปิด ที่เวลา ...",
-                        "ปิด เมื่อ ไม่มีทัก ไม่มีซื้อ",
-                        "ปิด เมื่อ มีทัก ไม่มีซื้อ",
-                        "ปิด เมื่อ มีซื้อ Roas < xxx",
-                        "เปิด คืนชีพ เมื่อ Roas > xxx",
-                        "Daily Scale เมื่อ Roas > xxx",
-                        "หยุด Scale เมื่อ Roas < xxx และ ใช้เงินไปแล้ว > xxx // รักษากำไร",
-                        "Reset งบ xxx ที่เวลา ...",
-                      ].map((rule, index) => (
-                        <div key={index} className="flex items-start gap-3 p-3 bg-background/50 rounded-lg">
-                          <span className="font-bold text-primary">{index + 1}.</span>
-                          <p>{rule}</p>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                  <Card className="neumorphic-card h-full">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Zap className="w-5 h-5 text-primary"/>กฎรูปแบบการชี้วัดด้วยต้นทุนซื้อ</CardTitle>
-                        <CardDescription>แนวทางการตั้งกฎอัตโนมัติพื้นฐานสำหรับ Revealbot</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                      {[
-                          "ปิด ที่เวลา ...",
-                          "เปิด ที่เวลา ...",
-                          "ปิด เมื่อ ไม่มีทัก ไม่มีซื้อ",
-                          "ปิด เมื่อ มีทัก ไม่มีซื้อ",
-                          "ปิด เมื่อ มีซื้อ และ ต้นทุนซื้อ > xxx",
-                          "เปิด คืนชีพ เมื่อ ต้นทุนซื้อ < xxx",
-                          "Daily Scale เมื่อ มีซื้อ และ ต้นทุนซื้อ < xxx",
-                          "หยุด Scale เมื่อ ต้นทุนซื้อ > xxx และ ใช้เงินไปแล้ว > xxx // รักษากำไร",
-                          "Reset งบ xxx ที่เวลา ...",
-                      ].map((rule, index) => (
-                        <div key={index} className="flex items-start gap-3 p-3 bg-background/50 rounded-lg">
-                          <span className="font-bold text-primary">{index + 1}.</span>
-                          <p>{rule}</p>
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-              </div>
-            </div>
+            )}
+
+
           </TabsContent>
            <TabsContent value="workflow">
              <div className="neumorphic-card mt-6 p-6">
