@@ -31,106 +31,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@
 import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy, Facebook, Wand, CheckIcon, ChevronDown, Play, Pause, ArrowUpRight, ArrowUp, ArrowDownRight, Square } from 'lucide-react';
 import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
-
-const RevealBotMockup = () => {
-  return (
-    <div className="bg-[#191C20] p-4 sm:p-6 md:p-8 rounded-lg font-sans w-full max-w-full mx-auto my-6 shadow-2xl border border-[#33373E]">
-      <div className="relative">
-        {/* Blurred Background for Dropdown */}
-        <div className="absolute top-[6.2rem] sm:top-[6.5rem] left-0 w-full h-56 bg-black/20 backdrop-blur-sm z-10 rounded-lg"></div>
-        
-        {/* Rule Name Bar */}
-        <div className="relative z-20 mb-4">
-          <Input 
-            value="ชื่อกฎ (เช่น ‘ปิด Ad Set ขาดทุน’)" 
-            readOnly
-            className="w-full bg-[#2A2F36] border-[#4A4F56] text-white text-base py-3 px-4 rounded-md placeholder-gray-400 focus-visible:ring-primary/50"
-          />
-        </div>
-
-        {/* Condition Row */}
-        <div className="relative z-20 flex items-center flex-wrap gap-2 bg-[#2A2F36] p-3 rounded-lg border border-[#4A4F56]">
-          <div className="bg-[#1877F2] w-7 h-7 flex items-center justify-center rounded-md shrink-0">
-            <Facebook className="w-5 h-5 text-white" fill="white" />
-          </div>
-
-          <div className="relative">
-            <Button variant="outline" className="bg-[#3A3F46] border-[#5A5F66] text-white hover:bg-[#4a4f56] hover:text-white">
-              Purchase ROAS <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-          
-          <span className="text-gray-400 font-bold hidden sm:inline">IF</span>
-
-          <Select>
-            <SelectTrigger className="w-auto bg-[#3A3F46] border-[#5A5F66] text-white focus:ring-primary/50">
-              <SelectValue placeholder="is greater than" />
-            </SelectTrigger>
-          </Select>
-
-          <Input type="number" value="1" readOnly className="w-20 bg-[#3A3F46] border-[#5A5F66] text-white text-center focus-visible:ring-primary/50" />
-
-          <Select>
-            <SelectTrigger className="w-auto bg-[#3A3F46] border-[#5A5F66] text-white focus:ring-primary/50">
-              <SelectValue placeholder="วัน" />
-            </SelectTrigger>
-          </Select>
-        </div>
-        
-        {/* Forced Open Dropdown */}
-        <div className="absolute top-[6.5rem] sm:top-[6.8rem] left-10 sm:left-[3.7rem] w-64 bg-[#2C3138] rounded-lg shadow-2xl border border-[#4A4F56] z-30">
-          <div className="p-1">
-            <div className="px-3 py-2 text-sm text-gray-400">Common</div>
-            <div className="flex items-center justify-between px-3 py-2 text-sm text-white rounded-md cursor-pointer hover:bg-[#3A3F46]">
-              Cost per Result
-            </div>
-            <div className="flex items-center justify-between px-3 py-2 text-sm text-white rounded-md cursor-pointer bg-[#359F8C]">
-              <span>Purchase ROAS</span>
-              <CheckIcon className="h-4 w-4" />
-            </div>
-            <div className="flex items-center justify-between px-3 py-2 text-sm text-white rounded-md cursor-pointer hover:bg-[#3A3F46]">
-              Lifetime Spend
-            </div>
-            <div className="flex items-center justify-between px-3 py-2 text-sm text-white rounded-md cursor-pointer hover:bg-[#3A3F46]">
-              Frequency
-            </div>
-            <div className="flex items-center justify-between px-3 py-2 text-sm text-white rounded-md cursor-pointer hover:bg-[#3A3F46]">
-              CPM
-            </div>
-          </div>
-        </div>
-
-        {/* Actions Bar */}
-        <div className="relative z-0 mt-8 ml-4 sm:ml-10 flex flex-col space-y-3">
-          <div className="flex items-center space-x-3 text-sm text-gray-300">
-            <Play className="w-5 h-5 text-yellow-400" />
-            <span>Start (เปิดแอด)</span>
-          </div>
-          <div className="flex items-center space-x-3 text-sm text-gray-300">
-            <Pause className="w-5 h-5 text-yellow-400" />
-            <span>Pause (หยุดแอด)</span>
-          </div>
-          <div className="flex items-center space-x-3 text-sm text-gray-300">
-            <ArrowUpRight className="w-5 h-5 text-yellow-400" />
-            <span>Increase budget (เพิ่มงบประมาณ CBO หรือ ABO)</span>
-          </div>
-          <div className="flex items-center space-x-3 text-sm text-gray-300">
-            <ArrowUp className="w-5 h-5 text-yellow-400" />
-            <span>Set budget (ตั้งงบประมาณ CBO หรือ ABO)</span>
-          </div>
-          <div className="flex items-center space-x-3 text-sm text-gray-300">
-            <ArrowUpRight className="w-5 h-5 text-yellow-400" />
-            <span>Increase spending limits (เพิ่มวงเงินที่ชุดโฆษณา)</span>
-          </div>
-           <div className="flex items-center space-x-3 text-sm text-gray-300">
-            <ArrowUp className="w-5 h-5 text-yellow-400" />
-            <span>Set spending limits (ตั้งวงเงินที่ชุดโฆษณา)</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+import RevealbotRuleBuilder from './RevealbotRuleBuilder';
 
 
 const F = {
@@ -1333,22 +1234,7 @@ export function ProfitPilotPage() {
 
             {inputs.automationTool === 'revealbot' && (
               <>
-                <RevealBotMockup />
-                <Card className="neumorphic-card mt-6">
-                  <CardHeader>
-                      <CardTitle>สรุปกฎทั้งหมด</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                      <ol className="list-decimal list-inside space-y-2 text-sm">
-                          <li className="text-white">
-                              <b>ปิด Ad Set ขาดทุน: </b>
-                              ที่ระดับ ชุดโฆษณา, ถ้า Purchase ROAS น้อยกว่า 2.5 
-                              ภายใน 3 วันล่าสุด, 
-                              ให้ ปิด Ad Set 
-                          </li>
-                      </ol>
-                  </CardContent>
-              </Card>
+                <RevealbotRuleBuilder />
               </>
             )}
 
@@ -1357,6 +1243,69 @@ export function ProfitPilotPage() {
                     <p className="text-muted-foreground">UI สำหรับเครื่องมือที่เลือกยังไม่พร้อมใช้งาน</p>
                 </div>
             )}
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <Card className="neumorphic-card">
+                  <CardHeader>
+                      <CardTitle>กฎรูปแบบการชี้วัดด้วย ROAS</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm">
+                      <p><b>- ปิด Ad Set ที่ ROAS ต่ำกว่า Breakeven:</b> ROAS ต่ำกว่า {F.formatNumber(calculated.breakevenRoas, 2)} ใน 3 วันล่าสุด ให้ปิด Ad Set</p>
+                      <p><b>- แจ้งเตือน Ad Set ที่ ROAS ต่ำกว่าเป้าหมาย:</b> ROAS ต่ำกว่า {F.formatNumber(calculated.targetRoas, 2)} แต่สูงกว่า {F.formatNumber(calculated.breakevenRoas, 2)} ใน 7 วันล่าสุด ให้ส่งแจ้งเตือน</p>
+                      <p><b>- เพิ่มงบ Ad Set ที่ ROAS สูง:</b> ROAS สูงกว่า {F.formatNumber(calculated.targetRoas + 2, 2)} ใน 3 วันล่าสุด และใช้งบไปแล้วมากกว่า 80% ให้เพิ่มงบ 20%</p>
+                  </CardContent>
+                </Card>
+                <Card className="neumorphic-card">
+                  <CardHeader>
+                      <CardTitle>กฎรูปแบบการชี้วัดด้วยต้นทุนซื้อ</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2 text-sm">
+                      <p><b>- ปิด Ad Set ที่ CPA สูงเกิน Breakeven:</b> CPA สูงกว่า {F.formatCurrency(calculated.breakevenCpa)} ใน 3 วันล่าสุด ให้ปิด Ad Set</p>
+                      <p><b>- แจ้งเตือน Ad Set ที่ CPA สูงกว่าเป้าหมาย:</b> CPA สูงกว่า {F.formatCurrency(calculated.targetCpa)} แต่ต่ำกว่า {F.formatCurrency(calculated.breakevenCpa)} ใน 7 วันล่าสุด ให้ส่งแจ้งเตือน</p>
+                      <p><b>- เพิ่มงบ Ad Set ที่ CPA ต่ำ:</b> CPA ต่ำกว่า {F.formatCurrency(calculated.targetCpa * 0.8)} ใน 3 วันล่าสุด และใช้งบไปแล้วมากกว่า 80% ให้เพิ่มงบ 20%</p>
+                  </CardContent>
+              </Card>
+            </div>
+             <Card className="neumorphic-card mt-6">
+                <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                        <span>สรุปกฎทั้งหมด</span>
+                        <Button size="sm" className="neon-button secondary" onClick={addRule}><Plus className="w-4 h-4"/> เพิ่มกฎใหม่</Button>
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    {automationRules.length > 0 ? (
+                        <ol className="list-decimal list-inside space-y-2 text-sm">
+                            {automationRules.map((rule, index) => {
+                                const toolConfig = automationToolsConfig[inputs.automationTool];
+                                const Icon = iconMap[toolConfig.icon] || Square;
+                                const levelText = toolConfig.levels.find(l => l.value === rule.level)?.text;
+                                const metricText = toolConfig.metrics.find(m => m.value === rule.metric)?.text;
+                                const operatorText = toolConfig.operators.find(o => o.value === rule.operator)?.text;
+                                const actionText = toolConfig.actions.find(a => a.value === rule.action)?.text;
+                                const timeframeText = toolConfig.timeframes.find(t => t.value === rule.timeframe)?.text;
+
+                                return (
+                                    <li key={rule.id} className="text-white p-2 rounded-md bg-background/30 flex items-start gap-2">
+                                       <span className="font-bold">{index + 1}.</span>
+                                       <div className="flex-grow">
+                                            <div className="flex items-center gap-2 font-bold mb-1">
+                                                <Icon className="w-4 h-4" />
+                                                <span>{rule.name || 'กฎที่ไม่ได้ตั้งชื่อ'}</span>
+                                            </div>
+                                            <span>
+                                                ที่ระดับ <b>{levelText}</b>, ถ้า <b>{metricText}</b> {operatorText} <b>{rule.value}</b> ภายใน <b>{timeframeText}</b>, ให้ <b>{actionText}</b> {rule.actionValue && `by ${rule.actionValue}%`}
+                                            </span>
+                                       </div>
+                                       <Button variant="ghost" size="icon" className="text-red-400 shrink-0" onClick={() => deleteRule(rule.id)}><Trash2 className="w-4 h-4" /></Button>
+                                    </li>
+                                );
+                            })}
+                        </ol>
+                    ) : (
+                        <p className="text-center opacity-60">ยังไม่มีกฎที่สร้างขึ้น</p>
+                    )}
+                </CardContent>
+            </Card>
 
 
           </TabsContent>
