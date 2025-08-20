@@ -6,6 +6,7 @@ import {
   faTiktok,
   faTwitter,
   faMedium,
+  faSalesforce,
 } from "@fortawesome/free-brands-svg-icons";
 import {
   faPlay,
@@ -212,7 +213,7 @@ export default function AutomationRuleBuilder() {
         operator: OPERATORS[0].value,
         value: 0,
         unit: "day",
-        action: ACTIONS[0].value,
+        action: getDefaultAction(tool),
       },
     ]);
   };
