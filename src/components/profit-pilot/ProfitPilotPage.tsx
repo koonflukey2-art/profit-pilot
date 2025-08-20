@@ -28,10 +28,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy, Facebook, Wand, CheckIcon, ChevronDown, Play, Pause, ArrowUpRight, ArrowUp, ArrowDownRight, Square } from 'lucide-react';
+import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy, Facebook, Wand, CheckIcon, ChevronDown, Play, Pause, ArrowUpRight, ArrowUp, Square } from 'lucide-react';
 import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
-import RevealbotRuleBuilder from './RevealbotRuleBuilder';
+import ToolSelectorShell from './RevealbotRuleBuilder';
 
 
 const F = {
@@ -1214,100 +1214,7 @@ export function ProfitPilotPage() {
             </div>
           </TabsContent>
           <TabsContent value="automation">
-            <div className="flex justify-end mb-4">
-              <div className="w-full max-w-xs">
-                <Label htmlFor="automation-tool-main" className="block text-sm mb-2 font-medium opacity-80">เลือกเครื่องมืออัตโนมัติ</Label>
-                <Select value={inputs.automationTool} onValueChange={(val) => handleInputChange('automationTool', val)}>
-                    <SelectTrigger id="automation-tool-main" className="neumorphic-select w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="revealbot">Revealbot</SelectItem>
-                      <SelectItem value="google_ads_script">Google Ads Script</SelectItem>
-                      <SelectItem value="facebook_ads_rules">Facebook Ads Manager Rules</SelectItem>
-                      <SelectItem value="tiktok_ads_automation">TikTok Ads Automation</SelectItem>
-                      <SelectItem value="custom_api">Custom API</SelectItem>
-                    </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {inputs.automationTool === 'revealbot' && (
-              <>
-                <RevealbotRuleBuilder />
-              </>
-            )}
-
-             {inputs.automationTool !== 'revealbot' && (
-                <div className="neumorphic-card p-6 mt-6 text-center">
-                    <p className="text-muted-foreground">UI สำหรับเครื่องมือที่เลือกยังไม่พร้อมใช้งาน</p>
-                </div>
-            )}
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <Card className="neumorphic-card">
-                  <CardHeader>
-                      <CardTitle>กฎรูปแบบการชี้วัดด้วย ROAS</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2 text-sm">
-                      <p><b>- ปิด Ad Set ที่ ROAS ต่ำกว่า Breakeven:</b> ROAS ต่ำกว่า {F.formatNumber(calculated.breakevenRoas, 2)} ใน 3 วันล่าสุด ให้ปิด Ad Set</p>
-                      <p><b>- แจ้งเตือน Ad Set ที่ ROAS ต่ำกว่าเป้าหมาย:</b> ROAS ต่ำกว่า {F.formatNumber(calculated.targetRoas, 2)} แต่สูงกว่า {F.formatNumber(calculated.breakevenRoas, 2)} ใน 7 วันล่าสุด ให้ส่งแจ้งเตือน</p>
-                      <p><b>- เพิ่มงบ Ad Set ที่ ROAS สูง:</b> ROAS สูงกว่า {F.formatNumber(calculated.targetRoas + 2, 2)} ใน 3 วันล่าสุด และใช้งบไปแล้วมากกว่า 80% ให้เพิ่มงบ 20%</p>
-                  </CardContent>
-                </Card>
-                <Card className="neumorphic-card">
-                  <CardHeader>
-                      <CardTitle>กฎรูปแบบการชี้วัดด้วยต้นทุนซื้อ</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2 text-sm">
-                      <p><b>- ปิด Ad Set ที่ CPA สูงเกิน Breakeven:</b> CPA สูงกว่า {F.formatCurrency(calculated.breakevenCpa)} ใน 3 วันล่าสุด ให้ปิด Ad Set</p>
-                      <p><b>- แจ้งเตือน Ad Set ที่ CPA สูงกว่าเป้าหมาย:</b> CPA สูงกว่า {F.formatCurrency(calculated.targetCpa)} แต่ต่ำกว่า {F.formatCurrency(calculated.breakevenCpa)} ใน 7 วันล่าสุด ให้ส่งแจ้งเตือน</p>
-                      <p><b>- เพิ่มงบ Ad Set ที่ CPA ต่ำ:</b> CPA ต่ำกว่า {F.formatCurrency(calculated.targetCpa * 0.8)} ใน 3 วันล่าสุด และใช้งบไปแล้วมากกว่า 80% ให้เพิ่มงบ 20%</p>
-                  </CardContent>
-              </Card>
-            </div>
-             <Card className="neumorphic-card mt-6">
-                <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                        <span>สรุปกฎทั้งหมด</span>
-                        <Button size="sm" className="neon-button secondary" onClick={addRule}><Plus className="w-4 h-4"/> เพิ่มกฎใหม่</Button>
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {automationRules.length > 0 ? (
-                        <ol className="list-decimal list-inside space-y-2 text-sm">
-                            {automationRules.map((rule, index) => {
-                                const toolConfig = automationToolsConfig[inputs.automationTool];
-                                const Icon = iconMap[toolConfig.icon] || Square;
-                                const levelText = toolConfig.levels.find(l => l.value === rule.level)?.text;
-                                const metricText = toolConfig.metrics.find(m => m.value === rule.metric)?.text;
-                                const operatorText = toolConfig.operators.find(o => o.value === rule.operator)?.text;
-                                const actionText = toolConfig.actions.find(a => a.value === rule.action)?.text;
-                                const timeframeText = toolConfig.timeframes.find(t => t.value === rule.timeframe)?.text;
-
-                                return (
-                                    <li key={rule.id} className="text-white p-2 rounded-md bg-background/30 flex items-start gap-2">
-                                       <span className="font-bold">{index + 1}.</span>
-                                       <div className="flex-grow">
-                                            <div className="flex items-center gap-2 font-bold mb-1">
-                                                <Icon className="w-4 h-4" />
-                                                <span>{rule.name || 'กฎที่ไม่ได้ตั้งชื่อ'}</span>
-                                            </div>
-                                            <span>
-                                                ที่ระดับ <b>{levelText}</b>, ถ้า <b>{metricText}</b> {operatorText} <b>{rule.value}</b> ภายใน <b>{timeframeText}</b>, ให้ <b>{actionText}</b> {rule.actionValue && `by ${rule.actionValue}%`}
-                                            </span>
-                                       </div>
-                                       <Button variant="ghost" size="icon" className="text-red-400 shrink-0" onClick={() => deleteRule(rule.id)}><Trash2 className="w-4 h-4" /></Button>
-                                    </li>
-                                );
-                            })}
-                        </ol>
-                    ) : (
-                        <p className="text-center opacity-60">ยังไม่มีกฎที่สร้างขึ้น</p>
-                    )}
-                </CardContent>
-            </Card>
-
-
+            <ToolSelectorShell />
           </TabsContent>
            <TabsContent value="workflow">
              <div className="neumorphic-card mt-6 p-6">
@@ -1396,3 +1303,5 @@ export function ProfitPilotPage() {
     </>
   );
 }
+
+    
