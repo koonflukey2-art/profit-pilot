@@ -517,7 +517,7 @@ export function ProfitPilotPage() {
     const campaignBoxWidth = 150;
     const adGroupBoxWidth = 150;
     const adBoxWidth = 144;
-    const mainGap = 48; 
+    const mainGap = 48;
     const verticalGap = 16;
   
     return (
@@ -588,26 +588,20 @@ export function ProfitPilotPage() {
   
               {/* Connecting Lines */}
               <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
-                {/* Stage -> Campaign */}
-                <line x1={stageX + stageBoxWidth} y1={funnelHeight / 2} x2={campaignX} y2={funnelHeight / 2} stroke="hsl(var(--primary))" strokeWidth="2" />
+                {/* Stage -> Campaign (Removed) */}
   
-                {/* Main vertical line from Campaign to AdGroup area */}
+                {/* Campaign -> AdGroup Main Line */}
                 <line x1={campaignX + campaignBoxWidth} y1={funnelHeight / 2} x2={adGroupX} y2={funnelHeight / 2} stroke="hsl(var(--primary))" strokeWidth="2" />
+                
+                {/* Vertical line connecting AdGroups */}
                 <line x1={adGroupX} y1={adGroupYPositions[0]} x2={adGroupX} y2={adGroupYPositions[adGroupYPositions.length - 1]} stroke="hsl(var(--primary))" strokeWidth="2" />
                 
-                {/* AdGroup Branches from vertical line */}
+                {/* Horizontal lines from vertical line to each AdGroup */}
                 {adGroupYPositions.map((y, i) => (
-                  <line key={`adgroup-branch-${i}`} x1={adGroupX} y1={y} x2={adGroupX + adGroupBoxWidth} y2={y} stroke="hsl(var(--primary))" strokeWidth="2" />
+                    <line key={`adgroup-h-line-${i}`} x1={adGroupX} y1={y} x2={adGroupX + adGroupBoxWidth} y2={y} stroke="hsl(var(--primary))" strokeWidth="2" />
                 ))}
-  
-                {/* AdGroup -> Ad Vertical Line */}
-                <line x1={adGroupX + adGroupBoxWidth} y1={funnelHeight / 2} x2={adX} y2={funnelHeight / 2} stroke="hsl(var(--primary))" strokeWidth="2" strokeDasharray="5 5"/>
-                <line x1={adX} y1={adYPositions[0]} x2={adX} y2={adYPositions[adYPositions.length - 1]} stroke="hsl(var(--primary))" strokeWidth="2" strokeDasharray="5 5"/>
-  
-                {/* Ad Branches */}
-                {adYPositions.map((y, i) => (
-                  <line key={`ad-branch-${i}`} x1={adX} y1={y} x2={adX + adBoxWidth} y2={y} stroke="hsl(var(--primary))" strokeWidth="2" strokeDasharray="5 5"/>
-                ))}
+
+                {/* Ad Groups -> Ads (Removed) */}
               </svg>
             </div>
           );
@@ -1153,7 +1147,7 @@ export function ProfitPilotPage() {
                     </div>
                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-center">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(mofuBudgetPerAccountMonthly)}</p></div>
+                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudgetPerAccountMonthly)}</p></div>
                       <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p></div>
                       <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{F.formatInt(numAccounts)}</p></div>
                     </div>
@@ -1249,36 +1243,6 @@ export function ProfitPilotPage() {
                     )
                   })}
                 </div>
-                 <Card className="neumorphic-card mt-6">
-                    <CardHeader>
-                        <CardTitle>สรุปกฎทั้งหมด</CardTitle>
-                        <CardDescription>นี่คือรายการกฎทั้งหมดที่คุณได้สร้างไว้</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {automationRules.length > 0 ? (
-                           <ol className="list-decimal list-inside space-y-2 text-sm">
-                            {automationRules.map((rule, index) => {
-                                const toolConfig = automationToolsConfig[inputs.automationTool];
-                                const levelText = toolConfig.levels.find(l => l.value === rule.level)?.text;
-                                const metricText = toolConfig.metrics.find(m => m.value === rule.metric)?.text;
-                                const operatorText = toolConfig.operators.find(o => o.value === rule.operator)?.text;
-                                const actionText = toolConfig.actions.find(a => a.value === rule.action)?.text;
-                                const timeText = toolConfig.timeframes.find(t => t.value === rule.timeframe)?.text;
-                                return (
-                                    <li key={rule.id} className="text-white">
-                                        <b>{rule.name ? `${rule.name}: ` : ''}</b>
-                                        ที่ระดับ {levelText}, ถ้า {metricText} {operatorText} {rule.value} 
-                                        ภายใน {timeText}, 
-                                        ให้ {actionText} {rule.actionValue && `${rule.actionValue}%`}
-                                    </li>
-                                );
-                            })}
-                           </ol>
-                        ) : (
-                            <p className="text-muted-foreground text-center">ยังไม่มีการสร้าง Rule</p>
-                        )}
-                    </CardContent>
-                  </Card>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:mt-0">
                   <Card className="neumorphic-card h-full">
@@ -1331,6 +1295,36 @@ export function ProfitPilotPage() {
                   </Card>
               </div>
             </div>
+            <Card className="neumorphic-card mt-6">
+                <CardHeader>
+                    <CardTitle>สรุปกฎทั้งหมด</CardTitle>
+                    <CardDescription>นี่คือรายการกฎทั้งหมดที่คุณได้สร้างไว้</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {automationRules.length > 0 ? (
+                        <ol className="list-decimal list-inside space-y-2 text-sm">
+                        {automationRules.map((rule, index) => {
+                            const toolConfig = automationToolsConfig[inputs.automationTool];
+                            const levelText = toolConfig.levels.find(l => l.value === rule.level)?.text;
+                            const metricText = toolConfig.metrics.find(m => m.value === rule.metric)?.text;
+                            const operatorText = toolConfig.operators.find(o => o.value === rule.operator)?.text;
+                            const actionText = toolConfig.actions.find(a => a.value === rule.action)?.text;
+                            const timeText = toolConfig.timeframes.find(t => t.value === rule.timeframe)?.text;
+                            return (
+                                <li key={rule.id} className="text-white">
+                                    <b>{rule.name ? `${rule.name}: ` : ''}</b>
+                                    ที่ระดับ {levelText}, ถ้า {metricText} {operatorText} {rule.value} 
+                                    ภายใน {timeText}, 
+                                    ให้ {actionText} {rule.actionValue && `${rule.actionValue}%`}
+                                </li>
+                            );
+                        })}
+                        </ol>
+                    ) : (
+                        <p className="text-muted-foreground text-center">ยังไม่มีการสร้าง Rule</p>
+                    )}
+                </CardContent>
+            </Card>
           </TabsContent>
            <TabsContent value="workflow">
              <div className="neumorphic-card mt-6 p-6">
