@@ -2,6 +2,7 @@
 
 
 
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -457,11 +458,27 @@ export function ProfitPilotPage() {
   const funnelLabels = useMemo(() => {
     const plan = funnelPlans[inputs.funnelPlan] || { tofu: 0, mofu: 0, bofu: 0 };
     return {
-      TOFU: { title: `TOFU ${plan.tofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.tofuBudgetPerAccountDaily)} ฿`] },
-      MOFU: { title: `MOFU ${plan.mofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.mofuBudgetPerAccountDaily)} ฿`] },
-      BOFU: { title: `BOFU ${plan.bofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.bofuBudgetPerAccountDaily)} ฿`] },
+      TOFU: { title: `TOFU ${plan.tofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}`] },
+      MOFU: { title: `MOFU ${plan.mofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.mofuBudgetPerAccountDaily)}`] },
+      BOFU: { title: `BOFU ${plan.bofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}`] },
     };
   }, [inputs.funnelPlan, calculated]);
+
+  const funnelIcons = {
+    TOFU: {
+      left:  "/assets/icons/megaphone-white-red.png",
+      right: "/assets/icons/phone-social.png",
+    },
+    MOFU: {
+      left:  "/assets/icons/target-red.png",
+      right: "/assets/icons/analytics-phone.png",
+    },
+    BOFU: {
+      left:  "/assets/icons/coin.png",
+      right: "/assets/icons/cart-sale.png",
+      badge: "/assets/icons/growth-bars.png",
+    },
+  };
   
   const FloatingIcon = ({ icon, className = '', size = 'md', style = {} }) => {
     const IconComponent = icon;
@@ -606,7 +623,7 @@ export function ProfitPilotPage() {
       stage: 'ลูกค้าใหม่',
       campaign: {
         title: 'CBO / ABO',
-        budget: `งบ/วัน: ${F.formatCurrency(calculated.tofuBudgetPerAccountDaily)} ฿`,
+        budget: `งบ/วัน: ${F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}`,
         accounts: `${F.formatInt(numAccounts)} บัญชี`,
       },
       adGroups: [
@@ -621,7 +638,7 @@ export function ProfitPilotPage() {
       stage: 'Retarget',
       campaign: {
         title: 'CBO / ABO',
-        budget: `งบ/วัน: ${F.formatCurrency(calculated.bofuBudgetPerAccountDaily)} ฿`,
+        budget: `งบ/วัน: ${F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}`,
         accounts: `${F.formatInt(numAccounts)} บัญชี`,
       },
       adGroups: [
@@ -1087,46 +1104,12 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8 px-4">
-                  <MarketingFunnelVisual width={800} labels={funnelLabels} />
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="neumorphic-card p-4 relative">
-                    <div className="flex justify-between items-center mb-2">
-                      <h5 className="font-bold" style={{ color: "#2FA4FF" }}>TOFU</h5>
-                      <span className="font-bold" style={{ color: "#2FA4FF" }}>{currentFunnelPlan.tofu}%</span>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-center">
-                      <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudget)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudgetPerAccountMonthly)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}</p></div>
-                      <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{F.formatInt(numAccounts)}</p></div>
-                    </div>
-                  </div>
-                   <div className="neumorphic-card p-4 relative">
-                    <div className="flex justify-between items-center mb-2">
-                      <h5 className="font-bold" style={{ color: "#22C7C1" }}>MOFU</h5>
-                       <span className="font-bold" style={{ color: "#22C7C1" }}>{currentFunnelPlan.mofu}%</span>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-center">
-                      <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudget)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudgetPerAccountMonthly)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudgetPerAccountDaily)}</p></div>
-                      <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{F.formatInt(numAccounts)}</p></div>
-                    </div>
-                  </div>
-                   <div className="neumorphic-card p-4 relative">
-                    <div className="flex justify-between items-center mb-2">
-                      <h5 className="font-bold" style={{ color: "#1D8C91" }}>BOFU</h5>
-                       <span className="font-bold" style={{ color: "#1D8C91" }}>{currentFunnelPlan.bofu}%</span>
-                    </div>
-                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-center">
-                      <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/เดือน</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudgetPerAccountMonthly)}</p></div>
-                      <div><p className="opacity-70">ต่อบัญชี/วัน</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</p></div>
-                      <div><p className="opacity-70">จำนวนบัญชี</p><p className="font-bold">{F.formatInt(numAccounts)}</p></div>
-                    </div>
-                  </div>
+                  <MarketingFunnelVisual
+                    width={1100}
+                    bofuFlatBase={true}
+                    icons={funnelIcons}
+                    labels={funnelLabels}
+                  />
                 </div>
               </div>
             </div>
