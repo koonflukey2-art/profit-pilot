@@ -1,12 +1,3 @@
-
-
-
-
-
-
-
-
-
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -460,13 +451,12 @@ export function ProfitPilotPage() {
   const numAccounts = F.num(inputs.numberOfAccounts) || 1;
   
   const funnelLabels = useMemo(() => {
-    const plan = funnelPlans[inputs.funnelPlan] || { tofu: 0, mofu: 0, bofu: 0 };
     return {
-      TOFU: { title: `TOFU ${plan.tofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}`] },
-      MOFU: { title: `MOFU ${plan.mofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.mofuBudgetPerAccountDaily)}`] },
-      BOFU: { title: `BOFU ${plan.bofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}`] },
+      TOFU: { title: "TOFU", lines: ["Top of Funnel:", "VDOs / Social Media"] },
+      MOFU: { title: "MOFU", lines: ["Middle of Funnel:", "White Papers / Case Studies"] },
+      BOFU: { title: "BOFU", lines: ["Bottom of Funnel", "Incentives and Offers / Sales"] },
     };
-  }, [inputs.funnelPlan, calculated]);
+  }, []);
 
   const FloatingIcon = ({ icon, className = '', size = 'md', style = {} }) => {
     const IconComponent = icon;
@@ -1093,7 +1083,6 @@ export function ProfitPilotPage() {
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8 px-4">
                   <MarketingFunnelVisual
-                    bofuFlatBase={false}
                     labels={funnelLabels}
                   />
                 </div>
@@ -1220,7 +1209,3 @@ export function ProfitPilotPage() {
     </>
   );
 }
-
-    
-
-
