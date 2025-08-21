@@ -3,6 +3,7 @@
 
 
 
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -464,22 +465,6 @@ export function ProfitPilotPage() {
     };
   }, [inputs.funnelPlan, calculated]);
 
-  const funnelIcons = {
-    TOFU: {
-      left:  "/assets/icons/megaphone-white-red.png",
-      right: "/assets/icons/phone-social.png",
-    },
-    MOFU: {
-      left:  "/assets/icons/target-red.png",
-      right: "/assets/icons/analytics-phone.png",
-    },
-    BOFU: {
-      left:  "/assets/icons/coin.png",
-      right: "/assets/icons/cart-sale.png",
-      badge: "/assets/icons/growth-bars.png",
-    },
-  };
-  
   const FloatingIcon = ({ icon, className = '', size = 'md', style = {} }) => {
     const IconComponent = icon;
     const sizeClasses = {
@@ -1107,7 +1092,6 @@ export function ProfitPilotPage() {
                   <MarketingFunnelVisual
                     width={1100}
                     bofuFlatBase={true}
-                    icons={funnelIcons}
                     labels={funnelLabels}
                   />
                 </div>
