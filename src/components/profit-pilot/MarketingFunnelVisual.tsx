@@ -1,4 +1,3 @@
-
 import React from "react";
 
 type StageKey = "TOFU" | "MOFU" | "BOFU";
@@ -254,7 +253,7 @@ export default function MarketingFunnelVisual({
               {labels[L.id].title}
             </text>
             {labels[L.id].lines.map((line, i) => (
-              <text key={i} x={L.text.x} y={L.text.y + i * 26} fontSize="22" opacity={0.95} fontWeight={600}>
+              <text key={i} x={L.text.x} y={L.text.y + 10 + i * 26} fontSize="22" opacity={0.95} fontWeight={600}>
                 {line}
               </text>
             ))}

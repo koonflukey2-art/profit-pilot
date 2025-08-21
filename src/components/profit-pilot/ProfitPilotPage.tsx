@@ -5,6 +5,7 @@
 
 
 
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -37,7 +38,7 @@ import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plu
 import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
 import AutomationRuleBuilder from './RevealbotRuleBuilder';
-import ProFunnel from './ProFunnel';
+import MarketingFunnelVisual from './MarketingFunnelVisual';
 
 
 const F = {
@@ -460,9 +461,9 @@ export function ProfitPilotPage() {
   const funnelLabels = useMemo(() => {
     const plan = funnelPlans[inputs.funnelPlan] || { tofu: 0, mofu: 0, bofu: 0 };
     return {
-      TOFU: { title: `TOFU ${plan.tofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}`] },
-      MOFU: { title: `MOFU ${plan.mofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.mofuBudgetPerAccountDaily)}`] },
-      BOFU: { title: `BOFU ${plan.bofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}`] },
+      TOFU: { title: `TOFU ${plan.tofu}%`, lines: [`Top of Funnel`, `งบ/วัน: ${F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}`] },
+      MOFU: { title: `MOFU ${plan.mofu}%`, lines: [`Middle of Funnel`, `งบ/วัน: ${F.formatCurrency(calculated.mofuBudgetPerAccountDaily)}`] },
+      BOFU: { title: `BOFU ${plan.bofu}%`, lines: [`Bottom of Funnel`, `งบ/วัน: ${F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}`] },
     };
   }, [inputs.funnelPlan, calculated]);
 
@@ -1090,7 +1091,8 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8 px-4">
-                  <ProFunnel
+                  <MarketingFunnelVisual
+                    bofuFlatBase={false}
                     labels={funnelLabels}
                   />
                 </div>
@@ -1219,3 +1221,4 @@ export function ProfitPilotPage() {
 }
 
     
+
