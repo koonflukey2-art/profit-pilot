@@ -1,15 +1,14 @@
+
 // MarketingFunnelVisual.jsx
 import React from "react";
 
 /**
- * แบบตามภาพ:
- * - TOFU:   เมกะโฟน (ซ้าย)  / โซเชียลบนมือถือ (ขวา)
- * - MOFU:   เป้ายิงแดง (ซ้าย) / การวิเคราะห์บนมือถือ (ขวา)
- * - BOFU:   เหรียญ (ซ้าย) / รถเข็น+SALE (ขวา) และ badge ไอคอนกราฟเล็กภายในก้นกรวย
- *
- * ปรับได้:
- * - iconLeft/iconRight/badgeInside: ใส่ URL หรือ dataURI
- * - bofuFlatBase: true = ฐาน BOFU เป็นเส้นตรง, false = ปลายแหลม (ค่าเริ่มต้นภาพตัวอย่าง = false)
+ * MarketingFunnelVisual
+ * - ฟันเนล 3 ชั้น: TOFU, MOFU, BOFU (ทรงเหมือนภาพตัวอย่าง)
+ * - ไอคอนซ้าย/ขวา วางกึ่งกลางชั้น และกันล้นด้วย clipPath
+ * - ข้อความกึ่งกลางแนวตั้ง-แนวนอน
+ * - เลือกให้ฐาน BOFU เป็น "เส้นตรง" ได้ (bofuFlatBase)
+ * - ปรับไอคอน/ข้อความ/สี ได้ผ่าน props
  */
 
 export default function MarketingFunnelVisual({
@@ -18,35 +17,32 @@ export default function MarketingFunnelVisual({
   bofuFlatBase = false,
   icons = {
     TOFU: {
-      left: "https://placehold.co/120x120/1d8c91/ffffff.png?text=📢",
-      right: "https://placehold.co/120x120/1d8c91/ffffff.png?text=📱",
+      left:  "/assets/icons/megaphone-white-red.png",
+      right: "/assets/icons/phone-social.png",
     },
     MOFU: {
-      left: "https://placehold.co/120x120/1d8c91/ffffff.png?text=🎯",
-      right: "https://placehold.co/120x120/1d8c91/ffffff.png?text=📈",
+      left:  "/assets/icons/target-red.png",
+      right: "/assets/icons/analytics-phone.png",
     },
     BOFU: {
-      left: "https://placehold.co/120x120/1d8c91/ffffff.png?text=💰",
-      right: "https://placehold.co/120x120/1d8c91/ffffff.png?text=🛒",
-      badge: "https://placehold.co/70x70/1d8c91/ffffff.png?text=📊", // ไอคอนเล็กวางในก้นกรวย
+      left:  "/assets/icons/coin.png",
+      right: "/assets/icons/cart-sale.png",
+      badge: "/assets/icons/growth-bars.png", // ไอคอนเล็กวางก้นกรวย (ถ้ามี)
     },
   },
   labels = {
-    TOFU: { title: "TOFU", lines: ["Top of Funnel:", "VDOs / Social Media"] },
-    MOFU: { title: "MOFU", lines: ["Middle of Funnel:", "White Papers /", "Case Studies"] },
-    BOFU: { title: "BOFU", lines: ["Bottom of Funnel", "Incentives and", "Offers / Sales"] },
+    TOFU: { title: "TOFU 60%", lines: ["งบ/วัน: 0.00 ฿ ฿"] },
+    MOFU: { title: "MOFU 30%", lines: ["งบ/วัน: 0.00 ฿ ฿"] },
+    BOFU: { title: "BOFU 10%", lines: ["งบ/วัน: 0.00 ฿ ฿"] },
   },
 }) {
-  // สัดส่วนให้เหมือนภาพ
-  const H = 610; // ความสูงรวมประมาณ
+  // สัดส่วนรูปร่างให้ใกล้เคียงงานจริง
   const layerH = 165;
   const corner = 18;
-
-  const topW   = [0.96, 0.86, 0.66];
-  const botW   = [0.76, 0.66, bofuFlatBase ? 0.66 : 0.30]; // BOFU flat base ได้
-  const y0     = 10;
-
-  const totalH = 3 * layerH + 2 * gap + y0;
+  const topW = [0.96, 0.86, 0.66];
+  const botW = [0.76, 0.66, bofuFlatBase ? 0.66 : 0.30]; // BOFU: เส้นตรงได้
+  const yOffset = 10;
+  const totalH = 3 * layerH + 2 * gap + yOffset;
 
   const mkPoly = (idx, y) => {
     const Wt = width * topW[idx];
@@ -54,11 +50,10 @@ export default function MarketingFunnelVisual({
     const cx = width / 2;
     const x1 = cx - Wt / 2, x2 = cx + Wt / 2;
     const x3 = cx + Wb / 2, x4 = cx - Wb / 2;
-
     const yTop = y, yBot = y + layerH;
 
     if (idx === 2 && !bofuFlatBase) {
-      // BOFU ปลายแหลม (เหมือนภาพ)
+      // BOFU ปลายแหลม (ตามภาพตัวอย่าง)
       const tipX = cx, tipY = yBot + 40;
       return [
         [x1 + corner, yTop],
@@ -69,7 +64,7 @@ export default function MarketingFunnelVisual({
         [x1, yTop + corner],
       ];
     }
-    // ชั้นทั่วไป/BOFU flat base
+    // ชั้นทั่วไป หรือ BOFU แบบฐานเส้นตรง
     return [
       [x1 + corner, yTop],
       [x2, yTop],
@@ -85,13 +80,12 @@ export default function MarketingFunnelVisual({
   };
 
   const iconBox = (poly, side = "left", maxPct = 0.20) => {
-    // กล่องไอคอนซ้าย/ขวา ชิดขอบนิดหน่อย และไม่ล้น (มี clip)
+    // กล่องไอคอนซ้าย/ขวา—ติดขอบเล็กน้อยและไม่ล้น
     const { minX, maxX, minY, maxY } = polyBounds(poly);
     const pad = 18;
     const w = maxX - minX - pad * 2;
     const h = maxY - minY - pad * 2;
     const size = Math.min(h * 0.75, w * maxPct, 120);
-
     const y = (minY + maxY) / 2 - size / 2;
     const x = side === "left" ? (minX + pad) : (maxX - pad - size);
     return { x, y, size };
@@ -112,16 +106,16 @@ export default function MarketingFunnelVisual({
   );
 
   const layers = [
-    { id: "TOFU",  fill: "url(#g1)", shadow: "#0a1b2f", brighten: 1.0 },
-    { id: "MOFU",  fill: "url(#g2)", shadow: "#0a1b2f", brighten: 1.0 },
-    { id: "BOFU",  fill: "url(#g3)", shadow: "#0a1b2f", brighten: 1.0 },
+    { id: "TOFU", fill: "url(#g1)" },
+    { id: "MOFU", fill: "url(#g2)" },
+    { id: "BOFU", fill: "url(#g3)" },
   ];
 
   return (
     <svg
       width={width}
-      height={Math.max(totalH, H)}
-      viewBox={`0 0 ${width} ${Math.max(totalH, H)}`}
+      height={Math.max(totalH, 610)}
+      viewBox={`0 0 ${width} ${Math.max(totalH, 610)}`}
       style={{ display: "block", background: "transparent", fontFamily: "Inter, system-ui, sans-serif" }}
       role="img"
       aria-label="Marketing Funnel"
@@ -130,19 +124,18 @@ export default function MarketingFunnelVisual({
         {grad("g1", "#2FA4FF", "#2898F0")}
         {grad("g2", "#22C7C1", "#17B4AD")}
         {grad("g3", "#1D8C91", "#157680")}
-
         <filter id="soft" x="-20%" y="-20%" width="140%" height="160%">
           <feDropShadow dx="0" dy="8" stdDeviation="12" floodColor="#000" floodOpacity="0.28" />
         </filter>
       </defs>
 
       {layers.map((L, i) => {
-        const y = y0 + i * (layerH + gap);
+        const y = yOffset + i * (layerH + gap);
         const poly = mkPoly(i, y);
         const clipId = `clip-${i}`;
-        const leftBox  = iconBox(poly, "left");
-        const rightBox = iconBox(poly, "right");
-        const textPos  = textCenter(poly);
+        const left  = iconBox(poly, "left");
+        const right = iconBox(poly, "right");
+        const txt   = textCenter(poly);
 
         return (
           <g key={L.id} filter="url(#soft)">
@@ -150,16 +143,16 @@ export default function MarketingFunnelVisual({
             <polygon points={polyStr(poly)} fill={L.fill} />
 
             {/* ไอคอนซ้าย/ขวา (กันล้นด้วย clipPath) */}
-            <image href={icons[L.id].left}  x={leftBox.x}  y={leftBox.y}  width={leftBox.size}  height={leftBox.size}  preserveAspectRatio="xMidYMid meet" clipPath={`url(#${clipId})`} />
-            <image href={icons[L.id].right} x={rightBox.x} y={rightBox.y} width={rightBox.size} height={rightBox.size} preserveAspectRatio="xMidYMid meet" clipPath={`url(#${clipId})`} />
+            <image href={icons[L.id].left}  x={left.x}  y={left.y}  width={left.size}  height={left.size}  preserveAspectRatio="xMidYMid meet" clipPath={`url(#${clipId})`} />
+            <image href={icons[L.id].right} x={right.x} y={right.y} width={right.size} height={right.size} preserveAspectRatio="xMidYMid meet" clipPath={`url(#${clipId})`} />
 
-            {/* BOFU: badge ไอคอนเล็กวางที่ก้นกรวย */}
-            {L.id === "BOFU" && icons.BOFU.badge && (
+            {/* BOFU: badge เล็กตรงก้นกรวย (ถ้ามี) */}
+            {L.id === "BOFU" && icons.BOFU?.badge && (
               <image
                 href={icons.BOFU.badge}
                 width={70}
                 height={70}
-                x={textPos.x - 35}
+                x={txt.x - 35}
                 y={bofuFlatBase ? (y + layerH - 80) : (y + layerH + 10)}
                 preserveAspectRatio="xMidYMid meet"
                 clipPath={`url(#${clipId})`}
@@ -168,9 +161,11 @@ export default function MarketingFunnelVisual({
 
             {/* ข้อความกึ่งกลาง */}
             <g textAnchor="middle" dominantBaseline="middle" fill="#fff">
-              <text x={textPos.x} y={textPos.y - 28} fontSize="42" fontWeight="800" letterSpacing="0.6"> {labels[L.id].title} </text>
+              <text x={txt.x} y={txt.y - 28} fontSize="42" fontWeight="800" letterSpacing="0.6">
+                {labels[L.id].title}
+              </text>
               {labels[L.id].lines.map((line, idx) => (
-                <text key={idx} x={textPos.x} y={textPos.y + idx * 26} fontSize="22" opacity="0.95" fontWeight={600}>
+                <text key={idx} x={txt.x} y={txt.y + idx * 26} fontSize="22" opacity="0.95" fontWeight={600}>
                   {line}
                 </text>
               ))}
