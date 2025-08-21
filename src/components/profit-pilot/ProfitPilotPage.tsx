@@ -4,6 +4,7 @@
 
 
 
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -36,7 +37,7 @@ import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plu
 import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
 import AutomationRuleBuilder from './RevealbotRuleBuilder';
-import MarketingFunnelVisual from './MarketingFunnelVisual';
+import ProFunnel from './ProFunnel';
 
 
 const F = {
@@ -1089,9 +1090,7 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8 px-4">
-                  <MarketingFunnelVisual
-                    width={1100}
-                    bofuFlatBase={true}
+                  <ProFunnel
                     labels={funnelLabels}
                   />
                 </div>
