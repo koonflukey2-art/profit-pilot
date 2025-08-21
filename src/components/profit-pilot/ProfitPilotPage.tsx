@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -458,6 +459,14 @@ export function ProfitPilotPage() {
       BOFU: { title: `BOFU ${plan.bofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}`] },
     };
   }, [inputs.funnelPlan, calculated]);
+
+  const defaultFunnelLabels = useMemo(() => {
+    return {
+      TOFU: { title: 'TOFU', lines: ['Top of Funnel:', 'VDOs / Social Media'] },
+      MOFU: { title: 'MOFU', lines: ['Middle of Funnel:', 'White Papers / Case Studies'] },
+      BOFU: { title: 'BOFU', lines: ['Bottom of Funnel', 'Incentives and Offers / Sales'] },
+    };
+  }, []);
 
   const FloatingIcon = ({ icon, className = '', size = 'md', style = {} }) => {
     const IconComponent = icon;
@@ -1053,7 +1062,7 @@ export function ProfitPilotPage() {
                 <Megaphone className="w-6 h-6 text-primary" />
                 การกระจายงบประมาณ
               </h3>
-              <div className="neumorphic-card p-6">
+               <div className="neumorphic-card p-6">
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <div>
                     <Label htmlFor="funnelPlan" className="block text-sm mb-2 font-medium opacity-80">แผนกลยุทธ์ Funnel</Label>
@@ -1082,13 +1091,44 @@ export function ProfitPilotPage() {
                 </div>
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
-                <div className="flex justify-center mb-8 px-4">
+                 <div className="flex justify-center mb-8 px-4">
                   <ProFunnel
-                    width={1140}
-                    bofuFlatBase={true}
+                    width={450}
                     labels={funnelLabels}
                   />
                 </div>
+                 <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Funnel</TableHead>
+                          <TableHead className="text-right">เปอร์เซ็นต์</TableHead>
+                          <TableHead className="text-right">งบประมาณ/เดือน</TableHead>
+                          <TableHead className="text-right">งบประมาณ/วัน</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell className="font-bold">TOFU</TableCell>
+                          <TableCell className="text-right">{currentFunnelPlan.tofu}%</TableCell>
+                          <TableCell className="text-right">{F.formatCurrency(calculated.tofuBudgetPerAccountMonthly)}</TableCell>
+                          <TableCell className="text-right">{F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-bold">MOFU</TableCell>
+                          <TableCell className="text-right">{currentFunnelPlan.mofu}%</TableCell>
+                          <TableCell className="text-right">{F.formatCurrency(calculated.mofuBudgetPerAccountMonthly)}</TableCell>
+                          <TableCell className="text-right">{F.formatCurrency(calculated.mofuBudgetPerAccountDaily)}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="font-bold">BOFU</TableCell>
+                          <TableCell className="text-right">{currentFunnelPlan.bofu}%</TableCell>
+                           <TableCell className="text-right">{F.formatCurrency(calculated.bofuBudgetPerAccountMonthly)}</TableCell>
+                          <TableCell className="text-right">{F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
               </div>
             </div>
             
