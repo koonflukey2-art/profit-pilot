@@ -1,6 +1,7 @@
 
 
 
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
@@ -33,6 +34,7 @@ import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plu
 import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
 import AutomationRuleBuilder from './RevealbotRuleBuilder';
+import MarketingFunnelVisual from './MarketingFunnelVisual';
 
 
 const F = {
@@ -452,52 +454,14 @@ export function ProfitPilotPage() {
   const currentFunnelPlan = funnelPlans[inputs.funnelPlan] || { tofu: 0, mofu: 0, bofu: 0 };
   const numAccounts = F.num(inputs.numberOfAccounts) || 1;
   
-  const funnelData = useMemo(() => {
-    const data = [
-      { name: 'TOFU', value: currentFunnelPlan.tofu, color: '#2196F3' },
-      { name: 'MOFU', value: currentFunnelPlan.mofu, color: '#29B6F6' },
-      { name: 'BOFU', value: currentFunnelPlan.bofu, color: '#4DD0E1' },
-    ];
-    return data;
-  }, [currentFunnelPlan]);
-
-  const FunnelChart = ({ data }) => {
-    if (!data.length) return null;
-  
-    const totalValue = data.reduce((sum, item) => sum + item.value, 0);
-    if (totalValue === 0) return null;
-  
-    const chartData = data;
-
-    return (
-      <div className="w-full flex justify-center items-end my-4 py-4 min-h-[300px]">
-        <div className="flex flex-col items-center justify-end w-full max-w-sm space-y-2">
-          {chartData.map((item, index) => {
-            const layerStyle: React.CSSProperties = {
-                width: `${100 - (index * 20)}%`, // Visually represent funnel shape
-                height: `${item.value}%`,
-                minHeight: '40px',
-                clipPath: 'polygon(15% 0, 85% 0, 100% 100%, 0% 100%)',
-                backgroundColor: item.color,
-                boxShadow: `0 0 15px ${item.color}, 0 0 25px ${item.color}66`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-                fontWeight: 'bold',
-                fontSize: '1.1rem',
-                textShadow: '0 0 5px #000, 0 0 10px #000',
-            };
-            return (
-              <div key={item.name} style={layerStyle}>
-                {item.name} {item.value}%
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
+  const funnelLabels = useMemo(() => {
+    const plan = funnelPlans[inputs.funnelPlan] || { tofu: 0, mofu: 0, bofu: 0 };
+    return {
+      TOFU: { title: `TOFU ${plan.tofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.tofuBudgetPerAccountDaily)} ฿`] },
+      MOFU: { title: `MOFU ${plan.mofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.mofuBudgetPerAccountDaily)} ฿`] },
+      BOFU: { title: `BOFU ${plan.bofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.bofuBudgetPerAccountDaily)} ฿`] },
+    };
+  }, [inputs.funnelPlan, calculated]);
   
   const FloatingIcon = ({ icon, className = '', size = 'md', style = {} }) => {
     const IconComponent = icon;
@@ -1123,31 +1087,14 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8 px-4">
-                   <div className="relative w-full max-w-4xl min-h-[400px] flex items-center justify-center">
-                    {/* Floating Icons */}
-                    <FloatingIcon icon={LineChart} className="top-0 left-1/4 animate-bounce" size="lg" />
-                    <FloatingIcon icon={BarChart} className="top-0 right-1/4 animate-bounce" size="lg" />
-                    <FloatingIcon icon={Users} className="top-1/3 left-8" size="lg"/>
-                    <FloatingIcon icon={Target} className="top-1/3 right-8" size="lg" />
-                    <FloatingIcon icon={Megaphone} className="top-2/3 left-10" size="lg" />
-                    <FloatingIcon icon={Heart} className="top-2/3 right-10" size="lg" />
-                    <FloatingIcon icon={Tv} className="bottom-0 left-1/4" size="lg" />
-                    <FloatingIcon icon={DollarSign} className="bottom-0 right-1/4" size="lg" />
-                    <FloatingIcon icon={Percent} className="bottom-1/2 left-12 animate-pulse" size="md" />
-                    <FloatingIcon icon={Hash} className="bottom-1/2 right-12 animate-pulse" size="md" />
-
-                    {/* Funnel Chart */}
-                    <div className="w-full max-w-sm">
-                      <FunnelChart data={funnelData} />
-                    </div>
-                  </div>
+                  <MarketingFunnelVisual width={800} labels={funnelLabels} />
                 </div>
                 
                 <div className="space-y-4">
                   <div className="neumorphic-card p-4 relative">
                     <div className="flex justify-between items-center mb-2">
-                      <h5 className="font-bold" style={{ color: funnelData.find(d => d.name === 'TOFU')?.color }}>TOFU</h5>
-                      <span className="font-bold" style={{ color: funnelData.find(d => d.name === 'TOFU')?.color }}>{currentFunnelPlan.tofu}%</span>
+                      <h5 className="font-bold" style={{ color: "#2FA4FF" }}>TOFU</h5>
+                      <span className="font-bold" style={{ color: "#2FA4FF" }}>{currentFunnelPlan.tofu}%</span>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-center">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.tofuBudget)}</p></div>
@@ -1158,8 +1105,8 @@ export function ProfitPilotPage() {
                   </div>
                    <div className="neumorphic-card p-4 relative">
                     <div className="flex justify-between items-center mb-2">
-                      <h5 className="font-bold" style={{ color: funnelData.find(d => d.name === 'MOFU')?.color }}>MOFU</h5>
-                       <span className="font-bold" style={{ color: funnelData.find(d => d.name === 'MOFU')?.color }}>{currentFunnelPlan.mofu}%</span>
+                      <h5 className="font-bold" style={{ color: "#22C7C1" }}>MOFU</h5>
+                       <span className="font-bold" style={{ color: "#22C7C1" }}>{currentFunnelPlan.mofu}%</span>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-center">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.mofuBudget)}</p></div>
@@ -1170,8 +1117,8 @@ export function ProfitPilotPage() {
                   </div>
                    <div className="neumorphic-card p-4 relative">
                     <div className="flex justify-between items-center mb-2">
-                      <h5 className="font-bold" style={{ color: funnelData.find(d => d.name === 'BOFU')?.color }}>BOFU</h5>
-                       <span className="font-bold" style={{ color: funnelData.find(d => d.name === 'BOFU')?.color }}>{currentFunnelPlan.bofu}%</span>
+                      <h5 className="font-bold" style={{ color: "#1D8C91" }}>BOFU</h5>
+                       <span className="font-bold" style={{ color: "#1D8C91" }}>{currentFunnelPlan.bofu}%</span>
                     </div>
                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-center">
                       <div><p className="opacity-70">ยอดรวม</p><p className="font-bold">{F.formatCurrency(calculated.bofuBudget)}</p></div>
@@ -1195,19 +1142,19 @@ export function ProfitPilotPage() {
           <TabsContent value="funnel">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <h5 className="font-bold mb-3" style={{ color: funnelData.find(d => d.name === 'TOFU')?.color }}>TOFU (Top of Funnel)</h5>
+                  <h5 className="font-bold mb-3" style={{ color: "#2FA4FF" }}>TOFU (Top of Funnel)</h5>
                   <ul className="list-disc list-inside space-y-1 text-sm opacity-90">
                     {funnelObjectives.tofu.map((o, i) => <li key={i}>{o}</li>)}
                   </ul>
                 </div>
                 <div>
-                  <h5 className="font-bold mb-3" style={{ color: funnelData.find(d => d.name === 'MOFU')?.color }}>MOFU (Middle of Funnel)</h5>
+                  <h5 className="font-bold mb-3" style={{ color: "#22C7C1" }}>MOFU (Middle of Funnel)</h5>
                   <ul className="list-disc list-inside space-y-1 text-sm opacity-90">
                     {funnelObjectives.mofu.map((o, i) => <li key={i}>{o}</li>)}
                   </ul>
                 </div>
                 <div>
-                  <h5 className="font-bold mb-3" style={{ color: funnelData.find(d => d.name === 'BOFU')?.color }}>BOFU (Bottom of Funnel)</h5>
+                  <h5 className="font-bold mb-3" style={{ color: "#1D8C91" }}>BOFU (Bottom of Funnel)</h5>
                   <ul className="list-disc list-inside space-y-1 text-sm opacity-90">
                     {funnelObjectives.bofu.map((o, i) => <li key={i}>{o}</li>)}
                   </ul>
