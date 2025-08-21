@@ -30,7 +30,7 @@ import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plu
 import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
 import AutomationRuleBuilder from './RevealbotRuleBuilder';
-import MarketingFunnelVisual from './MarketingFunnelVisual';
+import ProFunnel from './ProFunnel';
 
 
 const F = {
@@ -451,12 +451,13 @@ export function ProfitPilotPage() {
   const numAccounts = F.num(inputs.numberOfAccounts) || 1;
   
   const funnelLabels = useMemo(() => {
+    const plan = funnelPlans[inputs.funnelPlan] || { tofu: 0, mofu: 0, bofu: 0 };
     return {
-      TOFU: { title: "TOFU", lines: ["Top of Funnel:", "VDOs / Social Media"] },
-      MOFU: { title: "MOFU", lines: ["Middle of Funnel:", "White Papers / Case Studies"] },
-      BOFU: { title: "BOFU", lines: ["Bottom of Funnel", "Incentives and Offers / Sales"] },
+      TOFU: { title: `TOFU ${plan.tofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.tofuBudgetPerAccountDaily)}`] },
+      MOFU: { title: `MOFU ${plan.mofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.mofuBudgetPerAccountDaily)}`] },
+      BOFU: { title: `BOFU ${plan.bofu}%`, lines: [`งบ/วัน: ${F.formatCurrency(calculated.bofuBudgetPerAccountDaily)}`] },
     };
-  }, []);
+  }, [inputs.funnelPlan, calculated]);
 
   const FloatingIcon = ({ icon, className = '', size = 'md', style = {} }) => {
     const IconComponent = icon;
@@ -1082,7 +1083,9 @@ export function ProfitPilotPage() {
 
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                 <div className="flex justify-center mb-8 px-4">
-                  <MarketingFunnelVisual
+                  <ProFunnel
+                    width={1140}
+                    bofuFlatBase={true}
                     labels={funnelLabels}
                   />
                 </div>
