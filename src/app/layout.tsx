@@ -9,7 +9,7 @@ const notoSansThai = Noto_Sans_Thai({
 })
 
 export const metadata: Metadata = {
-  title: 'Profit Pilot',
+  title: 'Shearer (S1 ) Profit Pilot',
   description: 'Profit & Metrics Planner',
 };
 

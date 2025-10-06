@@ -663,7 +663,7 @@ export function ProfitPilotPage() {
   return (
     <>
       <header className="text-center mb-8 relative">
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Profit Pilot</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Shearer (S1 ) Profit Pilot</h1>
         <p className="text-base opacity-80">Profit & Metrics Planner v5.3</p>
       </header>
 
@@ -1093,7 +1093,6 @@ export function ProfitPilotPage() {
                 <h4 className="text-lg font-bold mb-4 text-center gradient-text">การกระจายงบประมาณ</h4>
                  <div className="flex justify-center mb-8 px-4">
                   <ProFunnel
-                    width={450}
                     labels={funnelLabels}
                   />
                 </div>
