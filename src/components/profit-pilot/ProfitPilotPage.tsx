@@ -27,7 +27,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy, Facebook, Wand, CheckIcon, ChevronDown, Play, Pause, ArrowUpRight, ArrowUp, Square, MousePointerClick } from 'lucide-react';
+import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy, Facebook, Wand, CheckIcon, ChevronDown, Play, Pause, ArrowUpRight, ArrowUp, Square, MousePointerClick, LayoutDashboard } from 'lucide-react';
 import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
 import AutomationRuleBuilder from './RevealbotRuleBuilder';
@@ -104,7 +104,7 @@ export function ProfitPilotPage() {
   });
   const [automationRules, setAutomationRules] = useState([]);
   const [uiTitles, setUiTitles] = useState({ productInfoTitle: 'ข้อมูลสินค้า', costCalculationTitle: 'คำนวณต้นทุน', goalsAndResultsTitle: 'เป้าหมายและผลลัพธ์', advancedPlanningTitle: 'Advanced Planning' });
-  const [activeTab, setActiveTab] = useState('metrics');
+  const [activeTab, setActiveTab] = useState('summary');
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [history, setHistory] = useState([]);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: () => {} });
@@ -112,110 +112,201 @@ export function ProfitPilotPage() {
   const [theme, setTheme] = useState('dark');
   const [funnelStageFilter, setFunnelStageFilter] = useState('all');
   const [aiAdvice, setAiAdvice] = useState({ recommendations: '', insights: '', loading: false });
-  
+
   const { toast } = useToast();
 
-  const handleInputChange = useCallback((key, value) => {
-    setInputs(prev => ({ ...prev, [key]: value }));
-  }, []);
-  
-  const calculateAll = useCallback(() => {
-    const newInputs = { ...inputs };
-    const s = {};
-  
-    s.sellingPrice = F.num(newInputs.sellingPrice);
-    s.priceBeforeVat = s.sellingPrice / (1 + F.num(newInputs.vatProduct) / 100);
-    s.cogs = F.num(newInputs.cogs);
-    s.platformFeeCost = s.priceBeforeVat * (F.num(newInputs.platformFee) / 100);
-    s.paymentFeeCost = s.sellingPrice * (F.num(newInputs.paymentFee) / 100);
-    s.kolFeeCost = s.priceBeforeVat * (F.num(newInputs.kolFee) / 100);
-    s.packagingCost = F.num(newInputs.packagingCost);
-    s.shippingCost = F.num(newInputs.shippingCost);
-    s.totalVariableCost = s.cogs + s.platformFeeCost + s.paymentFeeCost + s.kolFeeCost + s.packagingCost + s.shippingCost;
-    s.grossProfitUnit = s.priceBeforeVat - s.totalVariableCost;
-  
-    s.breakevenRoas = s.grossProfitUnit > 0 ? s.priceBeforeVat / s.grossProfitUnit : 0;
-    s.breakevenCpa = s.grossProfitUnit;
-    s.breakevenAdCostPercent = s.priceBeforeVat > 0 ? (s.breakevenCpa / s.priceBeforeVat) * 100 : 0;
-  
+  const computeMetrics = useCallback((inputData) => {
+    const newInputs = { ...inputData };
+    const sellingPrice = F.num(newInputs.sellingPrice);
+    const vatProduct = F.num(newInputs.vatProduct);
+    const cogs = F.num(newInputs.cogs);
+    const platformFeePercent = F.num(newInputs.platformFee);
+    const paymentFeePercent = F.num(newInputs.paymentFee);
+    const kolFeePercent = F.num(newInputs.kolFee);
+    const packagingCost = F.num(newInputs.packagingCost);
+    const shippingCost = F.num(newInputs.shippingCost);
+
+    const priceBeforeVat = sellingPrice / (1 + vatProduct / 100);
+    const platformFeeCost = priceBeforeVat * (platformFeePercent / 100);
+    const paymentFeeCost = sellingPrice * (paymentFeePercent / 100);
+    const kolFeeCost = priceBeforeVat * (kolFeePercent / 100);
+    const totalVariableCost = cogs + platformFeeCost + paymentFeeCost + kolFeeCost + packagingCost + shippingCost;
+    const grossProfitUnit = priceBeforeVat - totalVariableCost;
+
+    const breakevenRoas = grossProfitUnit > 0 ? priceBeforeVat / grossProfitUnit : 0;
+    const breakevenCpa = grossProfitUnit;
+    const breakevenAdCostPercent = priceBeforeVat > 0 ? (breakevenCpa / priceBeforeVat) * 100 : 0;
+
     let targetRoas = F.num(newInputs.targetRoas);
     let targetCpa = F.num(newInputs.targetCpa);
     let adCostPercent = F.num(newInputs.adCostPercent);
-  
-    if (s.priceBeforeVat > 0) {
+
+    if (priceBeforeVat > 0) {
       if (newInputs.calcDriver === 'roas') {
-        targetCpa = targetRoas > 0 ? s.priceBeforeVat / targetRoas : 0;
-        adCostPercent = s.priceBeforeVat > 0 ? (targetCpa / s.priceBeforeVat) * 100 : 0;
+        targetCpa = targetRoas > 0 ? priceBeforeVat / targetRoas : 0;
+        adCostPercent = priceBeforeVat > 0 ? (targetCpa / priceBeforeVat) * 100 : 0;
       } else if (newInputs.calcDriver === 'cpa') {
-        targetRoas = targetCpa > 0 ? s.priceBeforeVat / targetCpa : 0;
-        adCostPercent = s.priceBeforeVat > 0 ? (targetCpa / s.priceBeforeVat) * 100 : 0;
-      } else { // calcDriver === 'adcost'
-        targetCpa = s.priceBeforeVat * (adCostPercent / 100);
-        targetRoas = targetCpa > 0 ? s.priceBeforeVat / targetCpa : 0;
+        targetRoas = targetCpa > 0 ? priceBeforeVat / targetCpa : 0;
+        adCostPercent = priceBeforeVat > 0 ? (targetCpa / priceBeforeVat) * 100 : 0;
+      } else {
+        targetCpa = priceBeforeVat * (adCostPercent / 100);
+        targetRoas = targetCpa > 0 ? priceBeforeVat / targetCpa : 0;
       }
     } else {
-      targetRoas = 0; targetCpa = 0; adCostPercent = 0;
+      targetRoas = 0;
+      targetCpa = 0;
+      adCostPercent = 0;
     }
-    
-    s.targetRoas = targetRoas;
-    s.targetCpa = targetCpa;
-    s.adCostPercent = adCostPercent;
-  
-    s.netProfitUnit = s.grossProfitUnit - targetCpa;
+
+    const netProfitUnit = grossProfitUnit - targetCpa;
     const profitGoal = F.num(newInputs.profitGoal);
     const fixedCosts = F.num(newInputs.fixedCosts);
     const monthlyProfitGoal = newInputs.profitGoalTimeframe === 'daily' ? profitGoal * 30 : profitGoal;
     const totalProfitTarget = monthlyProfitGoal + fixedCosts;
-    s.targetOrders = s.netProfitUnit > 0 ? totalProfitTarget / s.netProfitUnit : 0;
-    s.targetRevenue = s.targetOrders * s.sellingPrice;
-    s.adBudget = s.targetOrders * targetCpa;
-    s.targetOrdersDaily = s.targetOrders / 30;
+    const targetOrders = netProfitUnit > 0 ? totalProfitTarget / netProfitUnit : 0;
+    const targetRevenue = targetOrders * sellingPrice;
+    const adBudget = targetOrders * targetCpa;
+    const targetOrdersDaily = targetOrders / 30;
+    const adBudgetWithVat = adBudget * (1 + (vatProduct / 100));
 
-    s.adBudgetWithVat = s.adBudget * (1 + (F.num(newInputs.vatProduct) / 100));
-  
     const funnelPlan = funnelPlans[newInputs.funnelPlan] || funnelPlans.launch;
-    s.tofuBudget = s.adBudget * (funnelPlan.tofu / 100);
-    s.mofuBudget = s.adBudget * (funnelPlan.mofu / 100);
-    s.bofuBudget = s.adBudget * (funnelPlan.bofu / 100);
+    const tofuBudget = adBudget * (funnelPlan.tofu / 100);
+    const mofuBudget = adBudget * (funnelPlan.mofu / 100);
+    const bofuBudget = adBudget * (funnelPlan.bofu / 100);
 
     const numAccounts = F.num(newInputs.numberOfAccounts) || 1;
-    s.tofuBudgetPerAccountMonthly = s.tofuBudget / numAccounts;
-    s.mofuBudgetPerAccountMonthly = s.mofuBudget / numAccounts;
-    s.bofuBudgetPerAccountMonthly = s.bofuBudget / numAccounts;
-    s.tofuBudgetPerAccountDaily = s.tofuBudgetPerAccountMonthly / 30;
-    s.mofuBudgetPerAccountDaily = s.mofuBudgetPerAccountMonthly / 30;
-    s.bofuBudgetPerAccountDaily = s.bofuBudgetPerAccountMonthly / 30;
-    
-    setCalculated(s);
+    const tofuBudgetPerAccountMonthly = tofuBudget / numAccounts;
+    const mofuBudgetPerAccountMonthly = mofuBudget / numAccounts;
+    const bofuBudgetPerAccountMonthly = bofuBudget / numAccounts;
+    const tofuBudgetPerAccountDaily = tofuBudgetPerAccountMonthly / 30;
+    const mofuBudgetPerAccountDaily = mofuBudgetPerAccountMonthly / 30;
+    const bofuBudgetPerAccountDaily = bofuBudgetPerAccountMonthly / 30;
 
-    const updatedInputs = {...newInputs};
-    let changed = false;
+    const metrics = {
+      grossProfitUnit,
+      breakevenRoas,
+      breakevenCpa,
+      breakevenAdCostPercent,
+      targetOrders,
+      targetOrdersDaily,
+      targetRevenue,
+      adBudget,
+      adBudgetWithVat,
+      tofuBudget,
+      mofuBudget,
+      bofuBudget,
+      tofuBudgetPerAccountMonthly,
+      mofuBudgetPerAccountMonthly,
+      bofuBudgetPerAccountMonthly,
+      tofuBudgetPerAccountDaily,
+      mofuBudgetPerAccountDaily,
+      bofuBudgetPerAccountDaily,
+      netProfitUnit,
+      targetRoas,
+      targetCpa,
+      adCostPercent,
+      priceBeforeVat,
+    };
+
+    const updatedInputs = { ...newInputs };
+    let shouldUpdateInputs = false;
 
     if (newInputs.calcDriver !== 'roas' && isFinite(targetRoas) && F.num(newInputs.targetRoas).toFixed(2) !== targetRoas.toFixed(2)) {
       updatedInputs.targetRoas = targetRoas > 0 ? targetRoas.toFixed(2) : '';
-      changed = true;
+      shouldUpdateInputs = true;
     }
     if (newInputs.calcDriver !== 'cpa' && isFinite(targetCpa) && F.num(newInputs.targetCpa).toFixed(2) !== targetCpa.toFixed(2)) {
       updatedInputs.targetCpa = targetCpa > 0 ? targetCpa.toFixed(2) : '';
-      changed = true;
+      shouldUpdateInputs = true;
     }
     if (newInputs.calcDriver !== 'adcost' && isFinite(adCostPercent) && F.num(newInputs.adCostPercent).toFixed(1) !== adCostPercent.toFixed(1)) {
       updatedInputs.adCostPercent = adCostPercent > 0 ? adCostPercent.toFixed(1) : '';
-      changed = true;
+      shouldUpdateInputs = true;
     }
 
-    if (changed) {
-        setInputs(updatedInputs);
+    return {
+      metrics,
+      updatedInputs,
+      shouldUpdateInputs,
+      warnings: {
+        roasBelowBreakeven:
+          newInputs.calcDriver === 'roas' && targetRoas > 0 && breakevenRoas > 0 && targetRoas < breakevenRoas,
+      },
+    };
+  }, []);
+
+  const handleInputChange = useCallback((key, value) => {
+    setInputs(prev => ({ ...prev, [key]: value }));
+  }, []);
+
+  const platformReport = useMemo(() => {
+    const baseInputs = { ...inputs };
+    return Object.entries(platformFees).map(([key, fees]) => {
+      const platformInputs = {
+        ...baseInputs,
+        salesPlatform: key,
+        platformFee: key === 'other' ? baseInputs.platformFee : fees.platform.toString(),
+        paymentFee: key === 'other' ? baseInputs.paymentFee : fees.payment.toString(),
+      };
+
+      const { metrics } = computeMetrics(platformInputs);
+
+      return {
+        key,
+        name: platformFeeLabels[key] || key,
+        fees: {
+          platform: key === 'other' ? F.num(platformInputs.platformFee) : fees.platform,
+          payment: key === 'other' ? F.num(platformInputs.paymentFee) : fees.payment,
+        },
+        metrics,
+      };
+    });
+  }, [inputs, computeMetrics]);
+
+  const platformReportTotals = useMemo(() => {
+    const aggregate = platformReport.reduce(
+      (acc, item) => {
+        acc.totalRevenue += item.metrics.targetRevenue || 0;
+        acc.totalAdBudget += item.metrics.adBudget || 0;
+        acc.totalOrders += item.metrics.targetOrders || 0;
+        acc.netProfitSum += item.metrics.netProfitUnit || 0;
+        return acc;
+      },
+      { totalRevenue: 0, totalAdBudget: 0, totalOrders: 0, netProfitSum: 0 }
+    );
+
+    const platformCount = platformReport.length;
+
+    return {
+      totalRevenue: aggregate.totalRevenue,
+      totalAdBudget: aggregate.totalAdBudget,
+      totalOrders: aggregate.totalOrders,
+      averageNetProfitUnit: platformCount > 0 ? aggregate.netProfitSum / platformCount : 0,
+    };
+  }, [platformReport]);
+
+  const calculateAll = useCallback(() => {
+    const { metrics, updatedInputs, shouldUpdateInputs, warnings } = computeMetrics(inputs);
+    setCalculated(metrics);
+
+    if (shouldUpdateInputs) {
+      setInputs(updatedInputs);
     }
-  
-    if (newInputs.calcDriver === 'roas' && targetRoas > 0 && s.breakevenRoas > 0 && targetRoas < s.breakevenRoas) {
+
+    if (warnings.roasBelowBreakeven) {
       toast({
         variant: "destructive",
         title: "Warning",
         description: "เป้าหมาย ROAS ต่ำกว่าจุดคุ้มทุน อาจทำให้ขาดทุนได้",
-      })
+      });
     }
-  }, [inputs, toast]);
+  }, [inputs, computeMetrics, toast]);
+
+  const handleConfirmPlan = useCallback(() => {
+    calculateAll();
+    setActiveTab('summary');
+    toast({ title: 'อัปเดตผลลัพธ์แล้ว', description: 'คำนวณผลลัพธ์ล่าสุดและแสดงในหน้าสรุปแผนเรียบร้อย' });
+  }, [calculateAll, toast]);
 
 
   useEffect(() => {
@@ -639,6 +730,14 @@ export function ProfitPilotPage() {
   ]), [calculated, numAccounts]);
 
 
+  const ReportMetric = ({ label, value, helper }) => (
+    <div className="p-4 rounded-lg bg-background/60 border border-primary/20 shadow-inner">
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="text-lg font-bold mt-1">{value}</p>
+      {helper && <p className="text-xs text-muted-foreground mt-1">{helper}</p>}
+    </div>
+  );
+
   const SummaryInfoCard = ({ title, value, subValue, icon: Icon }) => (
     <Card className="neumorphic-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -703,6 +802,12 @@ export function ProfitPilotPage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="pt-2">
+                <Button onClick={() => setActiveTab('platform-report')} className="neon-button w-full flex items-center justify-center gap-2">
+                  <LayoutDashboard className="w-4 h-4" />
+                  สรุปรายงานทุกแพลตฟอร์ม
+                </Button>
               </div>
             </div>
           </div>
@@ -828,17 +933,111 @@ export function ProfitPilotPage() {
       </div>
       
       <div className="neumorphic-card p-6 mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1 space-y-3">
+            <div>
+              <Label htmlFor="metricsPlanQuickSelect" className="block text-sm mb-2 font-medium opacity-80">แผน Metrics</Label>
+              <Select value={inputs.metricsPlan} onValueChange={(val) => handleInputChange('metricsPlan', val)}>
+                <SelectTrigger id="metricsPlanQuickSelect" className="neumorphic-select"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(metricsPlans).map(([key, { name }]) => (
+                    <SelectItem key={key} value={key}>{name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button variant="outline" className="w-full flex items-center justify-center gap-2" onClick={() => setActiveTab('metrics')}>
+              <CalendarCheck className="w-4 h-4" />
+              ดูรายละเอียดแผน Metrics
+            </Button>
+          </div>
+          <div className="lg:col-span-2 space-y-4">
+            <div className="p-4 rounded-lg border bg-blue-900/20 border-primary/50 text-sm">
+              <b>บทสรุปแผน:</b>&nbsp;{selectedMetricsPlan.summary}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {selectedMetricsPlan.kpis.slice(0, 3).map((kpi, idx) => (
+                <div key={`${kpi.metric}-${idx}`} className="neumorphic-card p-3 text-sm">
+                  <p className="font-semibold">{kpi.metric}</p>
+                  <p className="text-primary font-bold">{kpi.benchmark}</p>
+                  <p className="text-xs text-muted-foreground">{kpi.notes}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="mt-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <p className="text-sm text-muted-foreground">
+            ตรวจสอบข้อมูลให้ครบถ้วนก่อนกดปุ่มยืนยัน เพื่ออัปเดตผลลัพธ์และดูสรุปแผนล่าสุดของคุณ
+          </p>
+          <Button onClick={handleConfirmPlan} className="neon-button w-full md:w-auto flex items-center justify-center gap-2">
+            <CheckIcon className="w-4 h-4" />
+            ยืนยันและดูผลลัพธ์
+          </Button>
+        </div>
+      </div>
+
+      <div className="neumorphic-card p-6 mt-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="tab-nav mb-6 grid w-full grid-cols-3 md:grid-cols-7 bg-background shadow-inner">
+          <TabsList className="tab-nav mb-6 grid w-full grid-cols-3 md:grid-cols-8 bg-background shadow-inner">
             <TabsTrigger value="metrics" className="tab-button"><CalendarCheck className="w-4 h-4"/>Metrics แนะนำ</TabsTrigger>
             <TabsTrigger value="planning" className="tab-button"><GanttChartSquare className="w-4 h-4"/>การวางแผน</TabsTrigger>
             <TabsTrigger value="funnel" className="tab-button"><Filter className="w-4 h-4"/>กลยุทธ์ Funnel</TabsTrigger>
             <TabsTrigger value="automation" className="tab-button"><Bot className="w-4 h-4"/>สร้าง Rule</TabsTrigger>
             <TabsTrigger value="workflow" className="tab-button"><Zap className="w-4 h-4"/>Workflow Generator</TabsTrigger>
+            <TabsTrigger value="platform-report" className="tab-button"><LayoutDashboard className="w-4 h-4"/>รายงานแพลตฟอร์ม</TabsTrigger>
             <TabsTrigger value="summary" className="tab-button"><FileText className="w-4 h-4"/>สรุปแผน</TabsTrigger>
             <TabsTrigger value="history" className="tab-button"><History className="w-4 h-4"/>ประวัติ</TabsTrigger>
           </TabsList>
-          
+
+          <TabsContent value="platform-report">
+            <div className="space-y-6">
+              <Card className="neumorphic-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><LayoutDashboard className="w-5 h-5 text-primary"/>สรุปภาพรวมทุกแพลตฟอร์ม</CardTitle>
+                  <CardDescription>รวมยอดสำคัญจากแพลตฟอร์มทั้งหมดที่ตั้งค่าไว้ในระบบ</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                    <ReportMetric label="ยอดขายรวมต่อเดือน" value={F.formatCurrency(platformReportTotals.totalRevenue)} helper="รวมรายได้เป้าหมายจากทุกแพลตฟอร์ม" />
+                    <ReportMetric label="งบโฆษณารวมต่อเดือน" value={F.formatCurrency(platformReportTotals.totalAdBudget)} helper="คำนวณรวมทุกแพลตฟอร์ม" />
+                    <ReportMetric label="จำนวนออเดอร์รวมต่อเดือน" value={F.formatInt(platformReportTotals.totalOrders)} helper={`เฉลี่ย ${F.formatNumber(platformReportTotals.totalOrders / 30 || 0, 1)} ออเดอร์/วัน`} />
+                    <ReportMetric label="กำไรสุทธิต่อหน่วย (เฉลี่ย)" value={F.formatCurrency(platformReportTotals.averageNetProfitUnit)} helper="ค่าเฉลี่ยกำไรสุทธิต่อหน่วยของทุกแพลตฟอร์ม" />
+                  </div>
+                </CardContent>
+              </Card>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                {platformReport.map((platform) => (
+                  <Card key={platform.key} className="neumorphic-card">
+                    <CardHeader>
+                      <CardTitle className="flex items-center justify-between">
+                        <span>{platform.name}</span>
+                        <Badge variant="outline" className="uppercase tracking-wide">{platform.key}</Badge>
+                      </CardTitle>
+                      <CardDescription>
+                        ค่าธรรมเนียมแพลตฟอร์ม {platform.fees.platform}% | ค่าชำระเงิน {platform.fees.payment}%
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <ReportMetric label="ราคาขาย (ไม่รวม VAT)" value={F.formatCurrency(platform.metrics.priceBeforeVat)} helper={`รวม VAT: ${F.formatCurrency(inputs.sellingPrice)}`} />
+                        <ReportMetric label="กำไรขั้นต้นต่อหน่วย" value={F.formatCurrency(platform.metrics.grossProfitUnit)} />
+                        <ReportMetric label="กำไรสุทธิต่อหน่วย" value={F.formatCurrency(platform.metrics.netProfitUnit)} />
+                        <ReportMetric label="ROAS เป้าหมาย" value={F.formatNumber(platform.metrics.targetRoas)} helper={`ROAS คุ้มทุน ${F.formatNumber(platform.metrics.breakevenRoas)}`} />
+                        <ReportMetric label="CPA เป้าหมาย" value={F.formatCurrency(platform.metrics.targetCpa)} helper={`CPA คุ้มทุน ${F.formatCurrency(platform.metrics.breakevenCpa)}`} />
+                        <ReportMetric label="งบโฆษณา/เดือน" value={F.formatCurrency(platform.metrics.adBudget)} helper={`รวม VAT: ${F.formatCurrency(platform.metrics.adBudgetWithVat)}`} />
+                        <ReportMetric label="ยอดขายเป้าหมาย/เดือน" value={F.formatCurrency(platform.metrics.targetRevenue)} helper={`จำนวนออเดอร์ ${F.formatInt(platform.metrics.targetOrders)}`} />
+                        <ReportMetric label="งบ TOFU / เดือน" value={F.formatCurrency(platform.metrics.tofuBudget)} helper={`เฉลี่ยบัญชีละ ${F.formatCurrency(platform.metrics.tofuBudgetPerAccountMonthly)}`} />
+                        <ReportMetric label="งบ MOFU / เดือน" value={F.formatCurrency(platform.metrics.mofuBudget)} helper={`เฉลี่ยบัญชีละ ${F.formatCurrency(platform.metrics.mofuBudgetPerAccountMonthly)}`} />
+                        <ReportMetric label="งบ BOFU / เดือน" value={F.formatCurrency(platform.metrics.bofuBudget)} helper={`เฉลี่ยบัญชีละ ${F.formatCurrency(platform.metrics.bofuBudgetPerAccountMonthly)}`} />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+
           <TabsContent value="summary">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Overview Card */}
