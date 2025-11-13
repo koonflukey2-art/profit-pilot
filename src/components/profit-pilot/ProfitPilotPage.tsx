@@ -32,6 +32,7 @@ import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
 import AutomationRuleBuilder from './RevealbotRuleBuilder';
 import ProFunnel from './ProFunnel';
+import { format, isThisYear, isToday, parseISO } from 'date-fns';
 
 
 const F = {
@@ -74,6 +75,44 @@ const iconMap = {
   Wand,
 };
 
+type AdEntry = {
+  id: number;
+  platform: string;
+  campaignName: string;
+  date: string;
+  spend: number;
+  revenue: number;
+  conversions: number;
+  source: 'manual' | 'sync';
+};
+
+type OrderEntry = {
+  id: number;
+  platform: string;
+  orderId: string;
+  date: string;
+  amount: number;
+  cost: number;
+  items: number;
+  source: 'manual' | 'sync';
+};
+
+const adPlatformOptions = [
+  { value: 'facebook_ads', label: 'Facebook Ads' },
+  { value: 'tiktok_ads', label: 'TikTok Ads' },
+  { value: 'google_ads', label: 'Google Ads' },
+  { value: 'lazada_ads', label: 'Lazada Sponsored Ads' },
+  { value: 'custom', label: 'Custom / Other' },
+];
+
+const orderPlatformOptions = [
+  { value: 'facebook_shop', label: 'Facebook Shop' },
+  { value: 'tiktok_shop', label: 'TikTok Shop' },
+  { value: 'lazada_shop', label: 'Lazada Shop' },
+  { value: 'shopee', label: 'Shopee' },
+  { value: 'own_website', label: 'Own Website' },
+];
+
 export function ProfitPilotPage() {
   const [isClient, setIsClient] = useState(false);
   const [inputs, setInputs] = useState(initialInputs);
@@ -112,8 +151,266 @@ export function ProfitPilotPage() {
   const [theme, setTheme] = useState('dark');
   const [funnelStageFilter, setFunnelStageFilter] = useState('all');
   const [aiAdvice, setAiAdvice] = useState({ recommendations: '', insights: '', loading: false });
+  const [adEntries, setAdEntries] = useState<AdEntry[]>([]);
+  const [orderEntries, setOrderEntries] = useState<OrderEntry[]>([]);
+  const [adForm, setAdForm] = useState(() => ({
+    platform: adPlatformOptions[0].value,
+    campaignName: '',
+    spend: '',
+    revenue: '',
+    conversions: '',
+    date: new Date().toISOString().slice(0, 10),
+  }));
+  const [orderForm, setOrderForm] = useState(() => ({
+    platform: orderPlatformOptions[0].value,
+    orderId: '',
+    amount: '',
+    cost: '',
+    items: '',
+    date: new Date().toISOString().slice(0, 10),
+  }));
+  const [detectionState, setDetectionState] = useState({ nsn: true, nn: false });
 
   const { toast } = useToast();
+
+  const getAdPlatformLabel = useCallback(
+    (value: string) => adPlatformOptions.find(option => option.value === value)?.label || value,
+    []
+  );
+
+  const getOrderPlatformLabel = useCallback(
+    (value: string) => orderPlatformOptions.find(option => option.value === value)?.label || value,
+    []
+  );
+
+  const parseEntryDate = useCallback((value: string) => {
+    if (!value) {
+      return null;
+    }
+    try {
+      const parsed = parseISO(value);
+      if (Number.isNaN(parsed.getTime())) {
+        return null;
+      }
+      return parsed;
+    } catch (error) {
+      return null;
+    }
+  }, []);
+
+  const aggregateAdMetrics = useCallback(
+    (predicate: (date: Date) => boolean) =>
+      adEntries.reduce(
+        (acc, entry) => {
+          const entryDate = parseEntryDate(entry.date);
+          if (!entryDate || !predicate(entryDate)) {
+            return acc;
+          }
+          const spend = F.num(entry.spend);
+          const revenue = F.num(entry.revenue);
+          const profit = revenue - spend;
+          return {
+            spend: acc.spend + spend,
+            revenue: acc.revenue + revenue,
+            profit: acc.profit + profit,
+            conversions: acc.conversions + F.num(entry.conversions),
+            count: acc.count + 1,
+          };
+        },
+        { spend: 0, revenue: 0, profit: 0, conversions: 0, count: 0 }
+      ),
+    [adEntries, parseEntryDate]
+  );
+
+  const aggregateOrderMetrics = useCallback(
+    (predicate: (date: Date) => boolean) =>
+      orderEntries.reduce(
+        (acc, entry) => {
+          const entryDate = parseEntryDate(entry.date);
+          if (!entryDate || !predicate(entryDate)) {
+            return acc;
+          }
+          const amount = F.num(entry.amount);
+          const cost = F.num(entry.cost);
+          const profit = amount - cost;
+          return {
+            amount: acc.amount + amount,
+            cost: acc.cost + cost,
+            profit: acc.profit + profit,
+            items: acc.items + F.num(entry.items),
+            count: acc.count + 1,
+          };
+        },
+        { amount: 0, cost: 0, profit: 0, items: 0, count: 0 }
+      ),
+    [orderEntries, parseEntryDate]
+  );
+
+  const adSummary = useMemo(() => {
+    const today = aggregateAdMetrics(date => isToday(date));
+    const year = aggregateAdMetrics(date => isThisYear(date));
+    const total = aggregateAdMetrics(() => true);
+    return { today, year, total };
+  }, [aggregateAdMetrics]);
+
+  const orderSummary = useMemo(() => {
+    const today = aggregateOrderMetrics(date => isToday(date));
+    const year = aggregateOrderMetrics(date => isThisYear(date));
+    const total = aggregateOrderMetrics(() => true);
+    return { today, year, total };
+  }, [aggregateOrderMetrics]);
+
+  const combinedYearProfit = useMemo(
+    () => adSummary.year.profit + orderSummary.year.profit,
+    [adSummary.year.profit, orderSummary.year.profit]
+  );
+
+  const formatEntryDate = useCallback(
+    (value: string) => {
+      const parsed = parseEntryDate(value);
+      if (!parsed) {
+        return value || '-';
+      }
+      try {
+        return format(parsed, 'dd MMM yyyy');
+      } catch (error) {
+        return value;
+      }
+    },
+    [parseEntryDate]
+  );
+
+  const formatRoas = useCallback((revenue: number, spend: number) => {
+    if (spend <= 0) {
+      return '—';
+    }
+    return F.formatNumber(revenue / spend, 2);
+  }, []);
+
+  const handleAdFormChange = useCallback((field: string, value: string) => {
+    setAdForm(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  const handleOrderFormChange = useCallback((field: string, value: string) => {
+    setOrderForm(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  const handleAddAdEntry = useCallback(
+    (event?: React.FormEvent<HTMLFormElement>) => {
+      event?.preventDefault();
+      const spend = F.num(adForm.spend);
+      const revenue = F.num(adForm.revenue);
+      const conversions = F.num(adForm.conversions);
+      const campaignName = adForm.campaignName.trim() || 'ไม่ระบุชื่อแคมเปญ';
+      const date = adForm.date || new Date().toISOString().slice(0, 10);
+
+      const newEntry: AdEntry = {
+        id: Date.now(),
+        platform: adForm.platform,
+        campaignName,
+        spend,
+        revenue,
+        conversions,
+        date,
+        source: 'manual',
+      };
+
+      setAdEntries(prev => [newEntry, ...prev]);
+      setAdForm(prev => ({ ...prev, campaignName: '', spend: '', revenue: '', conversions: '' }));
+      toast({ title: 'เพิ่มข้อมูลแคมเปญแล้ว', description: `${campaignName} ถูกบันทึกเรียบร้อย` });
+    },
+    [adForm, toast]
+  );
+
+  const handleAddOrderEntry = useCallback(
+    (event?: React.FormEvent<HTMLFormElement>) => {
+      event?.preventDefault();
+      const amount = F.num(orderForm.amount);
+      const cost = F.num(orderForm.cost);
+      const items = Math.max(1, F.num(orderForm.items));
+      const orderId = orderForm.orderId.trim() || `ORDER-${Date.now()}`;
+      const date = orderForm.date || new Date().toISOString().slice(0, 10);
+
+      const newEntry: OrderEntry = {
+        id: Date.now(),
+        platform: orderForm.platform,
+        orderId,
+        amount,
+        cost,
+        items,
+        date,
+        source: 'manual',
+      };
+
+      setOrderEntries(prev => [newEntry, ...prev]);
+      setOrderForm(prev => ({ ...prev, orderId: '', amount: '', cost: '', items: '' }));
+      toast({ title: 'เพิ่มคำสั่งซื้อแล้ว', description: `บันทึกคำสั่งซื้อ ${orderId} สำเร็จ` });
+    },
+    [orderForm, toast]
+  );
+
+  const handleRemoveAdEntry = useCallback((id: number) => {
+    setAdEntries(prev => prev.filter(entry => entry.id !== id));
+  }, []);
+
+  const handleRemoveOrderEntry = useCallback((id: number) => {
+    setOrderEntries(prev => prev.filter(entry => entry.id !== id));
+  }, []);
+
+  const handlePlatformSync = useCallback(
+    (type: 'ad' | 'order', platform: string) => {
+      const now = new Date();
+      const date = now.toISOString().slice(0, 10);
+      if (type === 'ad') {
+        const sample: AdEntry = {
+          id: Date.now(),
+          platform,
+          campaignName: 'Imported Campaign',
+          spend: 1200,
+          revenue: 2450,
+          conversions: 32,
+          date,
+          source: 'sync',
+        };
+        setAdEntries(prev => [sample, ...prev]);
+        toast({
+          title: 'ซิงก์ข้อมูลโฆษณา',
+          description: `${getAdPlatformLabel(platform)} ดึงข้อมูลล่าสุดสำเร็จ`,
+        });
+      } else {
+        const sample: OrderEntry = {
+          id: Date.now(),
+          platform,
+          orderId: `SYNC-${Date.now()}`,
+          amount: 1890,
+          cost: 940,
+          items: 2,
+          date,
+          source: 'sync',
+        };
+        setOrderEntries(prev => [sample, ...prev]);
+        toast({
+          title: 'ซิงก์คำสั่งซื้อ',
+          description: `${getOrderPlatformLabel(platform)} ดึงข้อมูลล่าสุดสำเร็จ`,
+        });
+      }
+    },
+    [getAdPlatformLabel, getOrderPlatformLabel, toast]
+  );
+
+  const handleDetectionScan = useCallback(() => {
+    const enabledSources = [
+      detectionState.nsn ? 'NSN' : null,
+      detectionState.nn ? 'N&N' : null,
+    ].filter(Boolean);
+    toast({
+      title: 'เริ่มการตรวจจับแคมเปญ',
+      description:
+        enabledSources.length > 0
+          ? `กำลังสแกนด้วย ${enabledSources.join(' & ')} เพื่อหากำไรสูงสุด`
+          : 'เปิดใช้งานอย่างน้อยหนึ่งระบบเพื่อตรวจจับการยิงแอด',
+    });
+  }, [detectionState, toast]);
 
   const computeMetrics = useCallback((inputData) => {
     const newInputs = { ...inputData };
@@ -313,9 +610,19 @@ export function ProfitPilotPage() {
         try {
             const savedHistory = JSON.parse(localStorage.getItem('profitPlannerHistory') || '[]');
             setHistory(savedHistory);
-            
+
             const savedTheme = localStorage.getItem('profitPlannerTheme') || 'dark';
             setTheme(savedTheme);
+
+            const savedAds = JSON.parse(localStorage.getItem('profitPlannerAds') || '[]');
+            if (Array.isArray(savedAds)) {
+              setAdEntries(savedAds);
+            }
+
+            const savedOrders = JSON.parse(localStorage.getItem('profitPlannerOrders') || '[]');
+            if (Array.isArray(savedOrders)) {
+              setOrderEntries(savedOrders);
+            }
         } catch (error) {
             console.error("Could not access localStorage:", error);
         }
@@ -333,6 +640,24 @@ export function ProfitPilotPage() {
         }
     }
   }, [theme, isClient]);
+
+  useEffect(() => {
+    if (!isClient) return;
+    try {
+      localStorage.setItem('profitPlannerAds', JSON.stringify(adEntries));
+    } catch (error) {
+      console.error('Could not persist ad entries:', error);
+    }
+  }, [adEntries, isClient]);
+
+  useEffect(() => {
+    if (!isClient) return;
+    try {
+      localStorage.setItem('profitPlannerOrders', JSON.stringify(orderEntries));
+    } catch (error) {
+      console.error('Could not persist order entries:', error);
+    }
+  }, [orderEntries, isClient]);
   
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -732,6 +1057,14 @@ export function ProfitPilotPage() {
     </div>
   );
 
+  const SummaryStat = ({ label, value, helper }) => (
+    <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="text-lg font-semibold mt-1">{value}</p>
+      {helper && <p className="text-xs text-muted-foreground mt-1">{helper}</p>}
+    </div>
+  );
+
   const SummaryInfoCard = ({ title, value, subValue, icon: Icon }) => (
     <Card className="neumorphic-card">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -759,6 +1092,447 @@ export function ProfitPilotPage() {
         <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Shearer (S1 ) Profit Pilot</h1>
         <p className="text-base opacity-80">Profit & Metrics Planner v5.3</p>
       </header>
+
+      <section className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-8">
+        <Card className="neumorphic-card h-full">
+          <CardHeader>
+            <CardTitle>สรุปการยิงแอด</CardTitle>
+            <CardDescription>แยกโฆษณา Facebook, TikTok, Lazada และอื่นๆ</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="today" className="w-full">
+              <TabsList className="grid grid-cols-2 w-full">
+                <TabsTrigger value="today">วันนี้</TabsTrigger>
+                <TabsTrigger value="year">ปีนี้</TabsTrigger>
+              </TabsList>
+              <TabsContent value="today" className="mt-4 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <SummaryStat
+                    label="งบโฆษณา"
+                    value={F.formatCurrency(adSummary.today.spend)}
+                    helper={`${adSummary.today.count.toLocaleString('th-TH')} แคมเปญ`}
+                  />
+                  <SummaryStat
+                    label="รายได้จากแอด"
+                    value={F.formatCurrency(adSummary.today.revenue)}
+                    helper={`ROAS ${formatRoas(adSummary.today.revenue, adSummary.today.spend)}`}
+                  />
+                  <SummaryStat
+                    label="กำไร/ขาดทุน"
+                    value={F.formatCurrency(adSummary.today.profit)}
+                    helper={`คอนเวอร์ชัน ${F.formatInt(adSummary.today.conversions)}`}
+                  />
+                  <SummaryStat
+                    label="แคมเปญทั้งหมด"
+                    value={adSummary.today.count.toLocaleString('th-TH')}
+                    helper="สรุปจากข้อมูลวันนี้"
+                  />
+                </div>
+              </TabsContent>
+              <TabsContent value="year" className="mt-4 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <SummaryStat
+                    label="งบโฆษณาสะสม"
+                    value={F.formatCurrency(adSummary.year.spend)}
+                    helper={`${adSummary.year.count.toLocaleString('th-TH')} แคมเปญ`}
+                  />
+                  <SummaryStat
+                    label="รายได้สะสม"
+                    value={F.formatCurrency(adSummary.year.revenue)}
+                    helper={`ROAS ${formatRoas(adSummary.year.revenue, adSummary.year.spend)}`}
+                  />
+                  <SummaryStat
+                    label="กำไรรวม"
+                    value={F.formatCurrency(adSummary.year.profit)}
+                    helper={`คอนเวอร์ชัน ${F.formatInt(adSummary.year.conversions)}`}
+                  />
+                  <SummaryStat
+                    label="จำนวนแพลตฟอร์ม"
+                    value={`${(new Set(adEntries.map(entry => entry.platform)).size || 0).toLocaleString('th-TH')} ช่องทาง`}
+                    helper="ข้อมูลรวมตั้งแต่ต้นปี"
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+
+        <Card className="neumorphic-card h-full">
+          <CardHeader>
+            <CardTitle>สรุปคำสั่งซื้อ</CardTitle>
+            <CardDescription>ติดตาม Lazada Shop, Facebook Shop, TikTok Shop และเว็บ</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="today" className="w-full">
+              <TabsList className="grid grid-cols-2 w-full">
+                <TabsTrigger value="today">วันนี้</TabsTrigger>
+                <TabsTrigger value="year">ปีนี้</TabsTrigger>
+              </TabsList>
+              <TabsContent value="today" className="mt-4 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <SummaryStat
+                    label="ยอดสั่งซื้อ"
+                    value={F.formatCurrency(orderSummary.today.amount)}
+                    helper={`${orderSummary.today.count.toLocaleString('th-TH')} ออเดอร์`}
+                  />
+                  <SummaryStat
+                    label="ต้นทุน"
+                    value={F.formatCurrency(orderSummary.today.cost)}
+                    helper={`สินค้า ${F.formatInt(orderSummary.today.items)} ชิ้น`}
+                  />
+                  <SummaryStat
+                    label="กำไรสุทธิ"
+                    value={F.formatCurrency(orderSummary.today.profit)}
+                    helper="รวมทุกแพลตฟอร์ม"
+                  />
+                  <SummaryStat
+                    label="GP %"
+                    value={orderSummary.today.amount > 0 ? `${F.formatNumber((orderSummary.today.profit / orderSummary.today.amount) * 100, 1)}%` : '—'}
+                    helper="วันนี้"
+                  />
+                </div>
+              </TabsContent>
+              <TabsContent value="year" className="mt-4 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <SummaryStat
+                    label="ยอดขายสะสม"
+                    value={F.formatCurrency(orderSummary.year.amount)}
+                    helper={`${orderSummary.year.count.toLocaleString('th-TH')} ออเดอร์`}
+                  />
+                  <SummaryStat
+                    label="ต้นทุนสะสม"
+                    value={F.formatCurrency(orderSummary.year.cost)}
+                    helper={`สินค้า ${F.formatInt(orderSummary.year.items)} ชิ้น`}
+                  />
+                  <SummaryStat
+                    label="กำไรสะสม"
+                    value={F.formatCurrency(orderSummary.year.profit)}
+                    helper="รวมทุกช่องทาง"
+                  />
+                  <SummaryStat
+                    label="GP % สะสม"
+                    value={orderSummary.year.amount > 0 ? `${F.formatNumber((orderSummary.year.profit / orderSummary.year.amount) * 100, 1)}%` : '—'}
+                    helper="ตั้งแต่ต้นปี"
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+
+        <Card className="neumorphic-card h-full">
+          <CardHeader>
+            <CardTitle>ศูนย์ควบคุมการตรวจจับแอด</CardTitle>
+            <CardDescription>เตรียมพร้อมเชื่อมต่อ NSN &amp; N&amp;N สำหรับอนาคต</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold">NSN Intelligence</p>
+                <p className="text-xs text-muted-foreground">วิเคราะห์การยิงแอดแบบเรียลไทม์</p>
+              </div>
+              <Switch
+                checked={detectionState.nsn}
+                onCheckedChange={value => setDetectionState(prev => ({ ...prev, nsn: value }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold">N&amp;N Analytics</p>
+                <p className="text-xs text-muted-foreground">ตรวจจับต้นทุนและคำนวณกำไรอัตโนมัติ</p>
+              </div>
+              <Switch
+                checked={detectionState.nn}
+                onCheckedChange={value => setDetectionState(prev => ({ ...prev, nn: value }))}
+              />
+            </div>
+            <div className="p-4 rounded-lg bg-primary/10 border border-primary/20">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">กำไรสะสมจากแอด + ออเดอร์</p>
+              <p className="text-2xl font-bold mt-1">{F.formatCurrency(combinedYearProfit)}</p>
+              <p className="text-xs text-muted-foreground">ใช้เพื่อตั้งเป้าหมายการสแกนในสัปดาห์นี้</p>
+            </div>
+            <Button className="w-full" onClick={handleDetectionScan}>
+              เริ่มสแกนผลลัพธ์โฆษณา
+            </Button>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-10">
+        <Card className="neumorphic-card">
+          <CardHeader>
+            <CardTitle>บันทึกและดึงข้อมูลการยิงแอด</CardTitle>
+            <CardDescription>แยกค่าใช้จ่ายและผลตอบแทนรายแคมเปญ</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleAddAdEntry} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="ad-platform" className="text-sm">ช่องทางโฆษณา</Label>
+                  <Select value={adForm.platform} onValueChange={value => handleAdFormChange('platform', value)}>
+                    <SelectTrigger id="ad-platform" className="neumorphic-select mt-1">
+                      <SelectValue placeholder="เลือกแพลตฟอร์ม" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {adPlatformOptions.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="ad-date" className="text-sm">วันที่</Label>
+                  <Input
+                    id="ad-date"
+                    type="date"
+                    className="neumorphic-input mt-1"
+                    value={adForm.date}
+                    onChange={event => handleAdFormChange('date', event.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ad-campaign" className="text-sm">ชื่อแคมเปญ</Label>
+                  <Input
+                    id="ad-campaign"
+                    className="neumorphic-input mt-1"
+                    placeholder="เช่น Retarget TikTok 7 วัน"
+                    value={adForm.campaignName}
+                    onChange={event => handleAdFormChange('campaignName', event.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ad-spend" className="text-sm">งบโฆษณา (฿)</Label>
+                  <Input
+                    id="ad-spend"
+                    type="number"
+                    min="0"
+                    className="neumorphic-input mt-1"
+                    value={adForm.spend}
+                    onChange={event => handleAdFormChange('spend', event.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ad-revenue" className="text-sm">รายได้จากแคมเปญ (฿)</Label>
+                  <Input
+                    id="ad-revenue"
+                    type="number"
+                    min="0"
+                    className="neumorphic-input mt-1"
+                    value={adForm.revenue}
+                    onChange={event => handleAdFormChange('revenue', event.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="ad-conversions" className="text-sm">จำนวนคอนเวอร์ชัน</Label>
+                  <Input
+                    id="ad-conversions"
+                    type="number"
+                    min="0"
+                    className="neumorphic-input mt-1"
+                    value={adForm.conversions}
+                    onChange={event => handleAdFormChange('conversions', event.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-2">
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => handlePlatformSync('ad', 'facebook_ads')}>
+                    ดึง Facebook Ads
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => handlePlatformSync('ad', 'tiktok_ads')}>
+                    ดึง TikTok Ads
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => handlePlatformSync('ad', 'lazada_ads')}>
+                    ดึง Lazada Ads
+                  </Button>
+                </div>
+                <Button type="submit" className="md:w-auto w-full">
+                  บันทึกข้อมูลแอด
+                </Button>
+              </div>
+            </form>
+
+            <div className="mt-6">
+              <h4 className="text-sm font-semibold mb-3">รายการแคมเปญล่าสุด</h4>
+              {adEntries.length === 0 ? (
+                <p className="text-xs text-muted-foreground">ยังไม่มีข้อมูลโฆษณาในระบบ กดบันทึกหรือดึงข้อมูลเพื่อเริ่มต้น</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>แพลตฟอร์ม</TableHead>
+                        <TableHead>แคมเปญ</TableHead>
+                        <TableHead>วันที่</TableHead>
+                        <TableHead className="text-right">งบ</TableHead>
+                        <TableHead className="text-right">รายได้</TableHead>
+                        <TableHead className="text-right">กำไร</TableHead>
+                        <TableHead className="text-right">เครื่องมือ</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {adEntries.map(entry => (
+                        <TableRow key={entry.id}>
+                          <TableCell>{getAdPlatformLabel(entry.platform)}</TableCell>
+                          <TableCell>{entry.campaignName}</TableCell>
+                          <TableCell>{formatEntryDate(entry.date)}</TableCell>
+                          <TableCell className="text-right">{F.formatCurrency(entry.spend)}</TableCell>
+                          <TableCell className="text-right">{F.formatCurrency(entry.revenue)}</TableCell>
+                          <TableCell className="text-right">{F.formatCurrency(entry.revenue - entry.spend)}</TableCell>
+                          <TableCell className="text-right">
+                            <Button variant="ghost" size="sm" onClick={() => handleRemoveAdEntry(entry.id)}>
+                              ลบ
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="neumorphic-card">
+          <CardHeader>
+            <CardTitle>บันทึกและดึงข้อมูลคำสั่งซื้อ</CardTitle>
+            <CardDescription>ติดตามยอดขายและต้นทุนจากทุกช่องทาง</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleAddOrderEntry} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="order-platform" className="text-sm">ช่องทางการขาย</Label>
+                  <Select value={orderForm.platform} onValueChange={value => handleOrderFormChange('platform', value)}>
+                    <SelectTrigger id="order-platform" className="neumorphic-select mt-1">
+                      <SelectValue placeholder="เลือกแพลตฟอร์ม" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {orderPlatformOptions.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="order-date" className="text-sm">วันที่</Label>
+                  <Input
+                    id="order-date"
+                    type="date"
+                    className="neumorphic-input mt-1"
+                    value={orderForm.date}
+                    onChange={event => handleOrderFormChange('date', event.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="order-id" className="text-sm">หมายเลขคำสั่งซื้อ</Label>
+                  <Input
+                    id="order-id"
+                    className="neumorphic-input mt-1"
+                    placeholder="เช่น Lazada-001"
+                    value={orderForm.orderId}
+                    onChange={event => handleOrderFormChange('orderId', event.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="order-amount" className="text-sm">ยอดขาย (฿)</Label>
+                  <Input
+                    id="order-amount"
+                    type="number"
+                    min="0"
+                    className="neumorphic-input mt-1"
+                    value={orderForm.amount}
+                    onChange={event => handleOrderFormChange('amount', event.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="order-cost" className="text-sm">ต้นทุนรวม (฿)</Label>
+                  <Input
+                    id="order-cost"
+                    type="number"
+                    min="0"
+                    className="neumorphic-input mt-1"
+                    value={orderForm.cost}
+                    onChange={event => handleOrderFormChange('cost', event.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="order-items" className="text-sm">จำนวนสินค้า (ชิ้น)</Label>
+                  <Input
+                    id="order-items"
+                    type="number"
+                    min="1"
+                    className="neumorphic-input mt-1"
+                    value={orderForm.items}
+                    onChange={event => handleOrderFormChange('items', event.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-2">
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => handlePlatformSync('order', 'facebook_shop')}>
+                    ดึง Facebook Shop
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => handlePlatformSync('order', 'tiktok_shop')}>
+                    ดึง TikTok Shop
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => handlePlatformSync('order', 'lazada_shop')}>
+                    ดึง Lazada Shop
+                  </Button>
+                </div>
+                <Button type="submit" className="md:w-auto w-full">
+                  บันทึกข้อมูลออเดอร์
+                </Button>
+              </div>
+            </form>
+
+            <div className="mt-6">
+              <h4 className="text-sm font-semibold mb-3">รายการคำสั่งซื้อล่าสุด</h4>
+              {orderEntries.length === 0 ? (
+                <p className="text-xs text-muted-foreground">ยังไม่มีข้อมูลคำสั่งซื้อในระบบ กดบันทึกหรือดึงข้อมูลเพื่อเริ่มต้น</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ช่องทาง</TableHead>
+                        <TableHead>คำสั่งซื้อ</TableHead>
+                        <TableHead>วันที่</TableHead>
+                        <TableHead className="text-right">ยอดขาย</TableHead>
+                        <TableHead className="text-right">ต้นทุน</TableHead>
+                        <TableHead className="text-right">กำไร</TableHead>
+                        <TableHead className="text-right">การจัดการ</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {orderEntries.map(entry => (
+                        <TableRow key={entry.id}>
+                          <TableCell>{getOrderPlatformLabel(entry.platform)}</TableCell>
+                          <TableCell>{entry.orderId}</TableCell>
+                          <TableCell>{formatEntryDate(entry.date)}</TableCell>
+                          <TableCell className="text-right">{F.formatCurrency(entry.amount)}</TableCell>
+                          <TableCell className="text-right">{F.formatCurrency(entry.cost)}</TableCell>
+                          <TableCell className="text-right">{F.formatCurrency(entry.amount - entry.cost)}</TableCell>
+                          <TableCell className="text-right">
+                            <Button variant="ghost" size="sm" onClick={() => handleRemoveOrderEntry(entry.id)}>
+                              ลบ
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-4">
