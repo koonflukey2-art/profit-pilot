@@ -415,6 +415,8 @@ export function ProfitPilotPage() {
   const [history, setHistory] = useState([]);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: () => {} });
   const [n8nWorkflow, setN8nWorkflow] = useState({ json: null, loading: false });
+  const [n8nWorkflowName, setN8nWorkflowName] = useState('Profit Pilot Workflow');
+  const [n8nPrimaryGoal, setN8nPrimaryGoal] = useState('Scale Revenue & Optimize CPA');
   const [theme, setTheme] = useState('dark');
   const [funnelStageFilter, setFunnelStageFilter] = useState('all');
   const [aiAdvice, setAiAdvice] = useState({ recommendations: '', insights: '', loading: false });
@@ -482,6 +484,7 @@ export function ProfitPilotPage() {
   const [lastLaunchSummary, setLastLaunchSummary] = useState<{ timestamp: string; payload: LaunchPayloadItem[] } | null>(null);
   const [detectionState, setDetectionState] = useState({ nsn: true, nn: false });
   const summaryRef = useRef<HTMLDivElement | null>(null);
+  const [summarySection, setSummarySection] = useState('overview');
   const [productPresets, setProductPresets] = useState<ProductPreset[]>([]);
   const [presetDialogOpen, setPresetDialogOpen] = useState(false);
   const [newPresetName, setNewPresetName] = useState('');
@@ -1973,28 +1976,31 @@ export function ProfitPilotPage() {
 
   const handleGenerateN8nWorkflow = async () => {
     if (automationRules.length === 0) {
-      toast({ variant: "destructive", title: "No Rules", description: "Please add at least one automation rule." });
+      toast({ variant: 'destructive', title: 'No Rules', description: 'Please add at least one automation rule.' });
       return;
     }
+
+    const workflowName = (n8nWorkflowName || '').trim() || 'Profit Pilot Workflow';
+    const primaryGoal = (n8nPrimaryGoal || '').trim() || 'Scale Revenue & Optimize CPA';
+
     setN8nWorkflow({ json: null, loading: true });
-    
-    const n8nWorkflowName = (document.getElementById('n8nWorkflowName') as HTMLInputElement)?.value;
-    const n8nPrimaryGoal = (document.getElementById('n8nPrimaryGoal') as HTMLInputElement)?.value;
-    
+
     try {
       const { generateAutomationWorkflow } = await import('./actions');
       const result = await generateAutomationWorkflow({
-        workflowName: n8nWorkflowName || "Profit Pilot Workflow",
-        primaryGoal: n8nPrimaryGoal || "Scale Revenue & Optimize CPA",
+        workflowName,
+        primaryGoal,
         platforms: [inputs.automationTool],
         features: automationRules.map(r => r.action),
-        rules: automationRules
+        rules: automationRules,
       });
       setN8nWorkflow({ json: result.workflowJson, loading: false });
-      toast({ title: "Success", description: "n8n Workflow JSON generated successfully!" });
+      setN8nWorkflowName(workflowName);
+      setN8nPrimaryGoal(primaryGoal);
+      toast({ title: 'Success', description: 'n8n Workflow JSON generated successfully!' });
     } catch (error) {
       setN8nWorkflow({ json: null, loading: false });
-      toast({ variant: "destructive", title: "Error", description: "Failed to generate workflow." });
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to generate workflow.' });
     }
   };
 
@@ -2258,6 +2264,132 @@ export function ProfitPilotPage() {
     </Card>
   );
 
+  const summaryTabsConfig = useMemo(
+    () => [
+      {
+        value: 'overview',
+        label: 'ภาพรวม',
+        icon: LayoutDashboard,
+        helper: `ROAS ปัจจุบัน ${F.formatNumber(actualRoas, 2)}x`,
+      },
+      {
+        value: 'profitability',
+        label: 'กำไร & ROAS',
+        icon: Gauge,
+        helper: `BE ROAS ${F.formatNumber(calculated.breakevenRoas || 0, 2)}x`,
+      },
+      {
+        value: 'budget',
+        label: 'เป้าหมาย & งบ',
+        icon: Target,
+        helper: `งบ/เดือน ${F.formatCurrency(calculated.adBudget || 0)}`,
+      },
+      {
+        value: 'advisor',
+        label: 'แจ้งเตือน & AI',
+        icon: BrainCircuit,
+        helper: roasHealth.label,
+      },
+    ],
+    [actualRoas, calculated.adBudget, calculated.breakevenRoas, roasHealth.label],
+  );
+
+  const StopAlertCard = () => (
+    <Card className="rounded-3xl border bg-card/80 shadow-sm">
+      <CardHeader className="flex flex-col gap-2">
+        <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+          <AlertCircle
+            className={cn(
+              'h-5 w-5',
+              stopAlert.status === 'stop'
+                ? 'text-destructive'
+                : stopAlert.status === 'warning'
+                ? 'text-amber-500'
+                : 'text-primary',
+            )}
+          />
+          ระบบเตือนควรหยุดยิงแอด
+        </CardTitle>
+        <CardDescription>ตั้งเงื่อนไขหยุดเทสเมื่อ ROAS ต่ำหรือใช้งบเกิน</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div
+          className={cn(
+            'rounded-2xl border p-4',
+            stopAlert.status === 'stop'
+              ? 'border-destructive/40 bg-destructive/10'
+              : stopAlert.status === 'warning'
+              ? 'border-amber-400/40 bg-amber-400/10'
+              : 'border-emerald-400/40 bg-emerald-400/10',
+          )}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-foreground">{stopAlert.message}</p>
+              {stopAlert.reasons.length > 0 ? (
+                <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                  {stopAlert.reasons.map(reason => (
+                    <li key={reason}>• {reason}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-2 text-xs text-muted-foreground">ROAS ยังสูงกว่าจุดคุ้มทุน และงบยังไม่เกินขอบเขต</p>
+              )}
+            </div>
+            <Badge variant={stopAlert.status === 'stop' ? 'destructive' : stopAlert.status === 'warning' ? 'default' : 'secondary'}>
+              {stopAlert.status === 'stop' ? 'ควรหยุด' : stopAlert.status === 'warning' ? 'เริ่มเสี่ยง' : 'ปลอดภัย'}
+            </Badge>
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div>
+            <Label htmlFor="rule-consecutive" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              ROAS ต่ำกว่าคุ้มทุน (วัน)
+            </Label>
+            <Input
+              id="rule-consecutive"
+              type="number"
+              min={1}
+              value={stopRules.consecutiveDays}
+              onChange={event => handleStopRuleChange('consecutiveDays', event.target.value)}
+              className="neumorphic-input mt-1"
+            />
+          </div>
+          <div>
+            <Label htmlFor="rule-loss" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              ขาดทุนสะสม (฿)
+            </Label>
+            <Input
+              id="rule-loss"
+              type="number"
+              min={0}
+              value={stopRules.lossThreshold}
+              onChange={event => handleStopRuleChange('lossThreshold', event.target.value)}
+              className="neumorphic-input mt-1"
+            />
+          </div>
+          <div>
+            <Label htmlFor="rule-budget" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              งบเทสสูงสุด (x ราคาสินค้า)
+            </Label>
+            <Input
+              id="rule-budget"
+              type="number"
+              min={1}
+              step={0.5}
+              value={stopRules.testBudgetMultiple}
+              onChange={event => handleStopRuleChange('testBudgetMultiple', event.target.value)}
+              className="neumorphic-input mt-1"
+            />
+            {stopAlert.spendLimit > 0 && (
+              <p className="mt-1 text-xs text-muted-foreground">งบเทสสูงสุดตอนนี้ {F.formatCurrency(stopAlert.spendLimit)}</p>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   const quickStatusToneClass: Record<'ready' | 'warning' | 'info', string> = {
     ready: 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-500',
     warning: 'border border-amber-500/30 bg-amber-500/10 text-amber-500',
@@ -2392,6 +2524,8 @@ export function ProfitPilotPage() {
 
   const mainTabTriggerClass =
     'flex min-w-[150px] items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm';
+  const summaryTabTriggerClass =
+    'flex min-h-[72px] w-full flex-col items-start gap-1 rounded-xl px-4 py-3 text-left text-sm font-medium text-muted-foreground transition hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm';
 
   if (!isClient) {
       return (
@@ -2774,75 +2908,7 @@ export function ProfitPilotPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="rounded-3xl border bg-card/80 shadow-sm">
-          <CardHeader className="flex flex-col gap-2">
-            <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-              <AlertCircle className={cn('h-5 w-5', stopAlert.status === 'stop' ? 'text-destructive' : stopAlert.status === 'warning' ? 'text-amber-500' : 'text-primary')} />
-              ระบบเตือนควรหยุดยิงแอด
-            </CardTitle>
-            <CardDescription>ตั้งเงื่อนไขหยุดเทสเมื่อ ROAS ต่ำหรือใช้งบเกิน</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className={cn('rounded-2xl border p-4', stopAlert.status === 'stop' ? 'border-destructive/40 bg-destructive/10' : stopAlert.status === 'warning' ? 'border-amber-400/40 bg-amber-400/10' : 'border-emerald-400/40 bg-emerald-400/10')}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{stopAlert.message}</p>
-                  {stopAlert.reasons.length > 0 ? (
-                    <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
-                      {stopAlert.reasons.map(reason => (
-                        <li key={reason}>• {reason}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="mt-2 text-xs text-muted-foreground">ROAS ยังสูงกว่าจุดคุ้มทุน และงบยังไม่เกินขอบเขต</p>
-                  )}
-                </div>
-                <Badge variant={stopAlert.status === 'stop' ? 'destructive' : stopAlert.status === 'warning' ? 'default' : 'secondary'}>
-                  {stopAlert.status === 'stop' ? 'ควรหยุด' : stopAlert.status === 'warning' ? 'เริ่มเสี่ยง' : 'ปลอดภัย'}
-                </Badge>
-              </div>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div>
-                <Label htmlFor="rule-consecutive" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">ROAS ต่ำกว่าคุ้มทุน (วัน)</Label>
-                <Input
-                  id="rule-consecutive"
-                  type="number"
-                  min={1}
-                  value={stopRules.consecutiveDays}
-                  onChange={event => handleStopRuleChange('consecutiveDays', event.target.value)}
-                  className="neumorphic-input mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="rule-loss" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">ขาดทุนสะสม (฿)</Label>
-                <Input
-                  id="rule-loss"
-                  type="number"
-                  min={0}
-                  value={stopRules.lossThreshold}
-                  onChange={event => handleStopRuleChange('lossThreshold', event.target.value)}
-                  className="neumorphic-input mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="rule-budget" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">งบเทสสูงสุด (x ราคาสินค้า)</Label>
-                <Input
-                  id="rule-budget"
-                  type="number"
-                  min={1}
-                  step={0.5}
-                  value={stopRules.testBudgetMultiple}
-                  onChange={event => handleStopRuleChange('testBudgetMultiple', event.target.value)}
-                  className="neumorphic-input mt-1"
-                />
-                {stopAlert.spendLimit > 0 && (
-                  <p className="mt-1 text-xs text-muted-foreground">งบเทสสูงสุดตอนนี้ {F.formatCurrency(stopAlert.spendLimit)}</p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <StopAlertCard />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[2fr_1fr]">
@@ -4530,120 +4596,196 @@ export function ProfitPilotPage() {
           </TabsContent>
 
           <TabsContent value="summary">
-            <div ref={summaryRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Overview Card */}
-              <Card className="neumorphic-card lg:col-span-3">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><Info className="w-6 h-6 text-primary"/> ภาพรวมแผน</CardTitle>
-                  <CardDescription>สรุปข้อมูลหลักและเป้าหมายของแผนที่คุณวางไว้</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                   <div className="flex items-center gap-4 p-4 bg-background/50 rounded-lg">
-                      <Briefcase className="w-8 h-8 text-primary"/>
-                      <div>
-                        <p className="text-sm text-muted-foreground">สินค้า/ธุรกิจ</p>
-                        <p className="font-bold">{inputs.productName || 'N/A'}</p>
-                        <p className="text-xs text-muted-foreground">{funnelObjectivesData[inputs.businessType]?.name || 'N/A'}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 p-4 bg-background/50 rounded-lg">
-                      <Target className="w-8 h-8 text-primary"/>
-                      <div>
-                        <p className="text-sm text-muted-foreground">เป้าหมายกำไร</p>
-                        <p className="font-bold">{F.formatCurrency(inputs.profitGoal)}</p>
-                        <p className="text-xs text-muted-foreground">{inputs.profitGoalTimeframe === 'monthly' ? 'ต่อเดือน' : 'ต่อวัน'}</p>
-                      </div>
-                    </div>
-                     <div className="flex items-center gap-4 p-4 bg-background/50 rounded-lg">
-                      <Scaling className="w-8 h-8 text-primary"/>
-                      <div>
-                        <p className="text-sm text-muted-foreground">ค่าใช้จ่ายคงที่</p>
-                        <p className="font-bold">{F.formatCurrency(inputs.fixedCosts)}</p>
-                         <p className="text-xs text-muted-foreground">ต่อเดือน</p>
-                      </div>
-                    </div>
-                </CardContent>
-              </Card>
+            <div ref={summaryRef} className="space-y-6">
+              <Tabs value={summarySection} onValueChange={setSummarySection} className="w-full">
+                <TabsList className="grid grid-cols-2 gap-2 rounded-2xl border bg-card/60 p-2 md:grid-cols-4">
+                  {summaryTabsConfig.map(section => {
+                    const Icon = section.icon;
+                    return (
+                      <TabsTrigger key={section.value} value={section.value} className={summaryTabTriggerClass}>
+                        <div className="flex items-center gap-2">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                            <Icon className="h-4 w-4" />
+                          </span>
+                          <span className="text-sm font-semibold text-foreground md:text-base">{section.label}</span>
+                        </div>
+                        <p className="text-xs font-normal text-muted-foreground md:text-sm">{section.helper}</p>
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
 
-              {/* Calculation Summary */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:col-span-3">
-                <SummaryInfoCard title="ราคาขาย (ต่อหน่วย)" value={F.formatCurrency(calculated.priceBeforeVat)} subValue={`รวม VAT: ${F.formatCurrency(inputs.sellingPrice)}`} icon={DollarSign} />
-                <SummaryInfoCard title="กำไรขั้นต้น (ต่อหน่วย)" value={F.formatCurrency(calculated.grossProfitUnit)} subValue="ราคาขาย(ไม่รวม VAT) - ต้นทุนแปรผันทั้งหมด" icon={BarChart} />
-                <SummaryInfoCard title="กำไรสุทธิ (ต่อหน่วย)" value={F.formatCurrency(calculated.netProfitUnit)} subValue="กำไรขั้นต้น - ค่าโฆษณาต่อหน่วย (CPA)" icon={LineChart} />
-                <SummaryInfoCard title="งบโฆษณา (ต่อหน่วย)" value={F.formatCurrency(calculated.targetCpa)} subValue="Target CPA ที่คำนวณได้" icon={Megaphone} />
-                <SummaryInfoCard title="Break-even ROAS" value={`${F.formatNumber(calculated.breakevenRoas, 2)}x`} subValue={`CPA คุ้มทุน ${F.formatCurrency(calculated.breakevenCpa)}`} icon={Gauge} />
-                <SummaryInfoCard title="Max CPC" value={F.formatCurrency(calculated.maxCpc)} subValue={`Conversion เป้าหมาย ${F.formatNumber(inputs.expectedConversionRate, 2)}%`} icon={MousePointerClick} />
-              </div>
+                <TabsContent value="overview" className="mt-6 space-y-6">
+                  <div className="grid gap-6 lg:grid-cols-3">
+                    <Card className="neumorphic-card lg:col-span-3">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Info className="h-6 w-6 text-primary" /> ภาพรวมแผน
+                        </CardTitle>
+                        <CardDescription>สรุปข้อมูลหลักและเป้าหมายของแผนที่คุณวางไว้</CardDescription>
+                      </CardHeader>
+                      <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                        <div className="flex items-center gap-4 rounded-lg bg-background/50 p-4">
+                          <Briefcase className="h-8 w-8 text-primary" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">สินค้า/ธุรกิจ</p>
+                            <p className="font-bold">{inputs.productName || 'N/A'}</p>
+                            <p className="text-xs text-muted-foreground">{funnelObjectivesData[inputs.businessType]?.name || 'N/A'}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 rounded-lg bg-background/50 p-4">
+                          <Target className="h-8 w-8 text-primary" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">เป้าหมายกำไร</p>
+                            <p className="font-bold">{F.formatCurrency(inputs.profitGoal)}</p>
+                            <p className="text-xs text-muted-foreground">{inputs.profitGoalTimeframe === 'monthly' ? 'ต่อเดือน' : 'ต่อวัน'}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4 rounded-lg bg-background/50 p-4">
+                          <Scaling className="h-8 w-8 text-primary" />
+                          <div>
+                            <p className="text-sm text-muted-foreground">ค่าใช้จ่ายคงที่</p>
+                            <p className="font-bold">{F.formatCurrency(inputs.fixedCosts)}</p>
+                            <p className="text-xs text-muted-foreground">ต่อเดือน</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4 lg:col-span-3">
+                      <SummaryStat label="ROAS ปัจจุบัน" value={`${F.formatNumber(actualRoas, 2)}x`} helper={`ROAS คุ้มทุน ${F.formatNumber(calculated.breakevenRoas, 2)}x`} />
+                      <SummaryStat label="Break-even ROAS" value={`${F.formatNumber(calculated.breakevenRoas, 2)}x`} helper="ROAS ขั้นต่ำที่ต้องได้เพื่อคุ้มทุน" />
+                      <SummaryStat label="Break-even CPA" value={F.formatCurrency(calculated.breakevenCpa)} helper="ค่าแอดสูงสุดต่อ 1 ออเดอร์" />
+                      <SummaryStat label="Max CPC ที่ไหว" value={F.formatCurrency(calculated.maxCpc)} helper={`ตาม CVR ปัจจุบัน ${F.formatNumber(calculated.expectedConversionRate || inputs.expectedConversionRate, 1)}%`} />
+                    </div>
+                  </div>
+                </TabsContent>
 
-              {/* Goals & Budget */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:col-span-3">
-                <SummaryInfoCard title="ยอดขายเป้าหมาย (ต่อเดือน)" value={F.formatCurrency(calculated.targetRevenue)} icon={Users} />
-                <SummaryInfoCard title="จำนวนออเดอร์ (ต่อเดือน)" value={F.formatInt(calculated.targetOrders)} subValue={`เฉลี่ย ${F.formatNumber(calculated.targetOrdersDaily, 1)} ออเดอร์/วัน`} icon={ThumbsUp} />
-                <SummaryInfoCard title="งบโฆษณารวม (ต่อเดือน)" value={F.formatCurrency(calculated.adBudget)} icon={Percent} />
-                <SummaryInfoCard title="งบโฆษณา + VAT (ต่อเดือน)" value={F.formatCurrency(calculated.adBudgetWithVat)} subValue={`VAT ${inputs.vatProduct}%`} icon={Hash} />
-                <SummaryInfoCard title="กำไรจำลอง 30 วัน" value={F.formatCurrency(calculated.monthlyProfitProjection)} icon={TrendingUp} />
-                <SummaryInfoCard title="ผลกระทบจากออเดอร์ยกเลิก" value={F.formatCurrency(calculated.returnImpact)} subValue={`อัตรายกเลิก ${F.formatNumber(calculated.expectedReturnRate, 1)}%`} icon={AlertTriangle} />
-                <SummaryInfoCard title="LTV ต่อออเดอร์" value={F.formatCurrency(calculated.ltvContribution)} subValue="ค่าที่เพิ่มจากลูกค้าซื้อซ้ำ" icon={Heart} />
-              </div>
-              
-              {/* KPIs */}
-              <div className="lg:col-span-3">
-                 <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Target className="w-5 h-5 text-primary"/>ตัวชี้วัด (KPIs)</h3>
-                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="neumorphic-card p-4 text-center bg-red-900/20 border-red-500/50">
+                <TabsContent value="profitability" className="mt-6 space-y-6">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    <SummaryInfoCard title="ราคาขาย (ต่อหน่วย)" value={F.formatCurrency(calculated.priceBeforeVat)} subValue={`รวม VAT: ${F.formatCurrency(inputs.sellingPrice)}`} icon={DollarSign} />
+                    <SummaryInfoCard title="กำไรขั้นต้น (ต่อหน่วย)" value={F.formatCurrency(calculated.grossProfitUnit)} subValue="ราคาขาย(ไม่รวม VAT) - ต้นทุนแปรผันทั้งหมด" icon={BarChart} />
+                    <SummaryInfoCard title="กำไรสุทธิ (ต่อหน่วย)" value={F.formatCurrency(calculated.netProfitUnit)} subValue="กำไรขั้นต้น - ค่าโฆษณาต่อหน่วย (CPA)" icon={LineChart} />
+                    <SummaryInfoCard title="Target CPA" value={F.formatCurrency(calculated.targetCpa)} subValue="Target CPA ที่คำนวณได้" icon={Megaphone} />
+                    <SummaryInfoCard title="Break-even ROAS" value={`${F.formatNumber(calculated.breakevenRoas, 2)}x`} subValue={`CPA คุ้มทุน ${F.formatCurrency(calculated.breakevenCpa)}`} icon={Gauge} />
+                    <SummaryInfoCard title="Max CPC" value={F.formatCurrency(calculated.maxCpc)} subValue={`Conversion เป้าหมาย ${F.formatNumber(inputs.expectedConversionRate, 2)}%`} icon={MousePointerClick} />
+                  </div>
+                  <div>
+                    <h3 className="mb-2 flex items-center gap-2 text-lg font-bold">
+                      <Target className="h-5 w-5 text-primary" /> ตัวชี้วัด (KPIs)
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+                      <div className="neumorphic-card border-red-500/50 bg-red-900/20 p-4 text-center">
                         <p className="font-bold text-red-400">BE ROAS</p>
                         <p className="text-2xl font-bold text-red-400">{F.formatNumber(calculated.breakevenRoas)}</p>
                         <p className="text-xs text-red-200/70">ROAS คุ้มทุน</p>
-                    </div>
-                    <div className="neumorphic-card p-4 text-center bg-red-900/20 border-red-500/50">
+                      </div>
+                      <div className="neumorphic-card border-red-500/50 bg-red-900/20 p-4 text-center">
                         <p className="font-bold text-red-400">BE CPA</p>
                         <p className="text-2xl font-bold text-red-400">{F.formatCurrency(calculated.breakevenCpa)}</p>
                         <p className="text-xs text-red-200/70">CPA คุ้มทุน</p>
-                    </div>
-                    <div className="neumorphic-card p-4 text-center bg-green-900/20 border-green-500/50">
+                      </div>
+                      <div className="neumorphic-card border-green-500/50 bg-green-900/20 p-4 text-center">
                         <p className="font-bold text-green-400">Target ROAS</p>
                         <p className="text-2xl font-bold text-green-400">{F.formatNumber(calculated.targetRoas)}</p>
-                         <p className="text-xs text-green-200/70">ROAS เป้าหมาย</p>
-                    </div>
-                    <div className="neumorphic-card p-4 text-center bg-green-900/20 border-green-500/50">
+                        <p className="text-xs text-green-200/70">ROAS เป้าหมาย</p>
+                      </div>
+                      <div className="neumorphic-card border-green-500/50 bg-green-900/20 p-4 text-center">
                         <p className="font-bold text-green-400">Target CPA</p>
                         <p className="text-2xl font-bold text-green-400">{F.formatCurrency(calculated.targetCpa)}</p>
-                         <p className="text-xs text-green-200/70">CPA เป้าหมาย</p>
+                        <p className="text-xs text-green-200/70">CPA เป้าหมาย</p>
+                      </div>
                     </div>
-                 </div>
-              </div>
+                  </div>
+                </TabsContent>
 
-               {/* AI Advisor */}
-              <div className="lg:col-span-3">
-                  <Card className="neumorphic-card">
+                <TabsContent value="budget" className="mt-6 space-y-6">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    <SummaryInfoCard title="ยอดขายเป้าหมาย (ต่อเดือน)" value={F.formatCurrency(calculated.targetRevenue)} subValue="ตั้งจากเป้ากำไรที่ระบุ" icon={Users} />
+                    <SummaryInfoCard title="จำนวนออเดอร์ (ต่อเดือน)" value={F.formatInt(calculated.targetOrders)} subValue={`เฉลี่ย ${F.formatNumber(calculated.targetOrdersDaily, 1)} ออเดอร์/วัน`} icon={ThumbsUp} />
+                    <SummaryInfoCard title="งบโฆษณารวม (ต่อเดือน)" value={F.formatCurrency(calculated.adBudget)} subValue="ไม่รวม VAT" icon={Percent} />
+                    <SummaryInfoCard title="งบโฆษณา + VAT" value={F.formatCurrency(calculated.adBudgetWithVat)} subValue={`VAT ${inputs.vatProduct}%`} icon={Hash} />
+                    <SummaryInfoCard title="ยอดขายจำลอง 30 วัน" value={F.formatCurrency(calculated.monthlyRevenueProjection)} subValue="ประเมินจาก Conversion และงบปัจจุบัน" icon={BarChart} />
+                    <SummaryInfoCard title="กำไรจำลอง 30 วัน" value={F.formatCurrency(calculated.monthlyProfitProjection)} subValue="ใช้ตัวเลขจำลองในแผนล่าสุด" icon={TrendingUp} />
+                    <SummaryInfoCard title="ผลกระทบจากออเดอร์ยกเลิก" value={F.formatCurrency(calculated.returnImpact)} subValue={`อัตรายกเลิก ${F.formatNumber(calculated.expectedReturnRate, 1)}%`} icon={AlertTriangle} />
+                    <SummaryInfoCard title="LTV ต่อออเดอร์" value={F.formatCurrency(calculated.ltvContribution)} subValue="ค่าที่เพิ่มจากลูกค้าซื้อซ้ำ" icon={Heart} />
+                  </div>
+                  <div className="rounded-2xl border bg-muted/40 p-4 text-sm">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">คิด LTV จากลูกค้าซื้อซ้ำ</p>
+                        <p className="text-xs text-muted-foreground">เพิ่มกำไรต่อหัวเพื่อผ่อนจุดคุ้มทุน</p>
+                      </div>
+                      <Switch checked={!!inputs.includeLtv} onCheckedChange={value => handleInputChange('includeLtv', value)} />
+                    </div>
+                    <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_160px]">
+                      <Input
+                        value={inputs.ltvPerCustomer}
+                        onChange={event => handleInputChange('ltvPerCustomer', event.target.value)}
+                        type="number"
+                        placeholder="กำไรจากการซื้อซ้ำต่อหัว"
+                        className="neumorphic-input"
+                        disabled={!inputs.includeLtv}
+                      />
+                      <Button variant="outline" size="sm" onClick={() => setIsSimulatorOpen(true)} className="w-full">
+                        <Gauge className="mr-2 h-4 w-4" /> เปิดตัวจำลอง What-if
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Button type="button" onClick={handleConfirmPlan} className="neon-button flex w-full items-center justify-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      ยืนยันและดูผลลัพธ์สรุปทั้งหมด
+                    </Button>
+                    <Button type="button" variant="outline" className="flex w-full items-center justify-center gap-2" onClick={() => setIsSimulatorOpen(true)}>
+                      <LineChart className="h-4 w-4" /> ทดลองตัวเลขเร็ว
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="advisor" className="mt-6 space-y-6">
+                  <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+                    <StopAlertCard />
+                    <Card className="neumorphic-card">
                       <CardHeader>
-                          <CardTitle className="flex items-center gap-2"><BrainCircuit className="w-6 h-6 text-primary"/> AI Advisor</CardTitle>
-                          <CardDescription>รับคำแนะนำและข้อมูลเชิงลึกจาก AI เพื่อปรับปรุงแผนของคุณ</CardDescription>
+                        <CardTitle className="flex items-center gap-2">
+                          <BrainCircuit className="h-6 w-6 text-primary" /> AI Advisor
+                        </CardTitle>
+                        <CardDescription>รับคำแนะนำและข้อมูลเชิงลึกจาก AI เพื่อปรับปรุงแผนของคุณ</CardDescription>
                       </CardHeader>
                       <CardContent>
-                          <Button onClick={fetchAiAdvice} disabled={aiAdvice.loading} className="w-full neon-button">
-                              {aiAdvice.loading ? 'กำลังวิเคราะห์...' : 'ขอคำแนะนำจาก AI'}
-                          </Button>
-                          {aiAdvice.loading && <Progress value={50} className="w-full mt-4" />}
-                          {!aiAdvice.loading && (aiAdvice.recommendations || aiAdvice.insights) && (
-                            <div className="mt-4 space-y-4 text-sm">
-                                {aiAdvice.recommendations && (
-                                  <div>
-                                      <h4 className="font-bold mb-2">คำแนะนำ (Recommendations):</h4>
-                                      <p className="p-4 bg-background/50 rounded-lg whitespace-pre-wrap">{aiAdvice.recommendations}</p>
-                                  </div>
-                                )}
-                                {aiAdvice.insights && (
-                                  <div>
-                                      <h4 className="font-bold mb-2">ข้อมูลเชิงลึก (Insights):</h4>
-                                      <p className="p-4 bg-background/50 rounded-lg whitespace-pre-wrap">{aiAdvice.insights}</p>
-                                  </div>
-                                )}
-                            </div>
-                          )}
+                        <Button onClick={fetchAiAdvice} disabled={aiAdvice.loading} className="w-full neon-button">
+                          {aiAdvice.loading ? 'กำลังวิเคราะห์...' : 'ขอคำแนะนำจาก AI'}
+                        </Button>
+                        {aiAdvice.loading && <Progress value={50} className="mt-4 w-full" />}
+                        {!aiAdvice.loading && (aiAdvice.recommendations || aiAdvice.insights) && (
+                          <div className="mt-4 space-y-4 text-sm">
+                            {aiAdvice.recommendations && (
+                              <div>
+                                <h4 className="mb-2 font-bold">คำแนะนำ (Recommendations):</h4>
+                                <p className="whitespace-pre-wrap rounded-lg bg-background/50 p-4">{aiAdvice.recommendations}</p>
+                              </div>
+                            )}
+                            {aiAdvice.insights && (
+                              <div>
+                                <h4 className="mb-2 font-bold">ข้อมูลเชิงลึก (Insights):</h4>
+                                <p className="whitespace-pre-wrap rounded-lg bg-background/50 p-4">{aiAdvice.insights}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </CardContent>
-                  </Card>
-              </div>
+                    </Card>
+                  </div>
+                  <div className="rounded-2xl border bg-card/70 p-4 text-xs text-muted-foreground">
+                    <p className="font-semibold text-foreground">เคล็ดลับ</p>
+                    <ul className="mt-2 list-disc space-y-1 pl-4">
+                      <li>ตั้งค่าการเตือนให้ตรงกับความเสี่ยงของสินค้าแต่ละตัว</li>
+                      <li>หลังเชื่อม API แล้ว ระบบจะดึง ROAS จริงมาประเมินอัตโนมัติ</li>
+                      <li>บันทึกแผนเพื่อเก็บผลการปรับปรุงในแต่ละเดือน</li>
+                    </ul>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           </TabsContent>
           <TabsContent value="metrics">
@@ -4864,9 +5006,31 @@ export function ProfitPilotPage() {
                   <h3 className="text-xl font-bold mb-4 gradient-text">n8n Workflow Generator</h3>
                   <p className="text-sm opacity-80 mb-6">สร้าง Workflow JSON สำหรับ n8n โดยอัตโนมัติตามกฎที่คุณสร้างไว้</p>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <Input id="n8nWorkflowName" placeholder="ชื่อ Workflow (เช่น 'Profit Pilot Automation')" className="neumorphic-input" />
-                    <Input id="n8nPrimaryGoal" placeholder="เป้าหมายหลัก (เช่น 'Scale Revenue & Optimize CPA')" className="neumorphic-input" />
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mb-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="n8nWorkflowName" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        ชื่อ Workflow
+                      </Label>
+                      <Input
+                        id="n8nWorkflowName"
+                        value={n8nWorkflowName}
+                        onChange={event => setN8nWorkflowName(event.target.value)}
+                        placeholder="ชื่อ Workflow (เช่น 'Profit Pilot Automation')"
+                        className="neumorphic-input"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="n8nPrimaryGoal" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        เป้าหมายหลักของ Automation
+                      </Label>
+                      <Input
+                        id="n8nPrimaryGoal"
+                        value={n8nPrimaryGoal}
+                        onChange={event => setN8nPrimaryGoal(event.target.value)}
+                        placeholder="เป้าหมายหลัก (เช่น 'Scale Revenue & Optimize CPA')"
+                        className="neumorphic-input"
+                      />
+                    </div>
                   </div>
                   
                   <Button onClick={handleGenerateN8nWorkflow} className="neon-button w-full" disabled={n8nWorkflow.loading || automationRules.length === 0}>
@@ -4879,10 +5043,17 @@ export function ProfitPilotPage() {
                     <div className="mt-6 relative">
                       <h4 className="font-bold mb-2">Generated Workflow JSON</h4>
                        <div className="p-4 bg-background rounded-lg max-h-96 overflow-auto relative">
-                        <Button size="sm" onClick={() => {
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            if (!n8nWorkflow.json) return;
                             navigator.clipboard.writeText(n8nWorkflow.json);
-                            toast({ title: "Copied!", description: "คัดลอก Workflow JSON แล้ว" });
-                        }} className="absolute top-2 right-2 z-10 neon-button secondary"><ClipboardCopy className="w-4 h-4"/>คัดลอก</Button>
+                            toast({ title: 'Copied!', description: 'คัดลอก Workflow JSON แล้ว' });
+                          }}
+                          className="absolute top-2 right-2 z-10 neon-button secondary"
+                        >
+                          <ClipboardCopy className="w-4 h-4" />คัดลอก
+                        </Button>
                         <pre className="text-xs whitespace-pre-wrap">{n8nWorkflow.json}</pre>
                       </div>
                     </div>
