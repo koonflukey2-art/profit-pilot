@@ -26,9 +26,9 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
-import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy, Facebook, Wand, CheckIcon, ChevronDown, Play, Pause, ArrowUpRight, ArrowUp, Square, MousePointerClick, LayoutDashboard, AlertTriangle, Music, ShoppingBag, Globe, Plug, Send, AlertCircle, CheckCircle2, Download, Gauge, TrendingDown, TrendingUp, Home } from 'lucide-react';
+import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy, Facebook, Wand, CheckIcon, ChevronDown, Play, Pause, ArrowUpRight, ArrowUp, Square, MousePointerClick, LayoutDashboard, AlertTriangle, Music, ShoppingBag, Globe, Plug, Send, AlertCircle, CheckCircle2, Download, Gauge, TrendingDown, TrendingUp, Home, PencilLine } from 'lucide-react';
 import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
 import AutomationRuleBuilder from './RevealbotRuleBuilder';
@@ -412,6 +412,11 @@ export function ProfitPilotPage() {
   const [uiTitles, setUiTitles] = useState({ productInfoTitle: 'ข้อมูลสินค้า', costCalculationTitle: 'คำนวณต้นทุน', goalsAndResultsTitle: 'เป้าหมายและผลลัพธ์', advancedPlanningTitle: 'Advanced Planning' });
   const [activeTab, setActiveTab] = useState('home');
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [renameHistoryState, setRenameHistoryState] = useState<{ isOpen: boolean; id: number | null; name: string }>({
+    isOpen: false,
+    id: null,
+    name: '',
+  });
   const [history, setHistory] = useState([]);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: () => {} });
   const [n8nWorkflow, setN8nWorkflow] = useState({ json: null, loading: false });
@@ -1915,6 +1920,34 @@ export function ProfitPilotPage() {
       setIsHistoryModalOpen(false);
       toast({ title: 'Success', description: `โหลดแผน "${entry.name}" สำเร็จ` });
     }
+  };
+
+  const requestRenameHistoryItem = (item) => {
+    setRenameHistoryState({ isOpen: true, id: item.id, name: item.name || '' });
+  };
+
+  const handleRenameHistoryNameChange = (value) => {
+    setRenameHistoryState(prev => ({ ...prev, name: value }));
+  };
+
+  const closeRenameHistoryDialog = () => {
+    setRenameHistoryState({ isOpen: false, id: null, name: '' });
+  };
+
+  const handleRenameHistorySubmit = () => {
+    if (typeof window === 'undefined') return;
+    if (!renameHistoryState.id) {
+      closeRenameHistoryDialog();
+      return;
+    }
+    const trimmedName = (renameHistoryState.name || '').trim() || 'แผนที่ไม่ได้ตั้งชื่อ';
+    const updatedHistory = history.map(item =>
+      item.id === renameHistoryState.id ? { ...item, name: trimmedName } : item,
+    );
+    setHistory(updatedHistory);
+    localStorage.setItem('profitPlannerHistory', JSON.stringify(updatedHistory));
+    toast({ title: 'Success', description: `เปลี่ยนชื่อแผนเป็น "${trimmedName}" แล้ว` });
+    closeRenameHistoryDialog();
   };
 
   const deleteHistoryItem = (id) => {
@@ -5160,6 +5193,9 @@ export function ProfitPilotPage() {
                     <p className="text-xs opacity-60">{new Date(item.id).toLocaleString()}</p>
                   </div>
                   <div className="flex gap-2">
+                    <Button variant="outline" onClick={() => requestRenameHistoryItem(item)}>
+                      <PencilLine className="w-4 h-4 mr-1" /> แก้ชื่อ
+                    </Button>
                     <Button onClick={() => loadHistory(item.id)}>โหลด</Button>
                     <Button variant="destructive" onClick={() => deleteHistoryItem(item.id)}><Trash2 className="w-4 h-4"/></Button>
                   </div>
@@ -5198,10 +5234,55 @@ export function ProfitPilotPage() {
             {history.length > 0 ? history.map(item => (
               <div key={item.id} className="neumorphic-card flex justify-between items-center p-3">
                 <div><p className="font-bold">{item.name}</p><p className="text-xs opacity-60">{new Date(item.id).toLocaleString()}</p></div>
-                <div className="flex gap-2"><Button onClick={() => loadHistory(item.id)}>Load</Button><Button variant="destructive" onClick={() => deleteHistoryItem(item.id)}><Trash2 className="w-4 h-4"/></Button></div>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => requestRenameHistoryItem(item)}>
+                    <PencilLine className="w-4 h-4 mr-1" /> แก้ชื่อ
+                  </Button>
+                  <Button onClick={() => loadHistory(item.id)}>Load</Button>
+                  <Button variant="destructive" onClick={() => deleteHistoryItem(item.id)}><Trash2 className="w-4 h-4"/></Button>
+                </div>
               </div>
             )) : <p className="text-center opacity-60">ยังไม่มีประวัติการวางแผน</p>}
           </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={renameHistoryState.isOpen}
+        onOpenChange={isOpen => {
+          if (!isOpen) {
+            closeRenameHistoryDialog();
+          }
+        }}
+      >
+        <DialogContent className="neumorphic-card max-w-md">
+          <DialogHeader>
+            <DialogTitle className="gradient-text">เปลี่ยนชื่อแผน</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm opacity-80">
+              ตั้งชื่อใหม่ให้แผนของคุณเพื่อค้นหาได้ง่ายขึ้นในภายหลัง
+            </p>
+            <Input
+              autoFocus
+              placeholder="ตั้งชื่อแผน"
+              value={renameHistoryState.name}
+              onChange={event => handleRenameHistoryNameChange(event.target.value)}
+              onKeyDown={event => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  handleRenameHistorySubmit();
+                }
+              }}
+            />
+          </div>
+          <DialogFooter className="pt-4">
+            <Button variant="outline" onClick={closeRenameHistoryDialog}>
+              ยกเลิก
+            </Button>
+            <Button onClick={handleRenameHistorySubmit} className="neon-button">
+              บันทึกชื่อใหม่
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
