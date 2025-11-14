@@ -28,7 +28,7 @@ import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose, DialogFooter } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
-import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy, Facebook, Wand, CheckIcon, ChevronDown, Play, Pause, ArrowUpRight, ArrowUp, Square, MousePointerClick, LayoutDashboard, AlertTriangle, Music, ShoppingBag, Globe, Plug, Send, AlertCircle, CheckCircle2, Download, Gauge, TrendingDown, TrendingUp, Home, PencilLine } from 'lucide-react';
+import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy, Facebook, Wand, CheckIcon, ChevronDown, Play, Pause, ArrowUpRight, ArrowUp, Square, MousePointerClick, LayoutDashboard, AlertTriangle, Music, ShoppingBag, Globe, Plug, Send, AlertCircle, CheckCircle2, Download, Gauge, TrendingDown, TrendingUp, Home, PencilLine, Calculator } from 'lucide-react';
 import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
 import AutomationRuleBuilder from './RevealbotRuleBuilder';
@@ -2466,13 +2466,23 @@ export function ProfitPilotPage() {
         ? { tone: 'info', label: `${history.length.toLocaleString('th-TH')} แผนที่บันทึกไว้` }
         : { tone: 'warning', label: 'ยังไม่มีประวัติ' };
 
-    return {
-      primary: [
-        {
-          key: 'planning',
-          title: 'ตั้งค่าต้นทุน & เป้าหมาย',
-          description: 'กรอกต้นทุนจริง คำนวณ Break-even ROAS, CPA และ Max CPC',
-          icon: GanttChartSquare,
+  return {
+    primary: [
+      {
+        key: 'calculator',
+        title: 'คำนวณจุดคุ้มทุน',
+        description: 'Break-even ROAS, CPA และ Max CPC ล่าสุด',
+        icon: Calculator,
+        status: {
+          tone: 'ready',
+          label: `ROAS คุ้มทุน ${F.formatNumber(calculated.breakevenRoas, 2)}x`,
+        },
+      },
+      {
+        key: 'planning',
+        title: 'ตั้งค่าต้นทุน & เป้าหมาย',
+        description: 'กรอกต้นทุนจริง คำนวณ Break-even ROAS, CPA และ Max CPC',
+        icon: GanttChartSquare,
           status: { tone: 'ready', label: 'พร้อมใช้งาน' },
         },
         {
@@ -2537,6 +2547,7 @@ export function ProfitPilotPage() {
     };
   }, [
     automationRules.length,
+    calculated.breakevenRoas,
     calculated.monthlyProfitProjection,
     history.length,
     launchReady,
@@ -2567,6 +2578,12 @@ export function ProfitPilotPage() {
             label: 'ภาพรวม & ทางลัด',
             helper: `ROAS ปัจจุบัน ${F.formatNumber(actualRoas, 2)}x`,
             icon: Home,
+          },
+          {
+            value: 'calculator',
+            label: 'คำนวณกำไร',
+            helper: `Break-even ROAS ${F.formatNumber(calculated.breakevenRoas, 2)}x`,
+            icon: Calculator,
           },
           {
             value: 'summary',
@@ -2648,6 +2665,7 @@ export function ProfitPilotPage() {
     [
       actualRoas,
       automationRules.length,
+      calculated.breakevenRoas,
       calculated.monthlyProfitProjection,
       history.length,
       launchReady,
@@ -2799,35 +2817,37 @@ export function ProfitPilotPage() {
         </DialogContent>
       </Dialog>
 
-      <header className="rounded-3xl bg-gradient-to-r from-primary to-primary/70 p-6 text-white shadow-lg">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-2">
-            <p className="text-xs font-medium uppercase tracking-wider text-white/70">
-              Profit &amp; Metrics Planner v5.3
-            </p>
-            <h1 className="text-3xl font-bold leading-tight md:text-4xl">Shearer (S1) Profit Pilot</h1>
-            <p className="max-w-2xl text-sm md:text-base text-white/80">
-              จัดการข้อมูลยิงแอดและคำสั่งซื้อในที่เดียว ดูสรุปสำคัญได้ทันที และย้ายไปยังหน้าผลลัพธ์ได้เพียงคลิกเดียว
-            </p>
-          </div>
-          <div className="flex w-full flex-col gap-3 rounded-2xl border border-white/20 bg-white/10 p-4 text-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:text-base">
-            <div>
-              <p className="text-xs uppercase tracking-wide text-white/70">กำไรสะสมปีนี้</p>
-              <p className="text-2xl font-semibold">{F.formatCurrency(combinedYearProfit)}</p>
+      {activeTab === 'home' && (
+        <>
+          <header className="rounded-3xl bg-gradient-to-r from-primary to-primary/70 p-6 text-white shadow-lg">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="space-y-2">
+                <p className="text-xs font-medium uppercase tracking-wider text-white/70">
+                  Profit &amp; Metrics Planner v5.3
+                </p>
+                <h1 className="text-3xl font-bold leading-tight md:text-4xl">Shearer (S1) Profit Pilot</h1>
+                <p className="max-w-2xl text-sm md:text-base text-white/80">
+                  จัดการข้อมูลยิงแอดและคำสั่งซื้อในที่เดียว ดูสรุปสำคัญได้ทันที และย้ายไปยังหน้าผลลัพธ์ได้เพียงคลิกเดียว
+                </p>
+              </div>
+              <div className="flex w-full flex-col gap-3 rounded-2xl border border-white/20 bg-white/10 p-4 text-sm backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:text-base">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-white/70">กำไรสะสมปีนี้</p>
+                  <p className="text-2xl font-semibold">{F.formatCurrency(combinedYearProfit)}</p>
+                </div>
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                  <Button variant="secondary" className="w-full" onClick={handleViewSummary}>
+                    ดูสรุปผลทั้งหมด
+                  </Button>
+                  <Button className="w-full" onClick={handleConfirmPlan}>
+                    ยืนยันข้อมูลล่าสุด
+                  </Button>
+                </div>
+              </div>
             </div>
-            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-              <Button variant="secondary" className="w-full" onClick={handleViewSummary}>
-                ดูสรุปผลทั้งหมด
-              </Button>
-              <Button className="w-full" onClick={handleConfirmPlan}>
-                ยืนยันข้อมูลล่าสุด
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+          </header>
 
-      <section className="grid gap-4 lg:grid-cols-[1.4fr,1fr]">
+          <section className="grid gap-4 lg:grid-cols-[1.4fr,1fr]">
         <Card className="rounded-3xl border bg-card/80 shadow-sm">
           <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
@@ -3043,9 +3063,13 @@ export function ProfitPilotPage() {
           </CardContent>
         </Card>
         <StopAlertCard />
-      </section>
+          </section>
+        </>
+      )}
 
-      <section className="grid gap-4 xl:grid-cols-[2fr_1fr]">
+
+      {activeTab === 'home' && (
+        <section className="grid gap-4 xl:grid-cols-[2fr_1fr]">
         <div className="grid gap-4 md:grid-cols-2">
           <Card className="h-full rounded-2xl border bg-card/80 shadow-sm">
           <CardHeader>
@@ -3211,8 +3235,11 @@ export function ProfitPilotPage() {
           </CardContent>
         </Card>
       </section>
+      )}
 
-      <section className="grid gap-6 xl:grid-cols-2">
+      {activeTab === 'platform-report' && (
+        <>
+          <section className="grid gap-6 xl:grid-cols-2">
         <Card className="rounded-2xl border bg-card/80 shadow-sm">
           <CardHeader>
             <CardTitle>บันทึกและดึงข้อมูลการยิงแอด</CardTitle>
@@ -3488,8 +3515,8 @@ export function ProfitPilotPage() {
         </Card>
       </section>
 
-      <Card className="rounded-3xl border bg-card/80 shadow-sm">
-        <CardHeader className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+          <Card className="rounded-3xl border bg-card/80 shadow-sm">
+            <CardHeader className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <CardTitle className="flex items-center gap-2 text-lg font-semibold">
               <BarChart className="h-5 w-5 text-primary" />
@@ -3502,8 +3529,8 @@ export function ProfitPilotPage() {
               <Download className="mr-2 h-4 w-4" /> ส่งออก CSV
             </Button>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-5">
+            </CardHeader>
+            <CardContent className="space-y-5">
           {campaignComparison.length === 0 ? (
             <p className="text-sm text-muted-foreground">ยังไม่มีข้อมูลแคมเปญ ให้เพิ่มข้อมูลเพื่อดูการจัดอันดับ</p>
           ) : (
@@ -3570,10 +3597,13 @@ export function ProfitPilotPage() {
               </div>
             </>
           )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </>
+      )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      {activeTab === 'calculator' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-4">
           <div className="neumorphic-card p-6 h-full">
             <div className="flex items-center gap-3 mb-6 pb-4 border-b border-primary/20">
@@ -3879,7 +3909,8 @@ export function ProfitPilotPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      )}
       
       <div className="neumorphic-card p-6 mt-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -3982,7 +4013,7 @@ export function ProfitPilotPage() {
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-3">
-                      <Button onClick={() => setActiveTab('planning')} className="neon-button flex items-center gap-2">
+                      <Button onClick={() => setActiveTab('calculator')} className="neon-button flex items-center gap-2">
                         <GanttChartSquare className="h-4 w-4" />
                         เปิดตัวคำนวณ
                       </Button>
@@ -4208,6 +4239,8 @@ export function ProfitPilotPage() {
               </Card>
             </div>
           </TabsContent>
+
+          <TabsContent value="calculator" className="hidden" />
 
 
           <TabsContent value="ad-launch">
