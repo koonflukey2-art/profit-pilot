@@ -28,7 +28,7 @@ import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
-import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy, Facebook, Wand, CheckIcon, ChevronDown, Play, Pause, ArrowUpRight, ArrowUp, Square, MousePointerClick, LayoutDashboard, AlertTriangle, Music, ShoppingBag, Globe, Plug, Send, AlertCircle, CheckCircle2, Download, Gauge, TrendingDown, TrendingUp } from 'lucide-react';
+import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy, Facebook, Wand, CheckIcon, ChevronDown, Play, Pause, ArrowUpRight, ArrowUp, Square, MousePointerClick, LayoutDashboard, AlertTriangle, Music, ShoppingBag, Globe, Plug, Send, AlertCircle, CheckCircle2, Download, Gauge, TrendingDown, TrendingUp, Home } from 'lucide-react';
 import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
 import AutomationRuleBuilder from './RevealbotRuleBuilder';
@@ -248,6 +248,14 @@ type MultiChannelPlatform = {
   defaultNotes: string;
 };
 
+type QuickNavConfig = {
+  key: string;
+  title: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  status: { tone: 'ready' | 'warning' | 'info'; label: string };
+};
+
 const multiChannelPlatforms: MultiChannelPlatform[] = [
   {
     key: 'facebook_ads',
@@ -402,7 +410,7 @@ export function ProfitPilotPage() {
   });
   const [automationRules, setAutomationRules] = useState([]);
   const [uiTitles, setUiTitles] = useState({ productInfoTitle: 'ข้อมูลสินค้า', costCalculationTitle: 'คำนวณต้นทุน', goalsAndResultsTitle: 'เป้าหมายและผลลัพธ์', advancedPlanningTitle: 'Advanced Planning' });
-  const [activeTab, setActiveTab] = useState('ad-launch');
+  const [activeTab, setActiveTab] = useState('home');
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [history, setHistory] = useState([]);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: () => {} });
@@ -2250,6 +2258,138 @@ export function ProfitPilotPage() {
     </Card>
   );
 
+  const quickStatusToneClass: Record<'ready' | 'warning' | 'info', string> = {
+    ready: 'border border-emerald-500/30 bg-emerald-500/10 text-emerald-500',
+    warning: 'border border-amber-500/30 bg-amber-500/10 text-amber-500',
+    info: 'border border-primary/30 bg-primary/10 text-primary',
+  };
+
+  const quickNavigationSections = useMemo((): { primary: QuickNavConfig[]; tools: QuickNavConfig[] } => {
+    const summaryProjection = calculated.monthlyProfitProjection || 0;
+    const summaryStatus =
+      summaryProjection > 0
+        ? { tone: 'ready', label: `กำไรจำลอง 30 วัน ${F.formatCurrency(summaryProjection)}` }
+        : summaryProjection < 0
+        ? { tone: 'warning', label: `ขาดทุนจำลอง 30 วัน ${F.formatCurrency(summaryProjection)}` }
+        : { tone: 'info', label: 'ยังไม่คำนวณกำไร' };
+
+    const platformRevenue = platformReportTotals.totalRevenue || 0;
+    const platformStatus =
+      platformRevenue > 0
+        ? { tone: 'info', label: `ยอดขายรวม ${F.formatCurrency(platformRevenue)}` }
+        : { tone: 'warning', label: 'ยังไม่มีข้อมูลแพลตฟอร์ม' };
+
+    const adLaunchStatus =
+      launchReady
+        ? { tone: 'ready', label: 'พร้อมจำลองยิงแล้ว' }
+        : missingCredentials.length > 0 || zeroBudgetPlatforms.length > 0
+        ? { tone: 'warning', label: 'กรอก API / งบให้ครบ' }
+        : { tone: 'info', label: 'เติมรายละเอียดการยิงแอด' };
+
+    const automationStatus =
+      automationRules.length > 0
+        ? { tone: 'info', label: `${automationRules.length.toLocaleString('th-TH')} กฎพร้อมใช้` }
+        : { tone: 'warning', label: 'ยังไม่มีกฎอัตโนมัติ' };
+
+    const workflowStatus =
+      automationRules.length > 0
+        ? { tone: 'info', label: 'สร้าง Workflow จาก Rule ที่มีได้เลย' }
+        : { tone: 'warning', label: 'เพิ่ม Rule ก่อนใช้งาน' };
+
+    const historyStatus =
+      history.length > 0
+        ? { tone: 'info', label: `${history.length.toLocaleString('th-TH')} แผนที่บันทึกไว้` }
+        : { tone: 'warning', label: 'ยังไม่มีประวัติ' };
+
+    return {
+      primary: [
+        {
+          key: 'planning',
+          title: 'ตั้งค่าต้นทุน & เป้าหมาย',
+          description: 'กรอกต้นทุนจริง คำนวณ Break-even ROAS, CPA และ Max CPC',
+          icon: GanttChartSquare,
+          status: { tone: 'ready', label: 'พร้อมใช้งาน' },
+        },
+        {
+          key: 'ad-launch',
+          title: 'จำลองยิงแอดหลายแพลตฟอร์ม',
+          description: 'แบ่งงบ ยิง API ไปยัง Facebook, TikTok, Google และ Lazada',
+          icon: Send,
+          status: adLaunchStatus,
+        },
+        {
+          key: 'summary',
+          title: 'ดูสรุปกำไร 30 วัน',
+          description: 'รวม ROAS, CPA, Margin และระบบเตือนหยุดยิง',
+          icon: FileText,
+          status: summaryStatus,
+        },
+      ],
+      tools: [
+        {
+          key: 'metrics',
+          title: 'Metrics แนะนำ',
+          description: 'เกณฑ์วัดผลสำคัญของแต่ละช่องทาง',
+          icon: CalendarCheck,
+          status: { tone: 'info', label: 'เปรียบเทียบตัวชี้วัด' },
+        },
+        {
+          key: 'funnel',
+          title: 'กลยุทธ์ Funnel',
+          description: 'ไอเดีย TOFU / MOFU / BOFU พร้อมใช้งาน',
+          icon: Filter,
+          status: { tone: 'info', label: 'พร้อมใช้งาน' },
+        },
+        {
+          key: 'automation',
+          title: 'สร้าง Rule อัตโนมัติ',
+          description: 'ตั้งเงื่อนไขหยุด/บูสต์เหมือน Revealbot',
+          icon: Bot,
+          status: automationStatus,
+        },
+        {
+          key: 'workflow',
+          title: 'n8n Workflow Generator',
+          description: 'สร้าง JSON Workflow จาก Rule ที่ตั้งไว้',
+          icon: Zap,
+          status: workflowStatus,
+        },
+        {
+          key: 'platform-report',
+          title: 'รายงานแพลตฟอร์ม',
+          description: 'รวมยอดขาย งบ และกำไรทุกแพลตฟอร์ม',
+          icon: LayoutDashboard,
+          status: platformStatus,
+        },
+        {
+          key: 'history',
+          title: 'ประวัติการวางแผน',
+          description: 'โหลดแผนที่เคยบันทึกไว้อย่างรวดเร็ว',
+          icon: History,
+          status: historyStatus,
+        },
+      ],
+    };
+  }, [
+    automationRules.length,
+    calculated.monthlyProfitProjection,
+    history.length,
+    launchReady,
+    missingCredentials.length,
+    platformReportTotals.totalRevenue,
+    zeroBudgetPlatforms.length,
+  ]);
+
+  const totalAdCpa = useMemo(
+    () => (adSummary.total.conversions > 0 ? adSummary.total.spend / adSummary.total.conversions : 0),
+    [adSummary.total.conversions, adSummary.total.spend],
+  );
+
+  const totalAdMargin = useMemo(
+    () => (adSummary.total.revenue > 0 ? adSummary.total.profit / adSummary.total.revenue : 0),
+    [adSummary.total.profit, adSummary.total.revenue],
+  );
+
   const mainTabTriggerClass =
     'flex min-w-[150px] items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm';
 
@@ -3544,6 +3684,10 @@ export function ProfitPilotPage() {
       <div className="neumorphic-card p-6 mt-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 flex w-full flex-wrap gap-2 overflow-x-auto rounded-2xl border bg-card/70 p-1 shadow-sm">
+            <TabsTrigger value="home" className={mainTabTriggerClass}>
+              <Home className="h-4 w-4" />
+              <span>ภาพรวม &amp; ทางลัด</span>
+            </TabsTrigger>
             <TabsTrigger value="ad-launch" className={mainTabTriggerClass}>
               <Send className="h-4 w-4" />
               <span>ยิงแอดหลายแพลตฟอร์ม</span>
@@ -3581,6 +3725,304 @@ export function ProfitPilotPage() {
               <span>ประวัติ</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="home">
+            <div className="space-y-6">
+              <div className="rounded-3xl border border-primary/20 bg-gradient-to-r from-primary/20 via-background to-background p-6 shadow-sm">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="flex-1 space-y-5">
+                    <div className="flex items-start gap-3">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
+                        <Home className="h-6 w-6" />
+                      </span>
+                      <div>
+                        <h2 className="text-2xl font-bold text-foreground">เริ่มต้นจัดการกำไรในที่เดียว</h2>
+                        <p className="text-sm text-muted-foreground">ดูสถานะ ROAS, คำแนะนำหยุดยิง และกดไปยังหน้าที่ต้องการได้ทันที</p>
+                      </div>
+                    </div>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="rounded-2xl border bg-background/80 p-4 shadow-sm">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">สถานะ ROAS</p>
+                        <p className="mt-2 text-xl font-bold text-foreground">{roasHealth.label}</p>
+                        <p className="text-sm text-muted-foreground">{roasHealth.message}</p>
+                        <div className="mt-4 flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">ROAS ปัจจุบัน</span>
+                          <Badge variant={roasHealth.badge}>{F.formatNumber(actualRoas, 2)}x</Badge>
+                        </div>
+                        <p className="mt-2 text-xs text-muted-foreground">ROAS คุ้มทุน {F.formatNumber(calculated.breakevenRoas, 2)}x</p>
+                      </div>
+                      <div
+                        className={cn(
+                          'rounded-2xl border p-4 shadow-sm transition',
+                          stopAlert.status === 'stop'
+                            ? 'border-destructive/50 bg-destructive/10'
+                            : stopAlert.status === 'warning'
+                            ? 'border-amber-500/50 bg-amber-500/10'
+                            : 'border-emerald-500/50 bg-emerald-500/10',
+                        )}
+                      >
+                        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                          <AlertCircle
+                            className={cn(
+                              'h-5 w-5',
+                              stopAlert.status === 'stop'
+                                ? 'text-destructive'
+                                : stopAlert.status === 'warning'
+                                ? 'text-amber-500'
+                                : 'text-emerald-500',
+                            )}
+                          />
+                          <span>
+                            {stopAlert.status === 'stop'
+                              ? 'ควรหยุดยิงทันที'
+                              : stopAlert.status === 'warning'
+                              ? 'เริ่มเข้าโซนเสี่ยง'
+                              : 'ยังปลอดภัย'}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-sm text-foreground">{stopAlert.message}</p>
+                        {stopAlert.reasons.length > 0 && (
+                          <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-muted-foreground">
+                            {stopAlert.reasons.map((reason, index) => (
+                              <li key={index}>{reason}</li>
+                            ))}
+                          </ul>
+                        )}
+                        {stopAlert.spendLimit > 0 && (
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            งบเทสสูงสุด {F.formatCurrency(stopAlert.spendLimit)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <Button onClick={() => setActiveTab('planning')} className="neon-button flex items-center gap-2">
+                        <GanttChartSquare className="h-4 w-4" />
+                        เปิดตัวคำนวณ
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setIsSimulatorOpen(true)}
+                        className="flex items-center gap-2"
+                      >
+                        <Gauge className="h-4 w-4" />
+                        ทดลอง What-if
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={handleConfirmPlan}
+                        className="flex items-center gap-2 text-primary"
+                      >
+                        <FileText className="h-4 w-4" />
+                        ดูสรุปทันที
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="w-full max-w-sm rounded-2xl border border-primary/30 bg-background/90 p-5 shadow-sm">
+                    <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      ภาพรวมการยิงแอดทั้งหมด
+                    </h3>
+                    <div className="mt-4 space-y-3 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">ยอดใช้จ่ายรวม</span>
+                        <span className="font-semibold text-foreground">{F.formatCurrency(adSummary.total.spend)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">ยอดขายรวม</span>
+                        <span className="font-semibold text-foreground">{F.formatCurrency(adSummary.total.revenue)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">กำไร / ขาดทุน</span>
+                        <span
+                          className={cn(
+                            'font-semibold',
+                            adSummary.total.profit >= 0 ? 'text-emerald-500' : 'text-destructive',
+                          )}
+                        >
+                          {F.formatCurrency(adSummary.total.profit)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">CPA ปัจจุบัน</span>
+                        <span className="font-semibold text-foreground">{F.formatCurrency(totalAdCpa)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Margin</span>
+                        <span className="font-semibold text-foreground">
+                          {F.formatNumber(totalAdMargin * 100 || 0, 1)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <SummaryStat
+                  label="ROAS ปัจจุบัน"
+                  value={`${F.formatNumber(actualRoas, 2)}x`}
+                  helper={`ROAS คุ้มทุน ${F.formatNumber(calculated.breakevenRoas, 2)}x`}
+                />
+                <SummaryStat
+                  label="Break-even ROAS"
+                  value={`${F.formatNumber(calculated.breakevenRoas, 2)}x`}
+                  helper="ROAS ขั้นต่ำที่ต้องได้เพื่อคุ้มทุน"
+                />
+                <SummaryStat
+                  label="Break-even CPA"
+                  value={F.formatCurrency(calculated.breakevenCpa)}
+                  helper="ค่าแอดสูงสุดต่อ 1 ออเดอร์"
+                />
+                <SummaryStat
+                  label="Max CPC ที่ไหว"
+                  value={F.formatCurrency(calculated.maxCpc)}
+                  helper={`ตาม CVR ปัจจุบัน ${F.formatNumber(calculated.expectedConversionRate, 1)}%`}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    เครื่องมือหลัก
+                  </h3>
+                  <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {quickNavigationSections.primary.map(section => {
+                      const Icon = section.icon;
+                      return (
+                        <button
+                          key={section.key}
+                          type="button"
+                          onClick={() => setActiveTab(section.key)}
+                          className="group h-full text-left"
+                        >
+                          <div className="flex h-full flex-col justify-between rounded-2xl border border-border bg-card/80 p-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                                  <Icon className="h-5 w-5" />
+                                </span>
+                                <span
+                                  className={cn(
+                                    'rounded-full px-3 py-1 text-xs font-medium',
+                                    quickStatusToneClass[section.status.tone],
+                                  )}
+                                >
+                                  {section.status.label}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="text-base font-semibold text-foreground">{section.title}</p>
+                                <p className="mt-1 text-sm text-muted-foreground">{section.description}</p>
+                              </div>
+                            </div>
+                            <div className="mt-4 flex items-center gap-2 text-sm font-medium text-primary transition group-hover:gap-3">
+                              ไปยังหน้าถัดไป
+                              <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-1 group-hover:-translate-y-1" />
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                    เครื่องมือเสริม
+                  </h3>
+                  <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {quickNavigationSections.tools.map(section => {
+                      const Icon = section.icon;
+                      return (
+                        <button
+                          key={section.key}
+                          type="button"
+                          onClick={() => setActiveTab(section.key)}
+                          className="group h-full text-left"
+                        >
+                          <div className="flex h-full flex-col justify-between rounded-2xl border border-border bg-card/70 p-5 text-left shadow-sm transition hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg">
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted text-foreground">
+                                  <Icon className="h-5 w-5" />
+                                </span>
+                                <span
+                                  className={cn(
+                                    'rounded-full px-3 py-1 text-xs font-medium',
+                                    quickStatusToneClass[section.status.tone],
+                                  )}
+                                >
+                                  {section.status.label}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="text-base font-semibold text-foreground">{section.title}</p>
+                                <p className="mt-1 text-sm text-muted-foreground">{section.description}</p>
+                              </div>
+                            </div>
+                            <div className="mt-4 flex items-center gap-2 text-sm font-medium text-primary transition group-hover:gap-3">
+                              ไปยังหน้าถัดไป
+                              <ArrowUpRight className="h-4 w-4 transition group-hover:translate-x-1 group-hover:-translate-y-1" />
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <Card className="neumorphic-card">
+                <CardHeader className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-foreground">แผนล่าสุดที่บันทึกไว้</CardTitle>
+                    <CardDescription>เรียกใช้แผนเดิมหรือดูประวัติทั้งหมดได้จากตรงนี้</CardDescription>
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={() => setActiveTab('history')}>
+                    ดูทั้งหมด
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  {history.length > 0 ? (
+                    <div className="space-y-3">
+                      {history.slice(0, 3).map(item => (
+                        <div
+                          key={item.id}
+                          className="flex flex-col gap-2 rounded-2xl border border-border bg-background/70 p-4 sm:flex-row sm:items-center sm:justify-between"
+                        >
+                          <div>
+                            <p className="text-sm font-semibold text-foreground">{item.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(item.id).toLocaleString('th-TH')}
+                            </p>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <Button size="sm" className="neon-button" onClick={() => loadHistory(item.id)}>
+                              โหลดแผนนี้
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setActiveTab('summary')}
+                            >
+                              ดูสรุป
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      ยังไม่มีการบันทึกแผน ลองกด “บันทึกแผน” จากเมนูด้านล่างเพื่อเริ่มต้น
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
 
           <TabsContent value="ad-launch">
             <div className="space-y-6">
