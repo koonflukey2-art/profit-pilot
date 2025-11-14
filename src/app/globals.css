@@ -60,28 +60,14 @@
 
 @layer components {
   .neumorphic-card {
-    background: hsl(var(--card));
-    border-radius: 20px;
-    position: relative;
-    box-shadow: 
-        8px 8px 16px rgba(0, 0, 0, 0.3),
-        -8px -8px 16px rgba(255, 255, 255, 0.05),
-        inset 1px 1px 2px rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease;
+    @apply relative rounded-2xl border border-border/70 bg-card shadow-sm transition-all;
   }
   .light .neumorphic-card {
-      box-shadow: 
-          8px 8px 16px rgba(0, 0, 0, 0.1),
-          -8px -8px 16px rgba(255, 255, 255, 0.7),
-          inset 1px 1px 2px rgba(255, 255, 255, 0.9);
+    @apply shadow-md;
   }
   .neumorphic-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 
-          10px 10px 20px rgba(0, 0, 0, 0.4),
-          -10px -10px 20px rgba(255, 255, 255, 0.05),
-          inset 1px 1px 2px rgba(255, 255, 255, 0.05),
-          0 0 20px hsla(var(--primary) / 0.3);
+    @apply -translate-y-0.5 shadow-lg;
+    box-shadow: 0 14px 30px hsla(var(--primary) / 0.18);
   }
   .neon-button {
     @apply inline-flex items-center justify-center gap-2;
@@ -176,18 +162,4 @@
     font-weight: 700;
   }
 
-  .tab-button.active {
-    opacity: 1;
-    background: hsl(var(--card));
-    color: hsl(var(--primary));
-    box-shadow: 
-        4px 4px 8px rgba(0, 0, 0, 0.3),
-        -4px -4px 8px rgba(255, 255, 255, 0.05);
-  }
-  
-  .light .tab-button.active {
-    box-shadow: 
-        4px 4px 8px rgba(0, 0, 0, 0.1),
-        -4px -4px 8px rgba(255, 255, 255, 0.7);
-  }
 }
