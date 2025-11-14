@@ -2522,8 +2522,109 @@ export function ProfitPilotPage() {
     [adSummary.total.profit, adSummary.total.revenue],
   );
 
+  const mainTabGroups = useMemo(
+    () => [
+      {
+        key: 'overview',
+        title: 'ภาพรวม & สรุป',
+        description: 'ดูตัวเลขสำคัญและประวัติล่าสุด',
+        items: [
+          {
+            value: 'home',
+            label: 'ภาพรวม & ทางลัด',
+            helper: `ROAS ปัจจุบัน ${F.formatNumber(actualRoas, 2)}x`,
+            icon: Home,
+          },
+          {
+            value: 'summary',
+            label: 'สรุปแผน',
+            helper: `จำลองกำไร 30 วัน ${F.formatCurrency(calculated.monthlyProfitProjection)}`,
+            icon: FileText,
+          },
+          {
+            value: 'history',
+            label: 'ประวัติ',
+            helper: history.length > 0 ? `${history.length.toLocaleString('th-TH')} รายการล่าสุด` : 'ยังไม่มีบันทึก',
+            icon: History,
+          },
+        ],
+      },
+      {
+        key: 'execution',
+        title: 'การยิงแอด & การวางแผน',
+        description: 'ตั้งค่าและจำลองก่อนปล่อยโฆษณาจริง',
+        items: [
+          {
+            value: 'ad-launch',
+            label: 'ยิงแอดหลายแพลตฟอร์ม',
+            helper: launchReady ? 'พร้อมยิงจริง' : 'เติมข้อมูลให้ครบก่อน',
+            icon: Send,
+          },
+          {
+            value: 'metrics',
+            label: 'Metrics แนะนำ',
+            helper: 'กำหนดตัวเลขที่ต้องตาม',
+            icon: CalendarCheck,
+          },
+          {
+            value: 'planning',
+            label: 'การวางแผน',
+            helper: 'จัดงบและเป้าหมายรายวัน',
+            icon: GanttChartSquare,
+          },
+          {
+            value: 'funnel',
+            label: 'กลยุทธ์ Funnel',
+            helper: 'ไอเดียคอนเทนต์ตามแต่ละเฟส',
+            icon: Filter,
+          },
+        ],
+      },
+      {
+        key: 'automation',
+        title: 'ระบบอัตโนมัติ & รายงาน',
+        description: 'ต่อยอดการทำงานและตรวจสอบผลแบบละเอียด',
+        items: [
+          {
+            value: 'automation',
+            label: 'สร้าง Rule',
+            helper:
+              automationRules.length > 0
+                ? `${automationRules.length.toLocaleString('th-TH')} Rule พร้อมใช้งาน`
+                : 'ตั้งค่าเงื่อนไขหยุดยิง',
+            icon: Bot,
+          },
+          {
+            value: 'workflow',
+            label: 'Workflow Generator',
+            helper: missingCredentials.length > 0 ? 'รอตรวจสอบ API' : 'พร้อมคัดลอก Payload',
+            icon: Zap,
+          },
+          {
+            value: 'platform-report',
+            label: 'รายงานแพลตฟอร์ม',
+            helper:
+              platformReportTotals.totalRevenue > 0
+                ? `ยอดขายรวม ${F.formatCurrency(platformReportTotals.totalRevenue)}`
+                : 'รอซิงค์ข้อมูลแพลตฟอร์ม',
+            icon: LayoutDashboard,
+          },
+        ],
+      },
+    ],
+    [
+      actualRoas,
+      automationRules.length,
+      calculated.monthlyProfitProjection,
+      history.length,
+      launchReady,
+      missingCredentials.length,
+      platformReportTotals.totalRevenue,
+    ],
+  );
+
   const mainTabTriggerClass =
-    'flex min-w-[150px] items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-muted-foreground transition hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm';
+    'flex h-full w-full items-start gap-3 rounded-2xl border border-transparent bg-background/80 p-4 text-left transition hover:border-primary/40 hover:bg-background data-[state=active]:border-primary data-[state=active]:bg-primary/10 data-[state=active]:shadow-md';
   const summaryTabTriggerClass =
     'flex min-h-[72px] w-full flex-col items-start gap-1 rounded-xl px-4 py-3 text-left text-sm font-medium text-muted-foreground transition hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-primary data-[state=active]:shadow-sm';
 
@@ -3749,48 +3850,34 @@ export function ProfitPilotPage() {
       
       <div className="neumorphic-card p-6 mt-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6 flex w-full flex-wrap gap-2 overflow-x-auto rounded-2xl border bg-card/70 p-1 shadow-sm">
-            <TabsTrigger value="home" className={mainTabTriggerClass}>
-              <Home className="h-4 w-4" />
-              <span>ภาพรวม &amp; ทางลัด</span>
-            </TabsTrigger>
-            <TabsTrigger value="ad-launch" className={mainTabTriggerClass}>
-              <Send className="h-4 w-4" />
-              <span>ยิงแอดหลายแพลตฟอร์ม</span>
-            </TabsTrigger>
-            <TabsTrigger value="metrics" className={mainTabTriggerClass}>
-              <CalendarCheck className="h-4 w-4" />
-              <span>Metrics แนะนำ</span>
-            </TabsTrigger>
-            <TabsTrigger value="planning" className={mainTabTriggerClass}>
-              <GanttChartSquare className="h-4 w-4" />
-              <span>การวางแผน</span>
-            </TabsTrigger>
-            <TabsTrigger value="funnel" className={mainTabTriggerClass}>
-              <Filter className="h-4 w-4" />
-              <span>กลยุทธ์ Funnel</span>
-            </TabsTrigger>
-            <TabsTrigger value="automation" className={mainTabTriggerClass}>
-              <Bot className="h-4 w-4" />
-              <span>สร้าง Rule</span>
-            </TabsTrigger>
-            <TabsTrigger value="workflow" className={mainTabTriggerClass}>
-              <Zap className="h-4 w-4" />
-              <span>Workflow Generator</span>
-            </TabsTrigger>
-            <TabsTrigger value="platform-report" className={mainTabTriggerClass}>
-              <LayoutDashboard className="h-4 w-4" />
-              <span>รายงานแพลตฟอร์ม</span>
-            </TabsTrigger>
-            <TabsTrigger value="summary" className={mainTabTriggerClass}>
-              <FileText className="h-4 w-4" />
-              <span>สรุปแผน</span>
-            </TabsTrigger>
-            <TabsTrigger value="history" className={mainTabTriggerClass}>
-              <History className="h-4 w-4" />
-              <span>ประวัติ</span>
-            </TabsTrigger>
-          </TabsList>
+          <div className="mb-6 space-y-6">
+            {mainTabGroups.map(group => (
+              <section key={group.key} className="space-y-3">
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{group.title}</p>
+                    <p className="text-sm text-muted-foreground sm:text-xs">{group.description}</p>
+                  </div>
+                </div>
+                <TabsList className="grid w-full gap-3 rounded-3xl border bg-card/70 p-3 shadow-sm md:grid-cols-2 xl:grid-cols-3">
+                  {group.items.map(item => {
+                    const Icon = item.icon;
+                    return (
+                      <TabsTrigger key={item.value} value={item.value} className={mainTabTriggerClass}>
+                        <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                          <Icon className="h-5 w-5" />
+                        </span>
+                        <div className="space-y-1">
+                          <span className="block text-base font-semibold text-foreground">{item.label}</span>
+                          <span className="block text-xs font-normal text-muted-foreground">{item.helper}</span>
+                        </div>
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
+              </section>
+            ))}
+          </div>
 
           <TabsContent value="home">
             <div className="space-y-6">
