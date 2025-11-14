@@ -27,7 +27,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy, Facebook, Wand, CheckIcon, ChevronDown, Play, Pause, ArrowUpRight, ArrowUp, Square, MousePointerClick, LayoutDashboard, AlertTriangle, Music, ShoppingBag, Globe, Plug, Send } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import { Bot, CalendarCheck, FileSliders, Filter, GanttChartSquare, History, Plus, RotateCcw, Save, Search, Settings, Trash2, X, Target, Heart, ThumbsUp, Hash, DollarSign, Megaphone, BarChart, Percent, Tv, LineChart, Users, BrainCircuit, Info, Scaling, Briefcase, FileText, Zap, ClipboardCopy, Facebook, Wand, CheckIcon, ChevronDown, Play, Pause, ArrowUpRight, ArrowUp, Square, MousePointerClick, LayoutDashboard, AlertTriangle, Music, ShoppingBag, Globe, Plug, Send, AlertCircle, CheckCircle2, Download, Gauge, TrendingDown, TrendingUp } from 'lucide-react';
 import { generateUiTitles } from './actions';
 import { Progress } from '../ui/progress';
 import AutomationRuleBuilder from './RevealbotRuleBuilder';
@@ -55,6 +56,19 @@ const initialInputs = {
   kolFee: '',
   packagingCost: '',
   shippingCost: '',
+  includePackaging: true,
+  includeShipping: true,
+  includePaymentFee: true,
+  includeKolFee: false,
+  includeCodFee: false,
+  codFeePercent: '',
+  includeExtraHandling: false,
+  extraHandlingCost: '',
+  includeReturnRate: false,
+  returnRatePercent: '',
+  expectedConversionRate: '2.5',
+  includeLtv: false,
+  ltvPerCustomer: '',
   profitGoal: '',
   profitGoalTimeframe: 'monthly',
   fixedCosts: '',
@@ -117,7 +131,43 @@ type WebAdProjection = {
   roas: number;
   margin: number;
   breakEvenOrders: number;
+  breakEvenRoas: number;
+  breakEvenCpa: number;
+  maxCpc: number;
+  thirtyDayRevenue: number;
+  thirtyDayProfit: number;
   warningLevel: 'loss' | 'watch' | 'healthy';
+};
+
+type ProductPreset = {
+  id: string;
+  name: string;
+  createdAt: string;
+  data: Record<string, unknown>;
+};
+
+type StopRuleConfig = {
+  consecutiveDays: number;
+  lossThreshold: number;
+  testBudgetMultiple: number;
+  roasBuffer: number;
+};
+
+type DailyAdPerformance = {
+  date: string;
+  spend: number;
+  revenue: number;
+  roas: number;
+};
+
+type CampaignComparison = {
+  campaignName: string;
+  platform: string;
+  spend: number;
+  revenue: number;
+  profit: number;
+  roas: number;
+  conversions: number;
 };
 
 type AdLaunchFormState = {
@@ -321,6 +371,7 @@ export function ProfitPilotPage() {
     breakevenRoas: 0,
     breakevenCpa: 0,
     breakevenAdCostPercent: 0,
+    maxCpc: 0,
     targetOrders: 0,
     targetOrdersDaily: 0,
     targetRevenue: 0,
@@ -340,6 +391,14 @@ export function ProfitPilotPage() {
     targetCpa: 0,
     adCostPercent: 0,
     priceBeforeVat: 0,
+    ltvContribution: 0,
+    returnImpact: 0,
+    expectedConversionRate: 0,
+    monthlyProfitProjection: 0,
+    monthlyRevenueProjection: 0,
+    expectedReturnRate: 0,
+    codFeePercent: 0,
+    extraHandlingCost: 0,
   });
   const [automationRules, setAutomationRules] = useState([]);
   const [uiTitles, setUiTitles] = useState({ productInfoTitle: 'ข้อมูลสินค้า', costCalculationTitle: 'คำนวณต้นทุน', goalsAndResultsTitle: 'เป้าหมายและผลลัพธ์', advancedPlanningTitle: 'Advanced Planning' });
@@ -415,6 +474,21 @@ export function ProfitPilotPage() {
   const [lastLaunchSummary, setLastLaunchSummary] = useState<{ timestamp: string; payload: LaunchPayloadItem[] } | null>(null);
   const [detectionState, setDetectionState] = useState({ nsn: true, nn: false });
   const summaryRef = useRef<HTMLDivElement | null>(null);
+  const [productPresets, setProductPresets] = useState<ProductPreset[]>([]);
+  const [presetDialogOpen, setPresetDialogOpen] = useState(false);
+  const [newPresetName, setNewPresetName] = useState('');
+  const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
+  const [whatIfState, setWhatIfState] = useState(() => ({
+    cpc: F.num(webAdPlan.expectedCpc),
+    conversionRate: F.num(webAdPlan.expectedConversionRate),
+    orderValue: F.num(webAdPlan.averageOrderValue),
+  }));
+  const [stopRules, setStopRules] = useState<StopRuleConfig>({
+    consecutiveDays: 3,
+    lossThreshold: 3000,
+    testBudgetMultiple: 3,
+    roasBuffer: 0.1,
+  });
 
   const { toast } = useToast();
 
@@ -863,6 +937,11 @@ export function ProfitPilotPage() {
     const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
     const contribution = averageOrderValue - productCost;
     const breakEvenOrders = contribution > 0 ? dailyBudget / contribution : 0;
+    const breakEvenCpa = contribution;
+    const breakEvenRoas = contribution > 0 ? averageOrderValue / contribution : 0;
+    const maxCpc = conversionRate > 0 ? breakEvenCpa * conversionRate : 0;
+    const thirtyDayRevenue = revenue * 30;
+    const thirtyDayProfit = profit * 30;
 
     let warningLevel: WebAdProjection['warningLevel'] = 'healthy';
     if (profit < 0) {
@@ -871,8 +950,225 @@ export function ProfitPilotPage() {
       warningLevel = 'watch';
     }
 
-    return { clicks, orders, revenue, goodsCost, profit, roas, margin, breakEvenOrders, warningLevel };
+    return {
+      clicks,
+      orders,
+      revenue,
+      goodsCost,
+      profit,
+      roas,
+      margin,
+      breakEvenOrders,
+      breakEvenRoas,
+      breakEvenCpa,
+      maxCpc,
+      thirtyDayRevenue,
+      thirtyDayProfit,
+      warningLevel,
+    };
   }, [webAdPlan]);
+
+  const actualRoas = useMemo(
+    () => (adSummary.total.spend > 0 ? adSummary.total.revenue / adSummary.total.spend : 0),
+    [adSummary.total.revenue, adSummary.total.spend]
+  );
+
+  const roasHealth = useMemo(
+    () => evaluateRoasStatus(actualRoas, calculated.breakevenRoas, stopRules.roasBuffer),
+    [actualRoas, calculated.breakevenRoas, stopRules.roasBuffer, evaluateRoasStatus]
+  );
+
+  const dailyAdPerformance = useMemo<DailyAdPerformance[]>(() => {
+    const map = new Map<string, DailyAdPerformance>();
+
+    adEntries.forEach(entry => {
+      const date = entry.date || new Date().toISOString().slice(0, 10);
+      const existing = map.get(date) || { date, spend: 0, revenue: 0, roas: 0 };
+      existing.spend += F.num(entry.spend);
+      existing.revenue += F.num(entry.revenue);
+      existing.roas = existing.spend > 0 ? existing.revenue / existing.spend : 0;
+      map.set(date, existing);
+    });
+
+    return Array.from(map.values()).sort((a, b) => (a.date > b.date ? -1 : 1));
+  }, [adEntries]);
+
+  const consecutiveBelowBreakeven = useMemo(() => {
+    if (!dailyAdPerformance.length || calculated.breakevenRoas <= 0) {
+      return 0;
+    }
+
+    const threshold = calculated.breakevenRoas * (1 - stopRules.roasBuffer);
+    let count = 0;
+    for (const day of dailyAdPerformance) {
+      if (day.roas > 0 && day.roas < threshold) {
+        count += 1;
+      } else {
+        break;
+      }
+    }
+    return count;
+  }, [dailyAdPerformance, calculated.breakevenRoas, stopRules.roasBuffer]);
+
+  const stopAlert = useMemo(() => {
+    const reasons: string[] = [];
+    const lossExceeded = stopRules.lossThreshold > 0 && adSummary.total.profit < -Math.abs(stopRules.lossThreshold);
+    const spendLimit = stopRules.testBudgetMultiple > 0 ? stopRules.testBudgetMultiple * F.num(inputs.sellingPrice) : 0;
+    const spendExceeded = spendLimit > 0 && adSummary.total.spend >= spendLimit;
+
+    if (stopRules.consecutiveDays > 0 && consecutiveBelowBreakeven >= stopRules.consecutiveDays) {
+      reasons.push(`ROAS ต่ำกว่าจุดคุ้มทุน ${stopRules.consecutiveDays} วันติด`);
+    }
+
+    if (lossExceeded) {
+      reasons.push(`ขาดทุนสะสมเกิน ${F.formatCurrency(stopRules.lossThreshold)}`);
+    }
+
+    if (spendExceeded) {
+      reasons.push(`ใช้งบเทสเกิน ${stopRules.testBudgetMultiple.toLocaleString('th-TH')}x ของราคาสินค้า`);
+    }
+
+    const nearing =
+      stopRules.consecutiveDays > 1 && consecutiveBelowBreakeven === stopRules.consecutiveDays - 1 && reasons.length === 0;
+
+    const status = reasons.length > 0 ? 'stop' : nearing || lossExceeded || spendExceeded ? 'warning' : 'safe';
+
+    return {
+      status,
+      reasons,
+      spendLimit,
+      message:
+        status === 'stop'
+          ? 'ตอนนี้เข้าเงื่อนไข ควรหยุดยิงชั่วคราว'
+          : status === 'warning'
+          ? 'เริ่มเข้าโซนเสี่ยง คุมต้นทุนเพิ่ม'
+          : 'ตัวเลขยังปลอดภัย ยิงต่อได้',
+    };
+  }, [
+    adSummary.total.profit,
+    adSummary.total.spend,
+    consecutiveBelowBreakeven,
+    inputs.sellingPrice,
+    stopRules.consecutiveDays,
+    stopRules.lossThreshold,
+    stopRules.testBudgetMultiple,
+  ]);
+
+  const campaignComparison = useMemo<CampaignComparison[]>(() => {
+    const map = new Map<string, CampaignComparison>();
+
+    adEntries.forEach(entry => {
+      const campaignName = entry.campaignName || 'ไม่ระบุชื่อแคมเปญ';
+      const key = `${entry.platform}::${campaignName}`;
+      if (!map.has(key)) {
+        map.set(key, {
+          campaignName,
+          platform: entry.platform,
+          spend: 0,
+          revenue: 0,
+          profit: 0,
+          roas: 0,
+          conversions: 0,
+        });
+      }
+
+      const current = map.get(key)!;
+      current.spend += F.num(entry.spend);
+      current.revenue += F.num(entry.revenue);
+      current.profit += F.num(entry.revenue) - F.num(entry.spend);
+      current.conversions += F.num(entry.conversions);
+    });
+
+    return Array.from(map.values()).map(item => ({
+      ...item,
+      roas: item.spend > 0 ? item.revenue / item.spend : 0,
+    }));
+  }, [adEntries]);
+
+  const topRoasCampaigns = useMemo(
+    () => [...campaignComparison].sort((a, b) => b.roas - a.roas).slice(0, 3),
+    [campaignComparison]
+  );
+
+  const worstLossCampaigns = useMemo(
+    () => [...campaignComparison].sort((a, b) => a.profit - b.profit).slice(0, 3),
+    [campaignComparison]
+  );
+
+  const whatIfProjection = useMemo(() => {
+    const budget = Math.max(F.num(webAdPlan.dailyBudget), 0);
+    const cpc = Math.max(whatIfState.cpc, 0.1);
+    const conversionRate = Math.max(whatIfState.conversionRate, 0) / 100;
+    const orderValue = Math.max(whatIfState.orderValue, 0);
+    const clicks = budget / cpc;
+    const orders = clicks * conversionRate;
+    const revenue = orders * orderValue;
+    const goodsCost = orders * F.num(webAdPlan.productCost);
+    const profit = revenue - goodsCost - budget;
+    const roas = budget > 0 ? revenue / budget : 0;
+    const status = evaluateRoasStatus(
+      roas,
+      webAdProjection.breakEvenRoas || calculated.breakevenRoas,
+      stopRules.roasBuffer
+    );
+
+    return {
+      clicks,
+      orders,
+      revenue,
+      goodsCost,
+      profit,
+      roas,
+      status,
+    };
+  }, [
+    calculated.breakevenRoas,
+    evaluateRoasStatus,
+    stopRules.roasBuffer,
+    webAdPlan.dailyBudget,
+    webAdPlan.productCost,
+    webAdProjection.breakEvenRoas,
+    whatIfState.conversionRate,
+    whatIfState.cpc,
+    whatIfState.orderValue,
+  ]);
+
+  const handleExportReport = useCallback(() => {
+    if (campaignComparison.length === 0) {
+      toast({ title: 'ยังไม่มีข้อมูลแคมเปญ', description: 'เพิ่มข้อมูลการยิงแอดก่อนจึงจะส่งออกได้' });
+      return;
+    }
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const header = 'Campaign,Platform,Spend,Revenue,Profit,ROAS,Conversions';
+    const rows = campaignComparison
+      .map(item => [
+        `"${item.campaignName.replace(/"/g, '""')}"`,
+        item.platform,
+        item.spend.toFixed(2),
+        item.revenue.toFixed(2),
+        item.profit.toFixed(2),
+        item.roas.toFixed(2),
+        item.conversions.toFixed(0),
+      ].join(','))
+      .join('\n');
+
+    const csv = `${header}\n${rows}`;
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `campaign-report-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({ title: 'ส่งออกเรียบร้อย', description: 'ดาวน์โหลดไฟล์รายงานแล้ว' });
+  }, [campaignComparison, toast]);
 
   const atRiskCampaigns = useMemo<AtRiskCampaign[]>(
     () =>
@@ -1099,19 +1395,37 @@ export function ProfitPilotPage() {
     const platformFeePercent = F.num(newInputs.platformFee);
     const paymentFeePercent = F.num(newInputs.paymentFee);
     const kolFeePercent = F.num(newInputs.kolFee);
-    const packagingCost = F.num(newInputs.packagingCost);
-    const shippingCost = F.num(newInputs.shippingCost);
-
+    const includePackaging = newInputs.includePackaging !== false;
+    const includeShipping = newInputs.includeShipping !== false;
+    const includePaymentFee = newInputs.includePaymentFee !== false;
+    const includeKolFee = Boolean(newInputs.includeKolFee);
+    const includeCodFee = Boolean(newInputs.includeCodFee);
+    const includeExtraHandling = Boolean(newInputs.includeExtraHandling);
+    const includeReturnRate = Boolean(newInputs.includeReturnRate);
+    const includeLtv = Boolean(newInputs.includeLtv);
+    const packagingCost = includePackaging ? F.num(newInputs.packagingCost) : 0;
+    const shippingCost = includeShipping ? F.num(newInputs.shippingCost) : 0;
+    const codFeePercent = includeCodFee ? F.num(newInputs.codFeePercent) : 0;
+    const extraHandlingCost = includeExtraHandling ? F.num(newInputs.extraHandlingCost) : 0;
+    const ltvContribution = includeLtv ? F.num(newInputs.ltvPerCustomer) : 0;
+    const expectedConversionRatePercent = Math.max(F.num(newInputs.expectedConversionRate), 0);
+    const expectedConversionRate = expectedConversionRatePercent / 100;
     const priceBeforeVat = sellingPrice / (1 + vatProduct / 100);
     const platformFeeCost = priceBeforeVat * (platformFeePercent / 100);
-    const paymentFeeCost = sellingPrice * (paymentFeePercent / 100);
-    const kolFeeCost = priceBeforeVat * (kolFeePercent / 100);
-    const totalVariableCost = cogs + platformFeeCost + paymentFeeCost + kolFeeCost + packagingCost + shippingCost;
-    const grossProfitUnit = priceBeforeVat - totalVariableCost;
+    const paymentFeeCost = includePaymentFee ? sellingPrice * (paymentFeePercent / 100) : 0;
+    const kolFeeCost = includeKolFee ? priceBeforeVat * (kolFeePercent / 100) : 0;
+    const codFeeCost = includeCodFee ? sellingPrice * (codFeePercent / 100) : 0;
+    const totalVariableCost = cogs + platformFeeCost + paymentFeeCost + kolFeeCost + packagingCost + shippingCost + codFeeCost + extraHandlingCost;
+    const baseGrossProfitUnit = priceBeforeVat - totalVariableCost + ltvContribution;
+    const returnRatePercent = includeReturnRate ? Math.min(Math.max(F.num(newInputs.returnRatePercent), 0), 100) : 0;
+    const returnRate = returnRatePercent / 100;
+    const returnImpact = baseGrossProfitUnit * returnRate;
+    const grossProfitUnit = baseGrossProfitUnit - returnImpact;
 
     const breakevenRoas = grossProfitUnit > 0 ? priceBeforeVat / grossProfitUnit : 0;
     const breakevenCpa = grossProfitUnit;
     const breakevenAdCostPercent = priceBeforeVat > 0 ? (breakevenCpa / priceBeforeVat) * 100 : 0;
+    const maxCpc = expectedConversionRate > 0 ? breakevenCpa * expectedConversionRate : 0;
 
     let targetRoas = F.num(newInputs.targetRoas);
     let targetCpa = F.num(newInputs.targetCpa);
@@ -1144,6 +1458,8 @@ export function ProfitPilotPage() {
     const adBudget = targetOrders * targetCpa;
     const targetOrdersDaily = targetOrders / 30;
     const adBudgetWithVat = adBudget * (1 + (vatProduct / 100));
+    const monthlyProfitProjection = netProfitUnit * targetOrders;
+    const monthlyRevenueProjection = sellingPrice * targetOrders;
 
     const funnelPlan = funnelPlans[newInputs.funnelPlan] || funnelPlans.launch;
     const tofuBudget = adBudget * (funnelPlan.tofu / 100);
@@ -1163,6 +1479,7 @@ export function ProfitPilotPage() {
       breakevenRoas,
       breakevenCpa,
       breakevenAdCostPercent,
+      maxCpc,
       targetOrders,
       targetOrdersDaily,
       targetRevenue,
@@ -1182,6 +1499,14 @@ export function ProfitPilotPage() {
       targetCpa,
       adCostPercent,
       priceBeforeVat,
+      ltvContribution,
+      returnImpact,
+      expectedConversionRate: expectedConversionRatePercent,
+      monthlyProfitProjection,
+      monthlyRevenueProjection,
+      expectedReturnRate: returnRatePercent,
+      codFeePercent,
+      extraHandlingCost,
     };
 
     const updatedInputs = { ...newInputs };
@@ -1213,6 +1538,56 @@ export function ProfitPilotPage() {
 
   const handleInputChange = useCallback((key, value) => {
     setInputs(prev => ({ ...prev, [key]: value }));
+  }, []);
+
+  const handleStopRuleChange = useCallback((field: keyof StopRuleConfig, value: number | string) => {
+    setStopRules(prev => ({
+      ...prev,
+      [field]: Number(value),
+    }));
+  }, []);
+
+  const handleWhatIfChange = useCallback((field: 'cpc' | 'conversionRate' | 'orderValue', value: number) => {
+    setWhatIfState(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+  }, []);
+
+  const evaluateRoasStatus = useCallback((actual: number, breakeven: number, buffer = 0.1) => {
+    if (!Number.isFinite(actual) || breakeven <= 0) {
+      return {
+        tone: 'neutral',
+        badge: 'outline' as const,
+        label: 'รอข้อมูล',
+        message: 'กรอกข้อมูลให้ครบเพื่อคำนวณจุดคุ้มทุน',
+      };
+    }
+
+    if (actual >= breakeven * (1 + buffer)) {
+      return {
+        tone: 'good',
+        badge: 'default' as const,
+        label: 'กำไรดี',
+        message: 'ROAS สูงกว่าจุดคุ้มทุน สบายใจยิงต่อได้',
+      };
+    }
+
+    if (actual >= breakeven * (1 - buffer)) {
+      return {
+        tone: 'watch',
+        badge: 'secondary' as const,
+        label: 'ใกล้คุ้มทุน',
+        message: 'คุมต้นทุนเพิ่มอีกเล็กน้อยเพื่อให้ปลอดภัย',
+      };
+    }
+
+    return {
+      tone: 'risk',
+      badge: 'destructive' as const,
+      label: 'ต่ำกว่าคุ้มทุน',
+      message: 'พิจารณาหยุดหรือปรับแคมเปญก่อนขาดทุนหนัก',
+    };
   }, []);
 
   const platformReport = useMemo(() => {
@@ -1261,6 +1636,47 @@ export function ProfitPilotPage() {
     };
   }, [platformReport]);
 
+  const handleSavePreset = useCallback(() => {
+    const name = (newPresetName || inputs.productName || 'Preset ใหม่').trim();
+    if (!name) {
+      toast({
+        title: 'กรุณาตั้งชื่อ Preset',
+        description: 'ตั้งชื่อสั้นๆ เพื่อจำง่ายเวลาหยิบมาใช้',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const preset: ProductPreset = {
+      id: Date.now().toString(),
+      name,
+      createdAt: new Date().toISOString(),
+      data: { ...inputs },
+    };
+
+    setProductPresets(prev => [...prev, preset]);
+    setNewPresetName('');
+    toast({ title: 'บันทึก Preset แล้ว', description: `เลือก ${name} เพื่อเติมข้อมูลอัตโนมัติได้เลย` });
+  }, [inputs, newPresetName, toast]);
+
+  const handleApplyPreset = useCallback((presetId: string) => {
+    const preset = productPresets.find(item => item.id === presetId);
+    if (!preset) {
+      return;
+    }
+
+    setInputs(prev => ({
+      ...prev,
+      ...preset.data,
+    }));
+
+    toast({ title: `โหลด ${preset.name} แล้ว`, description: 'ข้อมูลสินค้าและต้นทุนถูกเติมให้ครบ' });
+  }, [productPresets, toast]);
+
+  const handleDeletePreset = useCallback((presetId: string) => {
+    setProductPresets(prev => prev.filter(item => item.id !== presetId));
+  }, []);
+
   const calculateAll = useCallback(() => {
     const { metrics, updatedInputs, shouldUpdateInputs, warnings } = computeMetrics(inputs);
     setCalculated(metrics);
@@ -1295,7 +1711,40 @@ export function ProfitPilotPage() {
 
   useEffect(() => {
     calculateAll();
-  }, [inputs.sellingPrice, inputs.vatProduct, inputs.cogs, inputs.platformFee, inputs.paymentFee, inputs.kolFee, inputs.packagingCost, inputs.shippingCost, inputs.profitGoal, inputs.profitGoalTimeframe, inputs.fixedCosts, inputs.targetRoas, inputs.targetCpa, inputs.adCostPercent, inputs.calcDriver, inputs.funnelPlan, inputs.numberOfAccounts, inputs.budgetingStrategy, calculateAll]);
+  }, [
+    inputs.sellingPrice,
+    inputs.vatProduct,
+    inputs.cogs,
+    inputs.platformFee,
+    inputs.paymentFee,
+    inputs.kolFee,
+    inputs.packagingCost,
+    inputs.shippingCost,
+    inputs.includePackaging,
+    inputs.includeShipping,
+    inputs.includePaymentFee,
+    inputs.includeKolFee,
+    inputs.includeCodFee,
+    inputs.codFeePercent,
+    inputs.includeExtraHandling,
+    inputs.extraHandlingCost,
+    inputs.includeReturnRate,
+    inputs.returnRatePercent,
+    inputs.includeLtv,
+    inputs.ltvPerCustomer,
+    inputs.expectedConversionRate,
+    inputs.profitGoal,
+    inputs.profitGoalTimeframe,
+    inputs.fixedCosts,
+    inputs.targetRoas,
+    inputs.targetCpa,
+    inputs.adCostPercent,
+    inputs.calcDriver,
+    inputs.funnelPlan,
+    inputs.numberOfAccounts,
+    inputs.budgetingStrategy,
+    calculateAll,
+  ]);
 
   useEffect(() => {
     if (activeTab === 'summary') {
@@ -1323,6 +1772,11 @@ export function ProfitPilotPage() {
             const savedOrders = JSON.parse(localStorage.getItem('profitPlannerOrders') || '[]');
             if (Array.isArray(savedOrders)) {
               setOrderEntries(savedOrders);
+            }
+
+            const savedPresets = JSON.parse(localStorage.getItem('profitPlannerPresets') || '[]');
+            if (Array.isArray(savedPresets)) {
+              setProductPresets(savedPresets);
             }
         } catch (error) {
             console.error("Could not access localStorage:", error);
@@ -1359,6 +1813,15 @@ export function ProfitPilotPage() {
       console.error('Could not persist order entries:', error);
     }
   }, [orderEntries, isClient]);
+
+  useEffect(() => {
+    if (!isClient) return;
+    try {
+      localStorage.setItem('profitPlannerPresets', JSON.stringify(productPresets));
+    } catch (error) {
+      console.error('Could not persist presets:', error);
+    }
+  }, [productPresets, isClient]);
   
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -1398,6 +1861,14 @@ export function ProfitPilotPage() {
     }, 300);
     return () => clearTimeout(timer);
   }, [inputs.productName, inputs.productKeywords, autoDetectBusinessType, isClient]);
+
+  useEffect(() => {
+    setWhatIfState({
+      cpc: F.num(webAdPlan.expectedCpc),
+      conversionRate: F.num(webAdPlan.expectedConversionRate),
+      orderValue: F.num(webAdPlan.averageOrderValue),
+    });
+  }, [webAdPlan.expectedCpc, webAdPlan.expectedConversionRate, webAdPlan.averageOrderValue]);
 
   const handlePlatformChange = (value) => {
     const fees = platformFees[value];
@@ -1792,6 +2263,134 @@ export function ProfitPilotPage() {
   
   return (
     <div className="mx-auto flex max-w-7xl flex-col gap-8 px-4 pb-24">
+      <Dialog open={presetDialogOpen} onOpenChange={setPresetDialogOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>จัดการ Preset สินค้า</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="preset-name" className="text-sm font-medium text-muted-foreground">
+                ตั้งชื่อ Preset ใหม่
+              </Label>
+              <Input
+                id="preset-name"
+                value={newPresetName}
+                onChange={event => setNewPresetName(event.target.value)}
+                placeholder="เช่น ชุดเปิดตัวเดือนนี้"
+                className="neumorphic-input"
+              />
+              <Button onClick={handleSavePreset} className="w-full">
+                <Save className="mr-2 h-4 w-4" />
+                บันทึก Preset ปัจจุบัน
+              </Button>
+            </div>
+            <div className="space-y-3">
+              <p className="text-sm font-semibold text-foreground">รายการ Preset</p>
+              {productPresets.length === 0 ? (
+                <p className="text-sm text-muted-foreground">ยังไม่มี Preset บันทึกไว้</p>
+              ) : (
+                <div className="max-h-64 space-y-3 overflow-y-auto pr-2">
+                  {productPresets.map(preset => (
+                    <div key={preset.id} className="flex items-center justify-between rounded-2xl border bg-muted/40 p-3 text-sm">
+                      <div>
+                        <p className="font-medium text-foreground">{preset.name}</p>
+                        <p className="text-xs text-muted-foreground">บันทึก {format(parseISO(preset.createdAt), 'dd MMM yyyy HH:mm')}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => {
+                            handleApplyPreset(preset.id);
+                            setPresetDialogOpen(false);
+                          }}
+                        >
+                          <CheckIcon className="mr-1 h-3.5 w-3.5" /> ใช้ค่า
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleDeletePreset(preset.id)}>
+                          <Trash2 className="mr-1 h-3.5 w-3.5" /> ลบ
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isSimulatorOpen} onOpenChange={setIsSimulatorOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>ตัวจำลอง What-if</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">CPC (฿)</Label>
+                  <span className="text-sm font-semibold text-primary">{F.formatNumber(whatIfState.cpc, 2)}</span>
+                </div>
+                <Slider value={[whatIfState.cpc]} min={1} max={50} step={0.5} onValueChange={([value]) => handleWhatIfChange('cpc', value)} />
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">อัตราแปลง (%)</Label>
+                  <span className="text-sm font-semibold text-primary">{F.formatNumber(whatIfState.conversionRate, 2)}%</span>
+                </div>
+                <Slider value={[whatIfState.conversionRate]} min={0.1} max={10} step={0.1} onValueChange={([value]) => handleWhatIfChange('conversionRate', value)} />
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">มูลค่าออเดอร์ (฿)</Label>
+                  <span className="text-sm font-semibold text-primary">{F.formatCurrency(whatIfState.orderValue)}</span>
+                </div>
+                <Slider value={[whatIfState.orderValue]} min={100} max={5000} step={10} onValueChange={([value]) => handleWhatIfChange('orderValue', value)} />
+              </div>
+              <div className="rounded-2xl border bg-muted/40 p-4 text-xs text-muted-foreground">
+                ปรับสไลเดอร์เพื่อดูว่าต้องกด CPC หรือเพิ่ม Conversion Rate เท่าไหร่ถึงจะผ่านจุดคุ้มทุน
+              </div>
+            </div>
+            <div className="flex flex-col justify-between gap-4 rounded-3xl border bg-card/70 p-5">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">ผลคาดการณ์</p>
+                <h3 className="mt-1 text-2xl font-bold text-foreground">{F.formatCurrency(whatIfProjection.profit)}</h3>
+                <p className="text-xs text-muted-foreground">กำไร/ขาดทุนต่อวัน หลังปรับค่าตามสไลเดอร์</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="rounded-2xl bg-muted/40 p-3">
+                  <p className="text-xs text-muted-foreground">ROAS</p>
+                  <p className="text-lg font-semibold">{whatIfProjection.roas > 0 ? `${F.formatNumber(whatIfProjection.roas, 2)}x` : '—'}</p>
+                </div>
+                <div className="rounded-2xl bg-muted/40 p-3">
+                  <p className="text-xs text-muted-foreground">ออเดอร์/วัน</p>
+                  <p className="text-lg font-semibold">{F.formatNumber(whatIfProjection.orders, 2)}</p>
+                </div>
+                <div className="rounded-2xl bg-muted/40 p-3">
+                  <p className="text-xs text-muted-foreground">ยอดขาย/วัน</p>
+                  <p className="text-lg font-semibold">{F.formatCurrency(whatIfProjection.revenue)}</p>
+                </div>
+                <div className="rounded-2xl bg-muted/40 p-3">
+                  <p className="text-xs text-muted-foreground">ต้นทุนสินค้า</p>
+                  <p className="text-lg font-semibold">{F.formatCurrency(whatIfProjection.goodsCost)}</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between rounded-2xl border bg-background/70 p-3">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{whatIfProjection.status.label}</p>
+                  <p className="text-xs text-muted-foreground">{whatIfProjection.status.message}</p>
+                </div>
+                {whatIfProjection.status.tone === 'good' && <CheckCircle2 className="h-6 w-6 text-emerald-500" />}
+                {whatIfProjection.status.tone === 'watch' && <AlertCircle className="h-6 w-6 text-amber-500" />}
+                {whatIfProjection.status.tone === 'risk' && <AlertTriangle className="h-6 w-6 text-destructive" />}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <header className="rounded-3xl bg-gradient-to-r from-primary to-primary/70 p-6 text-white shadow-lg">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-2">
@@ -1947,9 +2546,19 @@ export function ProfitPilotPage() {
                     value={webAdProjection.roas > 0 ? `${F.formatNumber(webAdProjection.roas, 2)}x` : '—'}
                     helper={`มาร์จิ้น ${F.formatNumber(webAdProjection.margin, 1)}%`}
                   />
+                  <ReportMetric
+                    label="Break-even ROAS"
+                    value={webAdProjection.breakEvenRoas > 0 ? `${F.formatNumber(webAdProjection.breakEvenRoas, 2)}x` : '—'}
+                    helper={`CPA คุ้มทุน ${F.formatCurrency(webAdProjection.breakEvenCpa)}`}
+                  />
+                  <ReportMetric
+                    label="Max CPC"
+                    value={F.formatCurrency(webAdProjection.maxCpc)}
+                    helper="สูงสุดที่จ่ายแล้วไม่ขาดทุน"
+                  />
                 </div>
                 <div className="rounded-2xl bg-muted/40 p-3 text-xs text-muted-foreground">
-                  ต้องการอย่างน้อย {F.formatNumber(webAdProjection.breakEvenOrders, 1)} ออเดอร์/วัน เพื่อจุดคุ้มทุนของงบนี้
+                  ต้องการอย่างน้อย {F.formatNumber(webAdProjection.breakEvenOrders, 1)} ออเดอร์/วัน เพื่อจุดคุ้มทุนของงบนี้ • หากรักษาตัวเลขเดิม 30 วันจะทำยอดขาย {F.formatCurrency(webAdProjection.thirtyDayRevenue)} และกำไร {F.formatCurrency(webAdProjection.thirtyDayProfit)}
                 </div>
               </div>
             </div>
@@ -2022,6 +2631,75 @@ export function ProfitPilotPage() {
             )}
             <div className="rounded-2xl border border-dashed bg-background/40 p-3 text-xs text-muted-foreground">
               งบที่เสี่ยงในตอนนี้ {F.formatCurrency(atRiskSpend)} — เห็นยอดซื้อยังน้อยให้หยุดหรือปรับครีเอทีฟทันที
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="rounded-3xl border bg-card/80 shadow-sm">
+          <CardHeader className="flex flex-col gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+              <AlertCircle className={cn('h-5 w-5', stopAlert.status === 'stop' ? 'text-destructive' : stopAlert.status === 'warning' ? 'text-amber-500' : 'text-primary')} />
+              ระบบเตือนควรหยุดยิงแอด
+            </CardTitle>
+            <CardDescription>ตั้งเงื่อนไขหยุดเทสเมื่อ ROAS ต่ำหรือใช้งบเกิน</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className={cn('rounded-2xl border p-4', stopAlert.status === 'stop' ? 'border-destructive/40 bg-destructive/10' : stopAlert.status === 'warning' ? 'border-amber-400/40 bg-amber-400/10' : 'border-emerald-400/40 bg-emerald-400/10')}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{stopAlert.message}</p>
+                  {stopAlert.reasons.length > 0 ? (
+                    <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                      {stopAlert.reasons.map(reason => (
+                        <li key={reason}>• {reason}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-2 text-xs text-muted-foreground">ROAS ยังสูงกว่าจุดคุ้มทุน และงบยังไม่เกินขอบเขต</p>
+                  )}
+                </div>
+                <Badge variant={stopAlert.status === 'stop' ? 'destructive' : stopAlert.status === 'warning' ? 'default' : 'secondary'}>
+                  {stopAlert.status === 'stop' ? 'ควรหยุด' : stopAlert.status === 'warning' ? 'เริ่มเสี่ยง' : 'ปลอดภัย'}
+                </Badge>
+              </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div>
+                <Label htmlFor="rule-consecutive" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">ROAS ต่ำกว่าคุ้มทุน (วัน)</Label>
+                <Input
+                  id="rule-consecutive"
+                  type="number"
+                  min={1}
+                  value={stopRules.consecutiveDays}
+                  onChange={event => handleStopRuleChange('consecutiveDays', event.target.value)}
+                  className="neumorphic-input mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="rule-loss" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">ขาดทุนสะสม (฿)</Label>
+                <Input
+                  id="rule-loss"
+                  type="number"
+                  min={0}
+                  value={stopRules.lossThreshold}
+                  onChange={event => handleStopRuleChange('lossThreshold', event.target.value)}
+                  className="neumorphic-input mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="rule-budget" className="text-xs font-medium uppercase tracking-wide text-muted-foreground">งบเทสสูงสุด (x ราคาสินค้า)</Label>
+                <Input
+                  id="rule-budget"
+                  type="number"
+                  min={1}
+                  step={0.5}
+                  value={stopRules.testBudgetMultiple}
+                  onChange={event => handleStopRuleChange('testBudgetMultiple', event.target.value)}
+                  className="neumorphic-input mt-1"
+                />
+                {stopAlert.spendLimit > 0 && (
+                  <p className="mt-1 text-xs text-muted-foreground">งบเทสสูงสุดตอนนี้ {F.formatCurrency(stopAlert.spendLimit)}</p>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -2470,6 +3148,91 @@ export function ProfitPilotPage() {
         </Card>
       </section>
 
+      <Card className="rounded-3xl border bg-card/80 shadow-sm">
+        <CardHeader className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+              <BarChart className="h-5 w-5 text-primary" />
+              เปรียบเทียบแคมเปญทุกช่องทาง
+            </CardTitle>
+            <CardDescription>ดูว่าแคมเปญไหนกำไรสูง ขาดทุนหนัก หรือ ROAS ดีสุด</CardDescription>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" onClick={handleExportReport} disabled={campaignComparison.length === 0}>
+              <Download className="mr-2 h-4 w-4" /> ส่งออก CSV
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          {campaignComparison.length === 0 ? (
+            <p className="text-sm text-muted-foreground">ยังไม่มีข้อมูลแคมเปญ ให้เพิ่มข้อมูลเพื่อดูการจัดอันดับ</p>
+          ) : (
+            <>
+              <div className="overflow-x-auto rounded-2xl border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>แคมเปญ</TableHead>
+                      <TableHead>ช่องทาง</TableHead>
+                      <TableHead className="text-right">งบใช้ไป</TableHead>
+                      <TableHead className="text-right">รายได้</TableHead>
+                      <TableHead className="text-right">กำไร/ขาดทุน</TableHead>
+                      <TableHead className="text-right">ROAS</TableHead>
+                      <TableHead className="text-right">คอนเวอร์ชัน</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {campaignComparison.map(item => (
+                      <TableRow key={`${item.platform}-${item.campaignName}`}>
+                        <TableCell className="font-medium">{item.campaignName}</TableCell>
+                        <TableCell>{getAdPlatformLabel(item.platform)}</TableCell>
+                        <TableCell className="text-right">{F.formatCurrency(item.spend)}</TableCell>
+                        <TableCell className="text-right">{F.formatCurrency(item.revenue)}</TableCell>
+                        <TableCell className={cn('text-right font-semibold', item.profit < 0 ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400')}>
+                          {F.formatCurrency(item.profit)}
+                        </TableCell>
+                        <TableCell className="text-right">{item.roas > 0 ? `${F.formatNumber(item.roas, 2)}x` : '—'}</TableCell>
+                        <TableCell className="text-right">{F.formatInt(item.conversions)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-2xl border bg-muted/30 p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-foreground">ROAS สูงสุด</p>
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                  </div>
+                  <ul className="mt-3 space-y-2 text-sm">
+                    {topRoasCampaigns.map(item => (
+                      <li key={`top-${item.platform}-${item.campaignName}`} className="flex items-center justify-between gap-2">
+                        <span className="truncate">{item.campaignName}</span>
+                        <span className="font-semibold text-primary">{F.formatNumber(item.roas, 2)}x</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="rounded-2xl border bg-muted/30 p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-foreground">ขาดทุนหนักสุด</p>
+                    <TrendingDown className="h-4 w-4 text-destructive" />
+                  </div>
+                  <ul className="mt-3 space-y-2 text-sm">
+                    {worstLossCampaigns.map(item => (
+                      <li key={`loss-${item.platform}-${item.campaignName}`} className="flex items-center justify-between gap-2">
+                        <span className="truncate">{item.campaignName}</span>
+                        <span className="font-semibold text-destructive">{F.formatCurrency(item.profit)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-4">
           <div className="neumorphic-card p-6 h-full">
@@ -2507,6 +3270,26 @@ export function ProfitPilotPage() {
                   </SelectContent>
                 </Select>
               </div>
+              {productPresets.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium opacity-80">Preset ล่าสุด</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {productPresets.map(preset => (
+                      <Button
+                        key={preset.id}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleApplyPreset(preset.id)}
+                      >
+                        {preset.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <Button variant="ghost" className="w-full justify-start" onClick={() => setPresetDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" /> จัดการ Preset สินค้า
+              </Button>
               <div className="pt-2">
                 <Button onClick={() => setActiveTab('platform-report')} className="neon-button w-full flex items-center justify-center gap-2">
                   <LayoutDashboard className="w-4 h-4" />
@@ -2547,29 +3330,71 @@ export function ProfitPilotPage() {
                   </SelectContent>
                 </Select>
               </div>
-               <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                  <div>
                     <Label htmlFor="platformFee" className="block text-sm mb-2 font-medium opacity-80">ค่าแพลตฟอร์ม (%)</Label>
                     <Input id="platformFee" value={inputs.platformFee} onChange={(e) => handleInputChange('platformFee', e.target.value)} type="number" className="neumorphic-input" readOnly={inputs.salesPlatform !== 'other'} placeholder="" />
                  </div>
                  <div>
-                    <Label htmlFor="paymentFee" className="block text-sm mb-2 font-medium opacity-80">ค่าชำระเงิน (%)</Label>
-                    <Input id="paymentFee" value={inputs.paymentFee} onChange={(e) => handleInputChange('paymentFee', e.target.value)} type="number" className="neumorphic-input" readOnly={inputs.salesPlatform !== 'other'} placeholder="" />
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="paymentFee" className="block text-sm mb-2 font-medium opacity-80">ค่าชำระเงิน (%)</Label>
+                      <Switch checked={!!inputs.includePaymentFee} onCheckedChange={value => handleInputChange('includePaymentFee', value)} />
+                    </div>
+                    <Input id="paymentFee" value={inputs.paymentFee} onChange={(e) => handleInputChange('paymentFee', e.target.value)} type="number" className="neumorphic-input" readOnly={inputs.salesPlatform !== 'other'} disabled={!inputs.includePaymentFee} placeholder="" />
                  </div>
               </div>
               <div>
-                <Label htmlFor="kolFee" className="block text-sm mb-2 font-medium opacity-80">ค่าคอมมิชชั่น KOL (%)</Label>
-                <Input id="kolFee" value={inputs.kolFee} onChange={(e) => handleInputChange('kolFee', e.target.value)} type="number" placeholder="" className="neumorphic-input" />
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="kolFee" className="block text-sm mb-2 font-medium opacity-80">ค่าคอมมิชชั่น KOL (%)</Label>
+                  <Switch checked={!!inputs.includeKolFee} onCheckedChange={value => handleInputChange('includeKolFee', value)} />
+                </div>
+                <Input id="kolFee" value={inputs.kolFee} onChange={(e) => handleInputChange('kolFee', e.target.value)} type="number" placeholder="" className="neumorphic-input" disabled={!inputs.includeKolFee} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                  <div>
-                    <Label htmlFor="packagingCost" className="block text-sm mb-2 font-medium opacity-80">ค่าแพ็ค</Label>
-                    <Input id="packagingCost" value={inputs.packagingCost} onChange={(e) => handleInputChange('packagingCost', e.target.value)} type="number" placeholder="" className="neumorphic-input" />
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="packagingCost" className="block text-sm mb-2 font-medium opacity-80">ค่าแพ็ค</Label>
+                      <Switch checked={!!inputs.includePackaging} onCheckedChange={value => handleInputChange('includePackaging', value)} />
+                    </div>
+                    <Input id="packagingCost" value={inputs.packagingCost} onChange={(e) => handleInputChange('packagingCost', e.target.value)} type="number" placeholder="" className="neumorphic-input" disabled={!inputs.includePackaging} />
                  </div>
                  <div>
-                    <Label htmlFor="shippingCost" className="block text-sm mb-2 font-medium opacity-80">ค่าส่ง</Label>
-                    <Input id="shippingCost" value={inputs.shippingCost} onChange={(e) => handleInputChange('shippingCost', e.target.value)} type="number" placeholder="" className="neumorphic-input" />
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="shippingCost" className="block text-sm mb-2 font-medium opacity-80">ค่าส่ง</Label>
+                      <Switch checked={!!inputs.includeShipping} onCheckedChange={value => handleInputChange('includeShipping', value)} />
+                    </div>
+                    <Input id="shippingCost" value={inputs.shippingCost} onChange={(e) => handleInputChange('shippingCost', e.target.value)} type="number" placeholder="" className="neumorphic-input" disabled={!inputs.includeShipping} />
                  </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="codFeePercent" className="block text-sm mb-2 font-medium opacity-80">ค่าธรรมเนียม COD (%)</Label>
+                    <Switch checked={!!inputs.includeCodFee} onCheckedChange={value => handleInputChange('includeCodFee', value)} />
+                  </div>
+                  <Input id="codFeePercent" value={inputs.codFeePercent} onChange={event => handleInputChange('codFeePercent', event.target.value)} type="number" placeholder="เช่น 3" className="neumorphic-input" disabled={!inputs.includeCodFee} />
+                </div>
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="extraHandlingCost" className="block text-sm mb-2 font-medium opacity-80">ค่าบรรจุ/จัดการ (฿)</Label>
+                    <Switch checked={!!inputs.includeExtraHandling} onCheckedChange={value => handleInputChange('includeExtraHandling', value)} />
+                  </div>
+                  <Input id="extraHandlingCost" value={inputs.extraHandlingCost} onChange={event => handleInputChange('extraHandlingCost', event.target.value)} type="number" placeholder="เช่น 15" className="neumorphic-input" disabled={!inputs.includeExtraHandling} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="returnRatePercent" className="block text-sm mb-2 font-medium opacity-80">อัตรายกเลิก/ตีกลับ (%)</Label>
+                    <Switch checked={!!inputs.includeReturnRate} onCheckedChange={value => handleInputChange('includeReturnRate', value)} />
+                  </div>
+                  <Input id="returnRatePercent" value={inputs.returnRatePercent} onChange={event => handleInputChange('returnRatePercent', event.target.value)} type="number" placeholder="เช่น 5" className="neumorphic-input" disabled={!inputs.includeReturnRate} />
+                </div>
+                <div>
+                  <Label htmlFor="expectedConversionRate" className="block text-sm mb-2 font-medium opacity-80">Conversion Rate เป้าหมาย (%)</Label>
+                  <Input id="expectedConversionRate" value={inputs.expectedConversionRate} onChange={event => handleInputChange('expectedConversionRate', event.target.value)} type="number" placeholder="เช่น 2.5" className="neumorphic-input" />
+                  <p className="mt-1 text-xs text-muted-foreground">ใช้คำนวณ Max CPC ที่ยังไม่ขาดทุน</p>
+                </div>
               </div>
             </div>
           </div>
@@ -2600,40 +3425,116 @@ export function ProfitPilotPage() {
                 <Input id="fixedCosts" value={inputs.fixedCosts} onChange={(e) => handleInputChange('fixedCosts', e.target.value)} type="number" placeholder="" className="neumorphic-input" />
               </div>
               <div className="space-y-3 pt-4">
-                  <div className="neumorphic-card p-3 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="opacity-80">กำไรขั้นต้น/หน่วย</span>
-                      <span className="font-bold text-primary">{F.formatCurrency(calculated.grossProfitUnit)}</span>
+                  <div className="rounded-2xl border bg-card/70 p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs uppercase tracking-wide text-muted-foreground">สถานะ ROAS ปัจจุบัน</p>
+                        <p className="text-lg font-semibold text-foreground">{roasHealth.label}</p>
+                        <p className="text-xs text-muted-foreground">{roasHealth.message}</p>
+                      </div>
+                      <Badge variant={roasHealth.badge}>{F.formatNumber(actualRoas, 2)}x</Badge>
+                    </div>
+                    <p className="mt-2 text-xs text-muted-foreground">จุดคุ้มทุน {F.formatNumber(calculated.breakevenRoas, 2)}x</p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <div className="neumorphic-card p-3 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="opacity-80">กำไรขั้นต้น/หน่วย</span>
+                        <span className="font-bold text-primary">{F.formatCurrency(calculated.grossProfitUnit)}</span>
+                      </div>
+                    </div>
+                    <div className="neumorphic-card p-3 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="opacity-80">Break-even CPA</span>
+                        <span className="font-bold text-primary">{F.formatCurrency(calculated.breakevenCpa)}</span>
+                      </div>
+                    </div>
+                    <div className="neumorphic-card p-3 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="opacity-80">Break-even ROAS</span>
+                        <span className="font-bold text-primary">{F.formatNumber(calculated.breakevenRoas, 2)}x</span>
+                      </div>
+                    </div>
+                    <div className="neumorphic-card p-3 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="opacity-80">Max CPC ที่ไหว</span>
+                        <span className="font-bold text-primary">{F.formatCurrency(calculated.maxCpc)}</span>
+                      </div>
+                    </div>
+                    <div className="neumorphic-card p-3 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="opacity-80">ยอดขายเป้าหมาย</span>
+                        <span className="font-bold text-primary">{F.formatCurrency(calculated.targetRevenue)}</span>
+                      </div>
+                    </div>
+                    <div className="neumorphic-card p-3 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="opacity-80">จำนวนออเดอร์</span>
+                        <span className="font-bold text-primary">{F.formatInt(calculated.targetOrders)} <span className="text-xs opacity-70">({F.formatNumber(calculated.targetOrdersDaily, 1)}/วัน)</span></span>
+                      </div>
+                    </div>
+                    <div className="neumorphic-card p-3 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="opacity-80">งบโฆษณา/เดือน</span>
+                        <span className="font-bold text-primary">{F.formatCurrency(calculated.adBudget)}</span>
+                      </div>
+                    </div>
+                    <div className="neumorphic-card p-3 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="opacity-80">กำไรคาดการณ์ 30 วัน</span>
+                        <span className="font-bold text-primary">{F.formatCurrency(calculated.monthlyProfitProjection)}</span>
+                      </div>
+                    </div>
+                    <div className="neumorphic-card p-3 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="opacity-80">ยอดขายจำลอง 30 วัน</span>
+                        <span className="font-bold text-primary">{F.formatCurrency(calculated.monthlyRevenueProjection)}</span>
+                      </div>
+                    </div>
+                    <div className="neumorphic-card p-3 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="opacity-80">ผลจากยอดยกเลิก</span>
+                        <span className="font-bold text-primary">{F.formatCurrency(calculated.returnImpact)}</span>
+                      </div>
+                    </div>
+                    <div className="neumorphic-card p-3 text-sm">
+                      <div className="flex justify-between items-center">
+                        <span className="opacity-80">มูลค่า LTV ต่อออเดอร์</span>
+                        <span className="font-bold text-primary">{F.formatCurrency(calculated.ltvContribution)}</span>
+                      </div>
                     </div>
                   </div>
-                  <div className="neumorphic-card p-3 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="opacity-80">จุดคุ้มทุน ROAS</span>
-                      <span className="font-bold text-primary">{F.formatNumber(calculated.breakevenRoas)}</span>
+                  <div className="rounded-2xl border bg-muted/40 p-4 text-sm">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">คิด LTV จากลูกค้าซื้อซ้ำ</p>
+                        <p className="text-xs text-muted-foreground">เพิ่มกำไรต่อหัวเพื่อผ่อนจุดคุ้มทุน</p>
+                      </div>
+                      <Switch checked={!!inputs.includeLtv} onCheckedChange={value => handleInputChange('includeLtv', value)} />
+                    </div>
+                    <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_160px]">
+                      <Input
+                        value={inputs.ltvPerCustomer}
+                        onChange={event => handleInputChange('ltvPerCustomer', event.target.value)}
+                        type="number"
+                        placeholder="กำไรจากการซื้อซ้ำต่อหัว"
+                        className="neumorphic-input"
+                        disabled={!inputs.includeLtv}
+                      />
+                      <Button variant="outline" size="sm" onClick={() => setIsSimulatorOpen(true)} className="w-full">
+                        <Gauge className="mr-2 h-4 w-4" /> เปิดตัวจำลอง What-if
+                      </Button>
                     </div>
                   </div>
-                  <div className="neumorphic-card p-3 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="opacity-80">ยอดขายเป้าหมาย</span>
-                      <span className="font-bold text-primary">{F.formatCurrency(calculated.targetRevenue)}</span>
-                    </div>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Button type="button" onClick={handleConfirmPlan} className="neon-button w-full flex items-center justify-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      ยืนยันและดูผลลัพธ์สรุปทั้งหมด
+                    </Button>
+                    <Button type="button" variant="outline" className="w-full flex items-center justify-center gap-2" onClick={() => setIsSimulatorOpen(true)}>
+                      <LineChart className="w-4 h-4" /> ทดลองตัวเลขเร็ว
+                    </Button>
                   </div>
-                  <div className="neumorphic-card p-3 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="opacity-80">จำนวนออเดอร์</span>
-                      <span className="font-bold text-primary">{F.formatInt(calculated.targetOrders)} <span className="text-xs opacity-70">({F.formatNumber(calculated.targetOrdersDaily, 1)}/วัน)</span></span>
-                    </div>
-                  </div>
-                  <div className="neumorphic-card p-3 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="opacity-80">งบโฆษณา</span>
-                      <span className="font-bold text-primary">{F.formatCurrency(calculated.adBudget)}</span>
-                    </div>
-                  </div>
-                  <Button type="button" onClick={handleConfirmPlan} className="neon-button w-full flex items-center justify-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    ยืนยันและดูผลลัพธ์สรุปทั้งหมด
-                  </Button>
               </div>
             </div>
           </div>
@@ -3228,6 +4129,8 @@ export function ProfitPilotPage() {
                 <SummaryInfoCard title="กำไรขั้นต้น (ต่อหน่วย)" value={F.formatCurrency(calculated.grossProfitUnit)} subValue="ราคาขาย(ไม่รวม VAT) - ต้นทุนแปรผันทั้งหมด" icon={BarChart} />
                 <SummaryInfoCard title="กำไรสุทธิ (ต่อหน่วย)" value={F.formatCurrency(calculated.netProfitUnit)} subValue="กำไรขั้นต้น - ค่าโฆษณาต่อหน่วย (CPA)" icon={LineChart} />
                 <SummaryInfoCard title="งบโฆษณา (ต่อหน่วย)" value={F.formatCurrency(calculated.targetCpa)} subValue="Target CPA ที่คำนวณได้" icon={Megaphone} />
+                <SummaryInfoCard title="Break-even ROAS" value={`${F.formatNumber(calculated.breakevenRoas, 2)}x`} subValue={`CPA คุ้มทุน ${F.formatCurrency(calculated.breakevenCpa)}`} icon={Gauge} />
+                <SummaryInfoCard title="Max CPC" value={F.formatCurrency(calculated.maxCpc)} subValue={`Conversion เป้าหมาย ${F.formatNumber(inputs.expectedConversionRate, 2)}%`} icon={MousePointerClick} />
               </div>
 
               {/* Goals & Budget */}
@@ -3235,7 +4138,10 @@ export function ProfitPilotPage() {
                 <SummaryInfoCard title="ยอดขายเป้าหมาย (ต่อเดือน)" value={F.formatCurrency(calculated.targetRevenue)} icon={Users} />
                 <SummaryInfoCard title="จำนวนออเดอร์ (ต่อเดือน)" value={F.formatInt(calculated.targetOrders)} subValue={`เฉลี่ย ${F.formatNumber(calculated.targetOrdersDaily, 1)} ออเดอร์/วัน`} icon={ThumbsUp} />
                 <SummaryInfoCard title="งบโฆษณารวม (ต่อเดือน)" value={F.formatCurrency(calculated.adBudget)} icon={Percent} />
-                 <SummaryInfoCard title="งบโฆษณา + VAT (ต่อเดือน)" value={F.formatCurrency(calculated.adBudgetWithVat)} subValue={`VAT ${inputs.vatProduct}%`} icon={Hash} />
+                <SummaryInfoCard title="งบโฆษณา + VAT (ต่อเดือน)" value={F.formatCurrency(calculated.adBudgetWithVat)} subValue={`VAT ${inputs.vatProduct}%`} icon={Hash} />
+                <SummaryInfoCard title="กำไรจำลอง 30 วัน" value={F.formatCurrency(calculated.monthlyProfitProjection)} icon={TrendingUp} />
+                <SummaryInfoCard title="ผลกระทบจากออเดอร์ยกเลิก" value={F.formatCurrency(calculated.returnImpact)} subValue={`อัตรายกเลิก ${F.formatNumber(calculated.expectedReturnRate, 1)}%`} icon={AlertTriangle} />
+                <SummaryInfoCard title="LTV ต่อออเดอร์" value={F.formatCurrency(calculated.ltvContribution)} subValue="ค่าที่เพิ่มจากลูกค้าซื้อซ้ำ" icon={Heart} />
               </div>
               
               {/* KPIs */}
