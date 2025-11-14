@@ -973,6 +973,42 @@ export function ProfitPilotPage() {
     [adSummary.total.revenue, adSummary.total.spend]
   );
 
+  const evaluateRoasStatus = useCallback((actual: number, breakeven: number, buffer = 0.1) => {
+    if (!Number.isFinite(actual) || breakeven <= 0) {
+      return {
+        tone: 'neutral',
+        badge: 'outline' as const,
+        label: 'รอข้อมูล',
+        message: 'กรอกข้อมูลให้ครบเพื่อคำนวณจุดคุ้มทุน',
+      };
+    }
+
+    if (actual >= breakeven * (1 + buffer)) {
+      return {
+        tone: 'good',
+        badge: 'default' as const,
+        label: 'กำไรดี',
+        message: 'ROAS สูงกว่าจุดคุ้มทุน สบายใจยิงต่อได้',
+      };
+    }
+
+    if (actual >= breakeven * (1 - buffer)) {
+      return {
+        tone: 'watch',
+        badge: 'secondary' as const,
+        label: 'ใกล้คุ้มทุน',
+        message: 'คุมต้นทุนเพิ่มอีกเล็กน้อยเพื่อให้ปลอดภัย',
+      };
+    }
+
+    return {
+      tone: 'risk',
+      badge: 'destructive' as const,
+      label: 'ต่ำกว่าคุ้มทุน',
+      message: 'พิจารณาหยุดหรือปรับแคมเปญก่อนขาดทุนหนัก',
+    };
+  }, []);
+
   const roasHealth = useMemo(
     () => evaluateRoasStatus(actualRoas, calculated.breakevenRoas, stopRules.roasBuffer),
     [actualRoas, calculated.breakevenRoas, stopRules.roasBuffer, evaluateRoasStatus]
@@ -1552,42 +1588,6 @@ export function ProfitPilotPage() {
       ...prev,
       [field]: value,
     }));
-  }, []);
-
-  const evaluateRoasStatus = useCallback((actual: number, breakeven: number, buffer = 0.1) => {
-    if (!Number.isFinite(actual) || breakeven <= 0) {
-      return {
-        tone: 'neutral',
-        badge: 'outline' as const,
-        label: 'รอข้อมูล',
-        message: 'กรอกข้อมูลให้ครบเพื่อคำนวณจุดคุ้มทุน',
-      };
-    }
-
-    if (actual >= breakeven * (1 + buffer)) {
-      return {
-        tone: 'good',
-        badge: 'default' as const,
-        label: 'กำไรดี',
-        message: 'ROAS สูงกว่าจุดคุ้มทุน สบายใจยิงต่อได้',
-      };
-    }
-
-    if (actual >= breakeven * (1 - buffer)) {
-      return {
-        tone: 'watch',
-        badge: 'secondary' as const,
-        label: 'ใกล้คุ้มทุน',
-        message: 'คุมต้นทุนเพิ่มอีกเล็กน้อยเพื่อให้ปลอดภัย',
-      };
-    }
-
-    return {
-      tone: 'risk',
-      badge: 'destructive' as const,
-      label: 'ต่ำกว่าคุ้มทุน',
-      message: 'พิจารณาหยุดหรือปรับแคมเปญก่อนขาดทุนหนัก',
-    };
   }, []);
 
   const platformReport = useMemo(() => {
